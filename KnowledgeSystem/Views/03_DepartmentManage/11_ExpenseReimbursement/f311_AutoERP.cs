@@ -1,0 +1,174 @@
+﻿using DevExpress.Utils.Svg;
+using DevExpress.XtraEditors;
+using DevExpress.XtraSplashScreen;
+using DocumentFormat.OpenXml.Drawing;
+using KAutoHelper;
+using KnowledgeSystem.Helpers;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using static DevExpress.XtraEditors.Mask.MaskSettings;
+
+namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
+{
+    public partial class f311_AutoERP : DevExpress.XtraEditors.XtraForm
+    {
+        public f311_AutoERP(List<ErpAction> datas)
+        {
+            InitializeComponent();
+            erpActions = datas;
+        }
+
+        int step = 1;
+
+        public class ErpAction
+        {
+            public int Step { get; set; } = 1;       // ✅ mặc định Step = 1
+            public bool IsClick { get; set; }        // true = click, false = send text
+            public string Text { get; set; }         // Dữ liệu để SendKeys
+            public Bitmap TempImage { get; set; }
+            public int X { get; set; }               // Vị trí click X
+            public int Y { get; set; }               // Vị trí click Y
+        }
+
+        // Import the mouse_event function from user32.dll
+        [DllImport("user32.dll")]
+        public static extern void mouse_event(int dwFlags, int dx, int dy, int cButtons, int dwExtraInfo);
+
+        // Constants for mouse event flags
+        private const int MOUSEEVENTF_MOVE = 0x0001;
+        private const int MOUSEEVENTF_LEFTDOWN = 0x0002;
+        private const int MOUSEEVENTF_LEFTUP = 0x0004;
+
+        protected override CreateParams CreateParams
+        {
+            get
+            {
+                CreateParams param = base.CreateParams;
+                param.ExStyle |= 0x08000000;
+                return param;
+            }
+        }
+
+        List<ErpAction> erpActions = new List<ErpAction>();
+
+        public void BlockUserInput(Action action)
+        {
+            Form overlay = new Form
+            {
+                FormBorderStyle = FormBorderStyle.None,
+                BackColor = Color.Black,
+                Opacity = 0.05,
+                WindowState = FormWindowState.Maximized,
+                TopMost = true,
+                ShowInTaskbar = false
+            };
+
+            overlay.Show();
+            overlay.BringToFront();
+            Application.DoEvents();
+
+            try
+            {
+                action?.Invoke(); // Gửi phím, chạy thao tác
+            }
+            finally
+            {
+                overlay.Close();
+                overlay.Dispose();
+            }
+        }
+
+        private void f311_AutoERP_Load(object sender, EventArgs e)
+        {
+            Text = "自動輸入ERP";
+            TopMost = true;
+
+            StartPosition = FormStartPosition.Manual;
+            int x = Screen.PrimaryScreen.WorkingArea.Right - Width;
+            int y = Screen.PrimaryScreen.WorkingArea.Top;
+            Location = new System.Drawing.Point(x, y);
+
+            SetImageAndTextBtn();
+        }
+
+        private void SetImageAndTextBtn()
+        {
+            var field = typeof(TPSvgimages).GetField($"Num{step}", BindingFlags.Public | BindingFlags.Static);
+            if (field != null)
+            {
+                btnAutoKey.ImageOptions.SvgImage = field.GetValue(null) as SvgImage;
+            }
+            btnAutoKey.Text = $"輸入ERP【第{step}步】";
+        }
+
+        private void btnAutoKey_Click(object sender, EventArgs e)
+        {
+            var erpActionsByStep = erpActions.Where(r => r.Step == step).ToList();
+            if (erpActionsByStep == null || erpActionsByStep.Count == 0)
+            {
+                XtraMessageBox.Show("Dữ liệu trống!", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+            if (!KeyboardHelper.IsEnglishAndCapsOff())
+                return;
+
+            using (var handle = SplashScreenManager.ShowOverlayForm(this))
+            {
+                foreach (ErpAction action in erpActionsByStep)
+                {
+                    // 🖱️ Xử lý hành động click
+                    if (action.IsClick)
+                    {
+                        if (action.TempImage == null)
+                        {
+                            // 👉 Click trực tiếp theo tọa độ
+                            AutoControl.MouseClick(action.X, action.Y);
+                        }
+                        else
+                        {
+                            // 👉 Click theo hình mẫu
+                            using (Bitmap screen = (Bitmap)CaptureHelper.CaptureScreen())
+                            {
+                                var matchPoint = ImageScanOpenCV.FindOutPoint(screen, action.TempImage);
+                                if (matchPoint.HasValue)
+                                    AutoControl.MouseClick(matchPoint.Value.X, matchPoint.Value.Y);
+                            }
+                        }
+
+                        Thread.Sleep(1000);
+                    }
+                    // ⌨️ Xử lý hành động gửi phím
+                    else if (!string.IsNullOrEmpty(action.Text))
+                    {
+                        SendKeys.SendWait(action.Text);
+                    }
+
+                    // ⏳ Tạm dừng giữa các hành động
+                    Thread.Sleep(1000);
+                }
+            }
+
+            step++;
+            erpActionsByStep = erpActions.Where(r => r.Step == step).ToList();
+
+            if (erpActionsByStep == null || erpActionsByStep.Count == 0)
+            {
+                Close();
+                return;
+            }
+
+            SetImageAndTextBtn();
+        }
+    }
+}

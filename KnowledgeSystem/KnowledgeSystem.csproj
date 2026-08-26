@@ -1,0 +1,2405 @@
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
+  <Import Project="..\packages\Scriban.5.9.0\build\Scriban.props" Condition="Exists('..\packages\Scriban.5.9.0\build\Scriban.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A3B2EA5D-8312-4DB7-BF78-326C76458305}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KnowledgeSystem</RootNamespace>
+    <AssemblyName>KnowledgeSystem</AssemblyName>
+    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>AppIcon.ico</ApplicationIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DebugType>full</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <OutputPath>bin\x64\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+    <PlatformTarget>x64</PlatformTarget>
+    <LangVersion>7.3</LangVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <Prefer32Bit>true</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Accessibility" />
+    <Reference Include="BouncyCastle.Cryptography, Version=2.0.0.0, Culture=neutral, PublicKeyToken=072edcf4a5328938, processorArchitecture=MSIL">
+      <HintPath>..\packages\BouncyCastle.Cryptography.2.4.0\lib\net461\BouncyCastle.Cryptography.dll</HintPath>
+    </Reference>
+    <Reference Include="DevExpress.BonusSkins.v22.1" />
+    <Reference Include="DevExpress.Charts.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.CodeParser.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Data.Desktop.v22.1" />
+    <Reference Include="DevExpress.Data.v22.1" />
+    <Reference Include="DevExpress.DataAccess.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.DataAccess.v22.1.UI, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.DataVisualization.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Diagram.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Docs.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Drawing.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Images.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Office.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Pdf.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Pdf.v22.1.Drawing, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.PivotGrid.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.RichEdit.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.RichEdit.v22.1.Export, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Spreadsheet.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Utils.v22.1" />
+    <Reference Include="DevExpress.Sparkline.v22.1.Core" />
+    <Reference Include="DevExpress.Utils.v22.1.UI, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.Xpo.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraBars.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraCharts.v22.1.Extensions, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraCharts.v22.1.UI, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraCharts.v22.1.Wizard, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraDiagram.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraDialogs.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraEditors.v22.1" />
+    <Reference Include="DevExpress.Printing.v22.1.Core" />
+    <Reference Include="DevExpress.XtraGauges.v22.1.Core, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraGrid.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraLayout.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraNavBar.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPdfViewer.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraPivotGrid.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraPrinting.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraReports.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraReports.v22.1.CodeCompletion, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraReports.v22.1.Extensions, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraRichEdit.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraSpreadsheet.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeList.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.XtraTreeMap.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DevExpress.XtraVerticalGrid.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a" />
+    <Reference Include="DocumentFormat.OpenXml, Version=3.0.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.3.0.1\lib\net46\DocumentFormat.OpenXml.dll</HintPath>
+    </Reference>
+    <Reference Include="DocumentFormat.OpenXml.Framework, Version=3.0.1.0, Culture=neutral, PublicKeyToken=8fb06cb64d019a17, processorArchitecture=MSIL">
+      <HintPath>..\packages\DocumentFormat.OpenXml.Framework.3.0.1\lib\net46\DocumentFormat.OpenXml.Framework.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.UI, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.UI.dll</HintPath>
+    </Reference>
+    <Reference Include="Emgu.CV.World, Version=4.1.1.3497, Culture=neutral, PublicKeyToken=7281126722ab4438, processorArchitecture=MSIL">
+      <HintPath>..\packages\EMGU.CV.4.1.1.3497\lib\net35\Emgu.CV.World.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
+    </Reference>
+    <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.SqlServer.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus, Version=7.0.4.0, Culture=neutral, PublicKeyToken=ea159fdaa78159a1, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.7.0.4\lib\net462\EPPlus.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.Interfaces, Version=6.1.1.0, Culture=neutral, PublicKeyToken=a694d7f3b0907a61, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.Interfaces.6.1.1\lib\net462\EPPlus.Interfaces.dll</HintPath>
+    </Reference>
+    <Reference Include="EPPlus.System.Drawing, Version=6.1.1.0, Culture=neutral, PublicKeyToken=2308d35469c9bac0, processorArchitecture=MSIL">
+      <HintPath>..\packages\EPPlus.System.Drawing.6.1.1\lib\net462\EPPlus.System.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader, Version=3.6.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.3.6.0\lib\net45\ExcelDataReader.dll</HintPath>
+    </Reference>
+    <Reference Include="ExcelDataReader.DataSet, Version=3.6.0.0, Culture=neutral, PublicKeyToken=93517dbe6a4012fa, processorArchitecture=MSIL">
+      <HintPath>..\packages\ExcelDataReader.DataSet.3.6.0\lib\net35\ExcelDataReader.DataSet.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack, Version=1.11.72.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
+      <HintPath>..\packages\HtmlAgilityPack.1.11.72\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="itextsharp, Version=5.5.13.4, Culture=neutral, PublicKeyToken=8354ae6d2174ddca, processorArchitecture=MSIL">
+      <HintPath>..\packages\iTextSharp.5.5.13.4\lib\net461\itextsharp.dll</HintPath>
+    </Reference>
+    <Reference Include="KAutoHelper, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\KAutoHelper_Kteam.1.0.1.2\lib\net471\KAutoHelper.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.IO.RecyclableMemoryStream, Version=1.4.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.IO.RecyclableMemoryStream.1.4.1\lib\net46\Microsoft.IO.RecyclableMemoryStream.dll</HintPath>
+    </Reference>
+    <Reference Include="MiniWord, Version=0.8.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MiniWord.0.8.0\lib\net45\MiniWord.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="PresentationCore" />
+    <Reference Include="Scriban, Version=5.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Scriban.5.9.0\lib\netstandard2.0\Scriban.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.License, Version=1.3.8.40, Culture=neutral, PublicKeyToken=b1144360237c8b3f, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\01. PhanAnhTuan\02. VMI Lab System\01. Projects\VMILabSystem\VMILabSystem\dll\Spire.License.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Pdf, Version=7.1.10.0, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\01. PhanAnhTuan\02. VMI Lab System\01. Projects\VMILabSystem\VMILabSystem\dll\Spire.Pdf.dll</HintPath>
+    </Reference>
+    <Reference Include="Spire.Presentation, Version=6.1.4.0, Culture=neutral, PublicKeyToken=663f351905198cb3, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>dll\Spire.Presentation.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.ComponentModel.Annotations, Version=4.2.1.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.ComponentModel.Annotations.5.0.0\lib\net461\System.ComponentModel.Annotations.dll</HintPath>
+    </Reference>
+    <Reference Include="System.ComponentModel.DataAnnotations" />
+    <Reference Include="System.Configuration" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="System.DirectoryServices.AccountManagement" />
+    <Reference Include="System.IO.Compression" />
+    <Reference Include="System.IO.Compression.FileSystem" />
+    <Reference Include="System.IO.Compression.ZipFile, Version=4.0.2.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.IO.Compression.ZipFile.4.3.0\lib\net46\System.IO.Compression.ZipFile.dll</HintPath>
+      <Private>True</Private>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="System.Management" />
+    <Reference Include="System.Net.Http" />
+    <Reference Include="System.Runtime.CompilerServices.Unsafe, Version=4.0.4.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Runtime.CompilerServices.Unsafe.4.5.0\lib\netstandard2.0\System.Runtime.CompilerServices.Unsafe.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.Runtime.Serialization.Formatters.Soap" />
+    <Reference Include="System.Security" />
+    <Reference Include="System.Threading.Tasks" />
+    <Reference Include="System.Threading.Tasks.Extensions, Version=4.2.0.0, Culture=neutral, PublicKeyToken=cc7b13ffcd2ddd51, processorArchitecture=MSIL">
+      <HintPath>..\packages\System.Threading.Tasks.Extensions.4.5.0\lib\netstandard2.0\System.Threading.Tasks.Extensions.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Transactions" />
+    <Reference Include="System.Web" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="ZedGraph, Version=5.1.7.430, Culture=neutral, PublicKeyToken=02a83cbd123fcd60, processorArchitecture=MSIL">
+      <HintPath>..\packages\ZedGraph.5.1.7\lib\net35-Client\ZedGraph.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Components\CropPictureBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Helpers\AIHelper.cs" />
+    <Compile Include="Helpers\AutoFilterNonUnicode.cs" />
+    <Compile Include="Helpers\AppCopyRight.cs" />
+    <Compile Include="Helpers\AppPermission.cs" />
+    <Compile Include="Helpers\DateTimeHelper.cs" />
+    <Compile Include="Helpers\DomainVNFPG.cs" />
+    <Compile Include="Helpers\EncryptionHelper.cs" />
+    <Compile Include="Helpers\EnumHelper.cs" />
+    <Compile Include="Helpers\FixedAsset313Helper.cs" />
+    <Compile Include="Helpers\FixedProgressHelper.cs" />
+    <Compile Include="Helpers\GridControlHelper.cs" />
+    <Compile Include="Helpers\ImageHelper.cs" />
+    <Compile Include="Helpers\KeyboardHelper.cs" />
+    <Compile Include="Helpers\Material309CheckPhotoHelper.cs" />
+    <Compile Include="Helpers\Material309Helper.cs" />
+    <Compile Include="Helpers\PCInfoHelper.cs" />
+    <Compile Include="Helpers\PdfHelper.cs" />
+    <Compile Include="Helpers\RefreshHelper.cs" />
+    <Compile Include="Helpers\RegistryHelper.cs" />
+    <Compile Include="Helpers\StringHelper.cs" />
+    <Compile Include="Helpers\TPConfigs.cs" />
+    <Compile Include="Helpers\TPSvgimages.cs" />
+    <Compile Include="Helpers\WordHelper.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\00_Generals\f00_AdminChangeUser.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_AdminChangeUser.Designer.cs">
+      <DependentUpon>f00_AdminChangeUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_CropImage.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_CropImage.Designer.cs">
+      <DependentUpon>f00_CropImage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_DesignReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_DesignReport.Designer.cs">
+      <DependentUpon>f00_DesignReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FixedProgInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FixedProgInfo.Designer.cs">
+      <DependentUpon>f00_FixedProgInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_PrintReport.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_PrintReport.Designer.cs">
+      <DependentUpon>f00_PrintReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_SelectFixedProg.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_SelectFixedProg.Designer.cs">
+      <DependentUpon>f00_SelectFixedProg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FixedProgMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FixedProgMain.Designer.cs">
+      <DependentUpon>f00_FixedProgMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_SendNoteSystem.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_SendNoteSystem.Designer.cs">
+      <DependentUpon>f00_SendNoteSystem.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_ViewMultiFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_ViewMultiFile.Designer.cs">
+      <DependentUpon>f00_ViewMultiFile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\01_ProductionAndSales\01_ContractManagement\uc101_ContractMgmtBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\01_ProductionAndSales\01_ContractManagement\uc101_ContractMgmtBase.Designer.cs">
+      <DependentUpon>uc101_ContractMgmtBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddAttachment.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddAttachment.Designer.cs">
+      <DependentUpon>f201_AddAttachment.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddNode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddNode.Designer.cs">
+      <DependentUpon>f201_AddNode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddRangeAtts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddRangeAtts.Designer.cs">
+      <DependentUpon>f201_AddRangeAtts.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AuditDoc_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AuditDoc_Info.Designer.cs">
+      <DependentUpon>f201_AuditDoc_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_DocSignInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_DocSignInfo.Designer.cs">
+      <DependentUpon>f201_DocSignInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignDoc_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignDoc_Info.Designer.cs">
+      <DependentUpon>f201_SignDoc_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignProg_Detail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignProg_Detail.Designer.cs">
+      <DependentUpon>f201_SignProg_Detail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_UpdateUsrReq_Detail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_UpdateUsrReq_Detail.Designer.cs">
+      <DependentUpon>f201_UpdateUsrReq_Detail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.Designer.cs">
+      <DependentUpon>uc201_Adv_CalibAtts.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ApprovalProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ApprovalProgress.Designer.cs">
+      <DependentUpon>uc201_ApprovalProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_AuditISOMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_AuditISOMain.Designer.cs">
+      <DependentUpon>uc201_AuditISOMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ExpiredDocs.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ExpiredDocs.Designer.cs">
+      <DependentUpon>uc201_ExpiredDocs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq.Designer.cs">
+      <DependentUpon>uc201_UpdateUsrReq.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq_Manual.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq_Manual.Designer.cs">
+      <DependentUpon>uc201_UpdateUsrReq_Manual.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\03_TechnicalPrj\f203_PrjInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\03_TechnicalPrj\f203_PrjInfo.Designer.cs">
+      <DependentUpon>f203_PrjInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\03_TechnicalPrj\uc203_TechnicalPrjBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\03_TechnicalPrj\uc203_TechnicalPrjBase.Designer.cs">
+      <DependentUpon>uc203_TechnicalPrjBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_ChooseDocRelated.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_ChooseDocRelated.Designer.cs">
+      <DependentUpon>f204_ChooseDocRelated.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_DocMgmt_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_DocMgmt_Info.Designer.cs">
+      <DependentUpon>f204_DocMgmt_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_OldVersions.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_OldVersions.Designer.cs">
+      <DependentUpon>f204_OldVersions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_UpdateVerDoc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_UpdateVerDoc.Designer.cs">
+      <DependentUpon>f204_UpdateVerDoc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\uc204_InternalDocMgmtMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\uc204_InternalDocMgmtMain.Designer.cs">
+      <DependentUpon>uc204_InternalDocMgmtMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_DigitalSignature.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_DigitalSignature.Designer.cs">
+      <DependentUpon>uc201_DigitalSignature.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_AddAtts.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_AddAtts.Designer.cs">
+      <DependentUpon>f205_AddAtts.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_DocsInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_DocsInfo.Designer.cs">
+      <DependentUpon>f205_DocsInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_Node_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\f205_Node_Info.Designer.cs">
+      <DependentUpon>f205_Node_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\uc205_IATF16949Main.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\05_IATF16949\uc205_IATF16949Main.Designer.cs">
+      <DependentUpon>uc205_IATF16949Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_Doc_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_Doc_Info.Designer.cs">
+      <DependentUpon>f206_Doc_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_UpdateDocVersion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_UpdateDocVersion.Designer.cs">
+      <DependentUpon>f206_UpdateDocVersion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\uc206_InternationalStdMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\06_InternationalStd\uc206_InternationalStdMain.Designer.cs">
+      <DependentUpon>uc206_InternationalStdMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\f302_InterviewRecord.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\f302_InterviewRecord.Designer.cs">
+      <DependentUpon>f302_InterviewRecord.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\03_ShiftSchedule\uc303_SickLeaveData.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\03_ShiftSchedule\uc303_SickLeaveData.Designer.cs">
+      <DependentUpon>uc303_SickLeaveData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rp5SAreaDivision.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rp5SAreaDivision.Designer.cs">
+      <DependentUpon>rp5SAreaDivision.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetLabel.Designer.cs">
+      <DependentUpon>rpCabinetLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetManage.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetManage.Designer.cs">
+      <DependentUpon>rpCabinetManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpDeviceManagement.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpDeviceManagement.Designer.cs">
+      <DependentUpon>rpDeviceManagement.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpFixedAssets.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpFixedAssets.Designer.cs">
+      <DependentUpon>rpFixedAssets.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpISODevice.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpISODevice.Designer.cs">
+      <DependentUpon>rpISODevice.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpWasteLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\rpWasteLabel.Designer.cs">
+      <DependentUpon>rpWasteLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\uc305_PrintLabelMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\05_PrintLabel\uc305_PrintLabelMain.Designer.cs">
+      <DependentUpon>uc305_PrintLabelMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_NewSignDoc.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_NewSignDoc.Designer.cs">
+      <DependentUpon>f306_NewSignDoc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_SignDocInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_SignDocInfo.Designer.cs">
+      <DependentUpon>f306_SignDocInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_SignProgDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\f306_SignProgDetail.Designer.cs">
+      <DependentUpon>f306_SignProgDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_AllSignDocs.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_AllSignDocs.Designer.cs">
+      <DependentUpon>uc306_AllSignDocs.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_AwaitingApproval.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_AwaitingApproval.Designer.cs">
+      <DependentUpon>uc306_AwaitingApproval.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_EditSignDoc.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_EditSignDoc.Designer.cs">
+      <DependentUpon>uc306_EditSignDoc.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_SignatureMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\06_Signature\uc306_SignatureMain.Designer.cs">
+      <DependentUpon>uc306_SignatureMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_ConfirmQues.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_ConfirmQues.Designer.cs">
+      <DependentUpon>f307_ConfirmQues.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_DoExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_DoExam.Designer.cs">
+      <DependentUpon>f307_DoExam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_ExamDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_ExamDetail.Designer.cs">
+      <DependentUpon>f307_ExamDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_Exam_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_Exam_Info.Designer.cs">
+      <DependentUpon>f307_Exam_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_Interview_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_Interview_Info.Designer.cs">
+      <DependentUpon>f315_Interview_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_UsersData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_UsersData.Designer.cs">
+      <DependentUpon>f315_UsersData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_JobSet_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_JobSet_Info.Designer.cs">
+      <DependentUpon>f307_JobSet_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_UploadQues.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_UploadQues.Designer.cs">
+      <DependentUpon>f307_UploadQues.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_UsersData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\f307_UsersData.Designer.cs">
+      <DependentUpon>f307_UsersData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_ExamMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_ExamMgmt.Designer.cs">
+      <DependentUpon>uc307_ExamMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\uc315_Interview.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\uc315_Interview.Designer.cs">
+      <DependentUpon>uc315_Interview.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\Exam317TemplateExporter.cs" />
+    <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.Designer.cs">
+      <DependentUpon>uc317_ExamStatistics.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.Designer.cs">
+      <DependentUpon>uc307_JobTitleSetting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_QuesManage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_QuesManage.Designer.cs">
+      <DependentUpon>uc307_QuesManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_QuizMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_QuizMain.Designer.cs">
+      <DependentUpon>uc307_QuizMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckData.Designer.cs">
+      <DependentUpon>f308_CheckData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckSession_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckSession_Info.Designer.cs">
+      <DependentUpon>f308_CheckSession_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_DetailDataReCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_DetailDataReCheck.Designer.cs">
+      <DependentUpon>f308_DetailDataReCheck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_SpecialUsrCheck.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_SpecialUsrCheck.Designer.cs">
+      <DependentUpon>f308_SpecialUsrCheck.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_UserData.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\f308_UserData.Designer.cs">
+      <DependentUpon>f308_UserData.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\uc308_ExportReport.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\uc308_ExportReport.Designer.cs">
+      <DependentUpon>uc308_ExportReport.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\uc308_HealthCheckMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\08_HealthCheck\uc308_HealthCheckMain.Designer.cs">
+      <DependentUpon>uc308_HealthCheckMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Machine_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Machine_Info.Designer.cs">
+      <DependentUpon>f309_Machine_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Material_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Material_Info.Designer.cs">
+      <DependentUpon>f309_Material_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_MaterialReplacement_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_MaterialReplacement_Info.Designer.cs">
+      <DependentUpon>f309_MaterialReplacement_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_MaterialReplacementChain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_MaterialReplacementChain.Designer.cs">
+      <DependentUpon>f309_MaterialReplacementChain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoveryEvidenceUpload.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoveryEvidenceUpload.Designer.cs">
+      <DependentUpon>f309_RecoveryEvidenceUpload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoveryGuideMgmt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoveryGuideMgmt.Designer.cs">
+      <DependentUpon>f309_RecoveryGuideMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoverySchedule.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_RecoverySchedule.Designer.cs">
+      <DependentUpon>f309_RecoverySchedule.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\Material309RecoveryHelper.cs" />
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\dt309_RecoveryConst.cs" />
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\dt309_RecoveryTicketGridRow.cs" />
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_ReCheckInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_ReCheckInfo.Designer.cs">
+      <DependentUpon>f309_ReCheckInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Transaction_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\f309_Transaction_Info.Designer.cs">
+      <DependentUpon>f309_Transaction_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_ChooseDate.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_ChooseDate.Designer.cs">
+      <DependentUpon>uc309_ChooseDate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_CostCalculation.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_CostCalculation.Designer.cs">
+      <DependentUpon>uc309_CostCalculation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_InOutMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_InOutMgmt.Designer.cs">
+      <DependentUpon>uc309_InOutMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_MachineMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_MachineMgmt.Designer.cs">
+      <DependentUpon>uc309_MachineMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_InspectionBatch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_InspectionBatch.Designer.cs">
+      <DependentUpon>uc309_InspectionBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_RecheckBatch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_RecheckBatch.Designer.cs">
+      <DependentUpon>uc309_RecheckBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_SparePartMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_SparePartMain.Designer.cs">
+      <DependentUpon>uc309_SparePartMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_RecoveryMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_RecoveryMgmt.Designer.cs">
+      <DependentUpon>uc309_RecoveryMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\09_SparePart\uc309_RecoveryTask.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_Area5SResponsible_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_Area5SResponsible_Info.Designer.cs">
+      <DependentUpon>f310_Area5SResponsible_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSAssign_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSAssign_Info.Designer.cs">
+      <DependentUpon>f310_EHSAssign_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSFunc_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSFunc_Info.Designer.cs">
+      <DependentUpon>f310_EHSFunc_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentInfo_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentInfo_Info.Designer.cs">
+      <DependentUpon>f310_EquipmentInfo_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UnitEHSOrg_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UnitEHSOrg_Info.Designer.cs">
+      <DependentUpon>f310_UnitEHSOrg_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateApproval.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateApproval.Designer.cs">
+      <DependentUpon>f310_UpdateApproval.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateLeaveUser_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateLeaveUser_Info.Designer.cs">
+      <DependentUpon>f310_UpdateLeaveUser_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_Area5SResponsible.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_Area5SResponsible.Designer.cs">
+      <DependentUpon>uc310_Area5SResponsible.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EHSFunction.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EHSFunction.Designer.cs">
+      <DependentUpon>uc310_EHSFunction.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EquipmentInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EquipmentInfo.Designer.cs">
+      <DependentUpon>uc310_EquipmentInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UnitEHSOrg.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UnitEHSOrg.Designer.cs">
+      <DependentUpon>uc310_UnitEHSOrg.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UpdateLeaveUser.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UpdateLeaveUser.Designer.cs">
+      <DependentUpon>uc310_UpdateLeaveUser.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AddFuel_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AddFuel_Info.Designer.cs">
+      <DependentUpon>f311_AddFuel_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AutoERP.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AutoERP.Designer.cs">
+      <DependentUpon>f311_AutoERP.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ExpenseMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ExpenseMain.Designer.cs">
+      <DependentUpon>uc311_ExpenseMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_MoreInfo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_MoreInfo.Designer.cs">
+      <DependentUpon>uc311_MoreInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_DoExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_DoExam.Designer.cs">
+      <DependentUpon>f312_DoExam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_QuesMgmt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_QuesMgmt.Designer.cs">
+      <DependentUpon>f312_QuesMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_SettingExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_SettingExam.Designer.cs">
+      <DependentUpon>f312_SettingExam.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMain.Designer.cs">
+      <DependentUpon>uc312_ExamMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMgmt.Designer.cs">
+      <DependentUpon>uc312_ExamMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_GroupMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_GroupMgmt.Designer.cs">
+      <DependentUpon>uc312_GroupMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_FixedAssetMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_FixedAssetMain.Designer.cs">
+      <DependentUpon>uc313_FixedAssetMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\FixedAsset313Context.cs" />
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\FixedAsset313GridHelper.cs" />
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\FixedAsset313UIHelper.cs" />
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_AbnormalCatalog_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_AbnormalCatalog_Info.Designer.cs">
+      <DependentUpon>f313_AbnormalCatalog_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_AssetPhoto_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_AssetPhoto_Info.Designer.cs">
+      <DependentUpon>f313_AssetPhoto_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_BatchCreate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_BatchCreate.Designer.cs">
+      <DependentUpon>f313_BatchCreate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_DepartmentSetting_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_DepartmentSetting_Info.Designer.cs">
+      <DependentUpon>f313_DepartmentSetting_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_FixedAsset_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_FixedAsset_Info.Designer.cs">
+      <DependentUpon>f313_FixedAsset_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_InspectionResult_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\f313_InspectionResult_Info.Designer.cs">
+      <DependentUpon>f313_InspectionResult_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_FixedAssetMain.Models.cs" />
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_AbnormalTrack.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_AbnormalTrack.Designer.cs">
+      <DependentUpon>uc313_AbnormalTrack.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_InspectionBatch.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_InspectionBatch.Designer.cs">
+      <DependentUpon>uc313_InspectionBatch.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_Setting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\13_FixedAsset\uc313_Setting.Designer.cs">
+      <DependentUpon>uc313_Setting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamInfo.Designer.cs">
+      <DependentUpon>f314_HskExamInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamDetail.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamDetail.Designer.cs">
+      <DependentUpon>f314_HskExamDetail.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\Hsk314Constants.cs" />
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\Hsk314ExamBuilder.cs" />
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\Hsk314ExamResultHelper.cs" />
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\Hsk314ReadingBankRepository.cs" />
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\uc314_HskExamMgmt.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\uc314_HskExamMgmt.Designer.cs">
+      <DependentUpon>uc314_HskExamMgmt.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\uc314_HskQuestionBank.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\14_ChineseExam\uc314_HskQuestionBank.Designer.cs">
+      <DependentUpon>uc314_HskQuestionBank.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignInfo.Designer.cs">
+      <DependentUpon>f402_SignInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FluentFrame.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_FluentFrame.Designer.cs">
+      <DependentUpon>f00_FluentFrame.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_CustomSplashScreen.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_CustomSplashScreen.Designer.cs">
+      <DependentUpon>f00_CustomSplashScreen.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_Login.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_Login.Designer.cs">
+      <DependentUpon>f00_Login.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_Main.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_Main.Designer.cs">
+      <DependentUpon>f00_Main.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_PdfTools.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_PdfTools.Designer.cs">
+      <DependentUpon>f00_PdfTools.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_UpdateSoftware.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_UpdateSoftware.Designer.cs">
+      <DependentUpon>f00_UpdateSoftware.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_VIewFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\f00_VIewFile.Designer.cs">
+      <DependentUpon>f00_VIewFile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_AdminLogin.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_AdminLogin.Designer.cs">
+      <DependentUpon>uc00_AdminLogin.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_AdvancedSign.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_AdvancedSign.Designer.cs">
+      <DependentUpon>uc00_AdvancedSign.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_ChangePassword.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_ChangePassword.Designer.cs">
+      <DependentUpon>uc00_ChangePassword.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_UserControl.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\00_Generals\uc00_UserControl.Designer.cs">
+      <DependentUpon>uc00_UserControl.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\f202_DocInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\f202_DocInfo.Designer.cs">
+      <DependentUpon>f202_DocInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\uc202_JFEnCSCBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\uc202_JFEnCSCBase.Designer.cs">
+      <DependentUpon>uc202_JFEnCSCBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ChartStatistics.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ChartStatistics.Designer.cs">
+      <DependentUpon>f207_ChartStatistics.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_Info.Designer.cs">
+      <DependentUpon>f207_Document_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_ViewOnly.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_ViewOnly.Designer.cs">
+      <DependentUpon>f207_Document_ViewOnly.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_SetTarget.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_SetTarget.Designer.cs">
+      <DependentUpon>f207_SetTarget.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ViewFile.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ViewFile.Designer.cs">
+      <DependentUpon>f207_ViewFile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DataStatistics.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DataStatistics.Designer.cs">
+      <DependentUpon>uc207_DataStatistics.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DocApproval.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DocApproval.Designer.cs">
+      <DependentUpon>uc207_DocApproval.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocProgress.Designer.cs">
+      <DependentUpon>uc207_Notify_DocProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocUpdateNotify.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocUpdateNotify.Designer.cs">
+      <DependentUpon>uc207_Notify_DocUpdateNotify.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_HisDownload.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_HisDownload.Designer.cs">
+      <DependentUpon>uc207_Notify_HisDownload.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Search.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Search.Designer.cs">
+      <DependentUpon>uc207_Search.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_SelectProgress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_SelectProgress.Designer.cs">
+      <DependentUpon>uc207_SelectProgress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertInfo.Designer.cs">
+      <DependentUpon>f301_CertInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertReqSetInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertReqSetInfo.Designer.cs">
+      <DependentUpon>f301_CertReqSetInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CourseInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CourseInfo.Designer.cs">
+      <DependentUpon>f301_CourseInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_CertReqSetting.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_CertReqSetting.Designer.cs">
+      <DependentUpon>uc301_CertReqSetting.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_Course.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_Course.Designer.cs">
+      <DependentUpon>uc301_Course.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SelectOutputFile.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SelectOutputFile.Designer.cs">
+      <DependentUpon>uc301_SelectOutputFile.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\f302_NewUserInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\f302_NewUserInfo.Designer.cs">
+      <DependentUpon>f302_NewUserInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\uc302_NewPersonnelMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\02_NewPersonnel\uc302_NewPersonnelMain.Designer.cs">
+      <DependentUpon>uc302_NewPersonnelMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\03_ShiftSchedule\f303_ShiftScheduleMain.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\03_ShiftSchedule\f303_ShiftScheduleMain.Designer.cs">
+      <DependentUpon>f303_ShiftScheduleMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_JobTitleInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_JobTitleInfo.Designer.cs">
+      <DependentUpon>f401_JobTitleInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_JobTitle.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_JobTitle.Designer.cs">
+      <DependentUpon>uc401_JobTitle.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SafetyCertMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SafetyCertMain.Designer.cs">
+      <DependentUpon>uc301_SafetyCertMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_UserInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_UserInfo.Designer.cs">
+      <DependentUpon>f401_UserInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_FuncInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_FuncInfo.Designer.cs">
+      <DependentUpon>f402_FuncInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_ProgressInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_ProgressInfo.Designer.cs">
+      <DependentUpon>f402_ProgressInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleInfo.Designer.cs">
+      <DependentUpon>f402_RoleInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignUsers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignUsers.Designer.cs">
+      <DependentUpon>f402_SignUsers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleUsers.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleUsers.Designer.cs">
+      <DependentUpon>f402_RoleUsers.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserMapping.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserMapping.Designer.cs">
+      <DependentUpon>f402_UserMapping.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserRoles.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserRoles.Designer.cs">
+      <DependentUpon>f402_UserRoles.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserSigns.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserSigns.Designer.cs">
+      <DependentUpon>f402_UserSigns.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_Watermark_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_Watermark_Info.Designer.cs">
+      <DependentUpon>f402_Watermark_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Progress.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Progress.Designer.cs">
+      <DependentUpon>uc402_Progress.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_GroupManage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_GroupManage.Designer.cs">
+      <DependentUpon>uc401_GroupManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_GroupInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_GroupInfo.Designer.cs">
+      <DependentUpon>f401_GroupInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_UserManage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_UserManage.Designer.cs">
+      <DependentUpon>uc401_UserManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Functions.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Functions.Designer.cs">
+      <DependentUpon>uc402_Functions.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_SignManage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_SignManage.Designer.cs">
+      <DependentUpon>uc402_SignManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_UploadExcelDB.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_UploadExcelDB.Designer.cs">
+      <DependentUpon>uc402_UploadExcelDB.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Watermark.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Watermark.Designer.cs">
+      <DependentUpon>uc402_Watermark.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\02_MaterialTrends\uc403_02_MaterialTrends.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\02_MaterialTrends\uc403_02_MaterialTrends.Designer.cs">
+      <DependentUpon>uc403_02_MaterialTrends.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_ImageAutoArray.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_ImageAutoArray.Designer.cs">
+      <DependentUpon>f403_03_ImageAutoArray.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_SurfaceRustHealth.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_SurfaceRustHealth.Designer.cs">
+      <DependentUpon>f403_03_SurfaceRustHealth.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_StandardInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_StandardInfo.Designer.cs">
+      <DependentUpon>f403_04_StandardInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_Standard_Info.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_Standard_Info.Designer.cs">
+      <DependentUpon>f403_04_Standard_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\uc403_04_HardnessStandardLog.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\uc403_04_HardnessStandardLog.Designer.cs">
+      <DependentUpon>uc403_04_HardnessStandardLog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_AddStandard.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_AddStandard.Designer.cs">
+      <DependentUpon>f403_05_AddStandard.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_UpdateStandar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_UpdateStandar.Designer.cs">
+      <DependentUpon>f403_05_UpdateStandar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\uc403_05_CalipStandardMain.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\uc403_05_CalipStandardMain.Designer.cs">
+      <DependentUpon>uc403_05_CalipStandardMain.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\f403_ProcessFilesTool.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\f403_ProcessFilesTool.Designer.cs">
+      <DependentUpon>f403_ProcessFilesTool.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftManual_Info.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftManual_Info.Designer.cs">
+      <DependentUpon>uc403_SoftManual_Info.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftwareManual.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftwareManual.Designer.cs">
+      <DependentUpon>uc403_SoftwareManual.cs</DependentUpon>
+    </Compile>
+    <EmbeddedResource Include="Components\CropPictureBox.resx">
+      <DependentUpon>CropPictureBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\licenses.licx" />
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <EmbeddedResource Include="Views\00_Generals\f00_AdminChangeUser.resx">
+      <DependentUpon>f00_AdminChangeUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_CropImage.resx">
+      <DependentUpon>f00_CropImage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_DesignReport.resx">
+      <DependentUpon>f00_DesignReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_FixedProgInfo.resx">
+      <DependentUpon>f00_FixedProgInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_PrintReport.resx">
+      <DependentUpon>f00_PrintReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_SelectFixedProg.resx">
+      <DependentUpon>f00_SelectFixedProg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_FixedProgMain.resx">
+      <DependentUpon>f00_FixedProgMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_SendNoteSystem.resx">
+      <DependentUpon>f00_SendNoteSystem.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_ViewMultiFile.resx">
+      <DependentUpon>f00_ViewMultiFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\01_ProductionAndSales\01_ContractManagement\uc101_ContractMgmtBase.resx">
+      <DependentUpon>uc101_ContractMgmtBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddAttachment.resx">
+      <DependentUpon>f201_AddAttachment.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddNode.resx">
+      <DependentUpon>f201_AddNode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AddRangeAtts.resx">
+      <DependentUpon>f201_AddRangeAtts.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_AuditDoc_Info.resx">
+      <DependentUpon>f201_AuditDoc_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_DocSignInfo.resx">
+      <DependentUpon>f201_DocSignInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignDoc_Info.resx">
+      <DependentUpon>f201_SignDoc_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_SignProg_Detail.resx">
+      <DependentUpon>f201_SignProg_Detail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\f201_UpdateUsrReq_Detail.resx">
+      <DependentUpon>f201_UpdateUsrReq_Detail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.resx">
+      <DependentUpon>uc201_Adv_CalibAtts.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ApprovalProgress.resx">
+      <DependentUpon>uc201_ApprovalProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_AuditISOMain.resx">
+      <DependentUpon>uc201_AuditISOMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_DigitalSignature.resx">
+      <DependentUpon>uc201_DigitalSignature.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ExpiredDocs.resx">
+      <DependentUpon>uc201_ExpiredDocs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq.resx">
+      <DependentUpon>uc201_UpdateUsrReq.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_UpdateUsrReq_Manual.resx">
+      <DependentUpon>uc201_UpdateUsrReq_Manual.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\03_TechnicalPrj\f203_PrjInfo.resx">
+      <DependentUpon>f203_PrjInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\03_TechnicalPrj\uc203_TechnicalPrjBase.resx">
+      <DependentUpon>uc203_TechnicalPrjBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_ChooseDocRelated.resx">
+      <DependentUpon>f204_ChooseDocRelated.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_DocMgmt_Info.resx">
+      <DependentUpon>f204_DocMgmt_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_OldVersions.resx">
+      <DependentUpon>f204_OldVersions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\f204_UpdateVerDoc.resx">
+      <DependentUpon>f204_UpdateVerDoc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\04_InternalDocMgmt\uc204_InternalDocMgmtMain.resx">
+      <DependentUpon>uc204_InternalDocMgmtMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\05_IATF16949\f205_AddAtts.resx">
+      <DependentUpon>f205_AddAtts.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\05_IATF16949\f205_DocsInfo.resx">
+      <DependentUpon>f205_DocsInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\05_IATF16949\f205_Node_Info.resx">
+      <DependentUpon>f205_Node_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\05_IATF16949\uc205_IATF16949Main.resx">
+      <DependentUpon>uc205_IATF16949Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_Doc_Info.resx">
+      <DependentUpon>f206_Doc_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\06_InternationalStd\f206_UpdateDocVersion.resx">
+      <DependentUpon>f206_UpdateDocVersion.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\06_InternationalStd\uc206_InternationalStdMain.resx">
+      <DependentUpon>uc206_InternationalStdMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\02_NewPersonnel\f302_InterviewRecord.resx">
+      <DependentUpon>f302_InterviewRecord.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\03_ShiftSchedule\uc303_SickLeaveData.resx">
+      <DependentUpon>uc303_SickLeaveData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rp5SAreaDivision.resx">
+      <DependentUpon>rp5SAreaDivision.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetLabel.resx">
+      <DependentUpon>rpCabinetLabel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpCabinetManage.resx">
+      <DependentUpon>rpCabinetManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpDeviceManagement.resx">
+      <DependentUpon>rpDeviceManagement.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpFixedAssets.resx">
+      <DependentUpon>rpFixedAssets.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpISODevice.resx">
+      <DependentUpon>rpISODevice.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\rpWasteLabel.resx">
+      <DependentUpon>rpWasteLabel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\05_PrintLabel\uc305_PrintLabelMain.resx">
+      <DependentUpon>uc305_PrintLabelMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\f306_NewSignDoc.resx">
+      <DependentUpon>f306_NewSignDoc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\f306_SignDocInfo.resx">
+      <DependentUpon>f306_SignDocInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\f306_SignProgDetail.resx">
+      <DependentUpon>f306_SignProgDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\uc306_AllSignDocs.resx">
+      <DependentUpon>uc306_AllSignDocs.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\uc306_AwaitingApproval.resx">
+      <DependentUpon>uc306_AwaitingApproval.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\uc306_EditSignDoc.resx">
+      <DependentUpon>uc306_EditSignDoc.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\06_Signature\uc306_SignatureMain.resx">
+      <DependentUpon>uc306_SignatureMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_ConfirmQues.resx">
+      <DependentUpon>f307_ConfirmQues.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_DoExam.resx">
+      <DependentUpon>f307_DoExam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_ExamDetail.resx">
+      <DependentUpon>f307_ExamDetail.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_Exam_Info.resx">
+      <DependentUpon>f307_Exam_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_Interview_Info.resx">
+      <DependentUpon>f315_Interview_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\15_InterviewAssessment\f315_UsersData.resx">
+      <DependentUpon>f315_UsersData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_JobSet_Info.resx">
+      <DependentUpon>f307_JobSet_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_UploadQues.resx">
+      <DependentUpon>f307_UploadQues.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\f307_UsersData.resx">
+      <DependentUpon>f307_UsersData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_ExamMgmt.resx">
+      <DependentUpon>uc307_ExamMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\15_InterviewAssessment\uc315_Interview.resx">
+      <DependentUpon>uc315_Interview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.resx">
+      <DependentUpon>uc307_JobTitleSetting.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_QuesManage.resx">
+      <DependentUpon>uc307_QuesManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_QuizMain.resx">
+      <DependentUpon>uc307_QuizMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckData.resx">
+      <DependentUpon>f308_CheckData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\f308_CheckSession_Info.resx">
+      <DependentUpon>f308_CheckSession_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\f308_DetailDataReCheck.resx">
+      <DependentUpon>f308_DetailDataReCheck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\f308_SpecialUsrCheck.resx">
+      <DependentUpon>f308_SpecialUsrCheck.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\f308_UserData.resx">
+      <DependentUpon>f308_UserData.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\uc308_ExportReport.resx">
+      <DependentUpon>uc308_ExportReport.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\08_HealthCheck\uc308_HealthCheckMain.resx">
+      <DependentUpon>uc308_HealthCheckMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\f309_Machine_Info.resx">
+      <DependentUpon>f309_Machine_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\f309_Material_Info.resx">
+      <DependentUpon>f309_Material_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\f309_ReCheckInfo.resx">
+      <DependentUpon>f309_ReCheckInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\f309_Transaction_Info.resx">
+      <DependentUpon>f309_Transaction_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_ChooseDate.resx">
+      <DependentUpon>uc309_ChooseDate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_CostCalculation.resx">
+      <DependentUpon>uc309_CostCalculation.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_InOutMgmt.resx">
+      <DependentUpon>uc309_InOutMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_MachineMgmt.resx">
+      <DependentUpon>uc309_MachineMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_InspectionBatch.resx">
+      <DependentUpon>uc309_InspectionBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_RecheckBatch.resx">
+      <DependentUpon>uc309_RecheckBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_SparePartMain.resx">
+      <DependentUpon>uc309_SparePartMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_Area5SResponsible_Info.resx">
+      <DependentUpon>f310_Area5SResponsible_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSAssign_Info.resx">
+      <DependentUpon>f310_EHSAssign_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSFunc_Info.resx">
+      <DependentUpon>f310_EHSFunc_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentInfo_Info.resx">
+      <DependentUpon>f310_EquipmentInfo_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UnitEHSOrg_Info.resx">
+      <DependentUpon>f310_UnitEHSOrg_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateApproval.resx">
+      <DependentUpon>f310_UpdateApproval.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_UpdateLeaveUser_Info.resx">
+      <DependentUpon>f310_UpdateLeaveUser_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_Area5SResponsible.resx">
+      <DependentUpon>uc310_Area5SResponsible.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EHSFunction.resx">
+      <DependentUpon>uc310_EHSFunction.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_EquipmentInfo.resx">
+      <DependentUpon>uc310_EquipmentInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UnitEHSOrg.resx">
+      <DependentUpon>uc310_UnitEHSOrg.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\10_EHSWorkforce\uc310_UpdateLeaveUser.resx">
+      <DependentUpon>uc310_UpdateLeaveUser.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AddFuel_Info.resx">
+      <DependentUpon>f311_AddFuel_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_AutoERP.resx">
+      <DependentUpon>f311_AutoERP.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ExpenseMain.resx">
+      <DependentUpon>uc311_ExpenseMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_MoreInfo.resx">
+      <DependentUpon>uc311_MoreInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_DoExam.resx">
+      <DependentUpon>f312_DoExam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_QuesMgmt.resx">
+      <DependentUpon>f312_QuesMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_SettingExam.resx">
+      <DependentUpon>f312_SettingExam.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMain.resx">
+      <DependentUpon>uc312_ExamMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamMgmt.resx">
+      <DependentUpon>uc312_ExamMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_GroupMgmt.resx">
+      <DependentUpon>uc312_GroupMgmt.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\13_FixedAsset\f313_AssetPhoto_Info.resx">
+      <DependentUpon>f313_AssetPhoto_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\13_FixedAsset\f313_BatchCreate.resx">
+      <DependentUpon>f313_BatchCreate.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\13_FixedAsset\f313_InspectionResult_Info.resx">
+      <DependentUpon>f313_InspectionResult_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\13_FixedAsset\uc313_FixedAssetMain.resx">
+      <DependentUpon>uc313_FixedAssetMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamInfo.resx">
+      <DependentUpon>f314_HskExamInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignInfo.resx">
+      <DependentUpon>f402_SignInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_CustomSplashScreen.resx">
+      <DependentUpon>f00_CustomSplashScreen.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_FluentFrame.resx">
+      <DependentUpon>f00_FluentFrame.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_Login.resx">
+      <DependentUpon>f00_Login.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_Main.resx">
+      <DependentUpon>f00_Main.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_PdfTools.resx">
+      <DependentUpon>f00_PdfTools.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_UpdateSoftware.resx">
+      <DependentUpon>f00_UpdateSoftware.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\f00_VIewFile.resx">
+      <DependentUpon>f00_VIewFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\uc00_AdminLogin.resx">
+      <DependentUpon>uc00_AdminLogin.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\uc00_AdvancedSign.resx">
+      <DependentUpon>uc00_AdvancedSign.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\uc00_ChangePassword.resx">
+      <DependentUpon>uc00_ChangePassword.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\00_Generals\uc00_UserControl.resx">
+      <DependentUpon>uc00_UserControl.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\f202_DocInfo.resx">
+      <DependentUpon>f202_DocInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\02_JFEnCSCDocs\uc202_JFEnCSCBase.resx">
+      <DependentUpon>uc202_JFEnCSCBase.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ChartStatistics.resx">
+      <DependentUpon>f207_ChartStatistics.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_Info.resx">
+      <DependentUpon>f207_Document_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_Document_ViewOnly.resx">
+      <DependentUpon>f207_Document_ViewOnly.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_SetTarget.resx">
+      <DependentUpon>f207_SetTarget.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\f207_ViewFile.resx">
+      <DependentUpon>f207_ViewFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DataStatistics.resx">
+      <DependentUpon>uc207_DataStatistics.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_DocApproval.resx">
+      <DependentUpon>uc207_DocApproval.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocProgress.resx">
+      <DependentUpon>uc207_Notify_DocProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_DocUpdateNotify.resx">
+      <DependentUpon>uc207_Notify_DocUpdateNotify.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Notify_HisDownload.resx">
+      <DependentUpon>uc207_Notify_HisDownload.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_Search.resx">
+      <DependentUpon>uc207_Search.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\07_KnowledgeBase\uc207_SelectProgress.resx">
+      <DependentUpon>uc207_SelectProgress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertInfo.resx">
+      <DependentUpon>f301_CertInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CertReqSetInfo.resx">
+      <DependentUpon>f301_CertReqSetInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\f301_CourseInfo.resx">
+      <DependentUpon>f301_CourseInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_CertReqSetting.resx">
+      <DependentUpon>uc301_CertReqSetting.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_Course.resx">
+      <DependentUpon>uc301_Course.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SelectOutputFile.resx">
+      <DependentUpon>uc301_SelectOutputFile.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\02_NewPersonnel\f302_NewUserInfo.resx">
+      <DependentUpon>f302_NewUserInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\02_NewPersonnel\uc302_NewPersonnelMain.resx">
+      <DependentUpon>uc302_NewPersonnelMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\03_ShiftSchedule\f303_ShiftScheduleMain.resx">
+      <DependentUpon>f303_ShiftScheduleMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\f401_JobTitleInfo.resx">
+      <DependentUpon>f401_JobTitleInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\uc401_JobTitle.resx">
+      <DependentUpon>uc401_JobTitle.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SafetyCertMain.resx">
+      <DependentUpon>uc301_SafetyCertMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\f401_UserInfo.resx">
+      <DependentUpon>f401_UserInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_FuncInfo.resx">
+      <DependentUpon>f402_FuncInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_ProgressInfo.resx">
+      <DependentUpon>f402_ProgressInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleInfo.resx">
+      <DependentUpon>f402_RoleInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignUsers.resx">
+      <DependentUpon>f402_SignUsers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_RoleUsers.resx">
+      <DependentUpon>f402_RoleUsers.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserMapping.resx">
+      <DependentUpon>f402_UserMapping.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserRoles.resx">
+      <DependentUpon>f402_UserRoles.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_UserSigns.resx">
+      <DependentUpon>f402_UserSigns.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_Watermark_Info.resx">
+      <DependentUpon>f402_Watermark_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Progress.resx">
+      <DependentUpon>uc402_Progress.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\uc401_GroupManage.resx">
+      <DependentUpon>uc401_GroupManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\f401_GroupInfo.resx">
+      <DependentUpon>f401_GroupInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\uc401_UserManage.resx">
+      <DependentUpon>uc401_UserManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Functions.resx">
+      <DependentUpon>uc402_Functions.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_SignManage.resx">
+      <DependentUpon>uc402_SignManage.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_UploadExcelDB.resx">
+      <DependentUpon>uc402_UploadExcelDB.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\uc402_Watermark.resx">
+      <DependentUpon>uc402_Watermark.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\02_MaterialTrends\uc403_02_MaterialTrends.resx">
+      <DependentUpon>uc403_02_MaterialTrends.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_ImageAutoArray.resx">
+      <DependentUpon>f403_03_ImageAutoArray.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\03_ImageAutoArrangement\f403_03_SurfaceRustHealth.resx">
+      <DependentUpon>f403_03_SurfaceRustHealth.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_StandardInfo.resx">
+      <DependentUpon>f403_04_StandardInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\f403_04_Standard_Info.resx">
+      <DependentUpon>f403_04_Standard_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\04_HardnessStandardLog\uc403_04_HardnessStandardLog.resx">
+      <DependentUpon>uc403_04_HardnessStandardLog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_AddStandard.resx">
+      <DependentUpon>f403_05_AddStandard.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\f403_05_UpdateStandar.resx">
+      <DependentUpon>f403_05_UpdateStandar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\05_CalipStandardMgmt\uc403_05_CalipStandardMain.resx">
+      <DependentUpon>uc403_05_CalipStandardMain.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\f403_ProcessFilesTool.resx">
+      <DependentUpon>f403_ProcessFilesTool.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftManual_Info.resx">
+      <DependentUpon>uc403_SoftManual_Info.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\03_Extension\uc403_SoftwareManual.resx">
+      <DependentUpon>uc403_SoftwareManual.cs</DependentUpon>
+    </EmbeddedResource>
+    <None Include="App.config" />
+    <None Include="AppResources\302_NewEmployeePlan.docx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\308_Statistic.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\403_03_BendingTest.pptx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\403_03_MixedAnalysis4Img.pptx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\403_03_MixedAnalysis7Img.pptx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\blank.pdf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\317\Templates\TE-701-T001-01 技術工程師評鑑學科成績明細表.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\317\Templates\TE-701-T001-02 技術工程師評鑑中文考試成績明細表.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\317\Templates\TE-701-T001-03 冶金部技術工程師中文補考成績表.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\317\Templates\TE-701-T001-04 冶金部技術工程師口試報告成績表.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\317\Templates\TE-701-T001-05 冶金部技術工程師評鑑結果彙總表.xlsx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="AppResources\403_03_SurfaceRustHealth.pptx">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="packages.config" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Content Include="AppIcon.ico" />
+    <Content Include="AppResources\310_updateehsassign.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\310_updateleaveruser.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dll\Spire.License.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dll\Spire.Pdf.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="dll\Spire.Presentation.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\dt307_ConfirmQuestion.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\dt307_ResultExam.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\f201_NotifyCalibCert.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\f301_NotifyPersonnelTransfer.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="AppResources\f308_GoogleAppScript.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Forbid.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Settings.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\background.jpg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\checked_radio_button.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_bot.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_calendar_plus_1.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_data_protection.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_department.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_design.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_disable.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_finish_flag.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_gas_station.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_gears.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_google_forms_new_logo.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_google_sheets.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_learn.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_medium_icons.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_print.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_rescue_workers_helmet.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_robot.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_schedule.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_stack_of_money.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_time.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons8_word.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_add.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_add_User_Group.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_attach.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_cancel.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_change_user.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_1.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_2.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_3.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_4.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_5.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_circled_6.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_classroom.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_close.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_denied.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_diploma.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_edit.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_email_send.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_excel.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_exchange.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_filter.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_heart_with_pulse.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_info.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_job.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_notification.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_ok.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_personnel_changes.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_plus.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_project_setup.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_quality.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_reload.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_remove.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_signature.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_team.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_transfer.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_unfriend.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_uplevel.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_upload_to_ftp.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\icons_view.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\no-image.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\SplashScreen.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\unchecked_radio_button.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\workshift.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="License-LGPL.txt" />
+    <None Include="Resources\logo.png" />
+    <None Include="Resources\AppIcon.ico" />
+    <None Include="Images\Approval.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <Content Include="Images\Customers.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\loginscreen.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\none.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\DocumentSystem.ico" />
+    <Content Include="Images\Search_more.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Statistics.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="Images\StepProcess.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\Approval.png" />
+    <None Include="Resources\TTKT.jpg" />
+    <None Include="Resources\ttktbg.png" />
+    <None Include="Resources\ttktbg1.png" />
+    <None Include="Resources\bgsplash.jpg" />
+    <None Include="Resources\Login3.png" />
+    <None Include="Resources\cancel_16px.png" />
+    <None Include="Resources\pen_16px.png" />
+    <Content Include="Images\Actions_Bell.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_CheckCircled.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_DeleteCircled.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Edit.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Find.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Refresh.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\Actions_Reload.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\BO_Department.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\BO_Employee.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Images\ShowPrintPreview.svg">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\BusinessLayer\BusinessLayer.csproj">
+      <Project>{81849d19-c902-4648-8b50-5fcaade4cc30}</Project>
+      <Name>BusinessLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DataAccessLayer\DataAccessLayer.csproj">
+      <Project>{f5b2c4ce-8802-43ce-af03-2e62a687dbd6}</Project>
+      <Name>DataAccessLayer</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Logger\Logger.csproj">
+      <Project>{4127014a-b6d8-4010-9103-fd652759b47e}</Project>
+      <Name>Logger</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\Scriban.5.9.0\build\Scriban.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Scriban.5.9.0\build\Scriban.props'))" />
+    <Error Condition="!Exists('..\packages\Scriban.5.9.0\build\Scriban.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Scriban.5.9.0\build\Scriban.targets'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.props'))" />
+    <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
+    <Error Condition="!Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets'))" />
+  </Target>
+  <Import Project="..\packages\Scriban.5.9.0\build\Scriban.targets" Condition="Exists('..\packages\Scriban.5.9.0\build\Scriban.targets')" />
+  <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
+  <Import Project="..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets" Condition="Exists('..\packages\EMGU.CV.4.1.1.3497\build\EMGU.CV.targets')" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it.
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
