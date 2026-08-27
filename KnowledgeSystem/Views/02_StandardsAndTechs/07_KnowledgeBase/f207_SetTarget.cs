@@ -13,6 +13,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
 {
     public partial class f207_SetTarget : DevExpress.XtraEditors.XtraForm
     {
+        private const int MaxTargetHierarchyLevel = 3;
         private List<dm_Departments> activeDepartments = new List<dm_Departments>();
 
         public f207_SetTarget()
@@ -38,7 +39,15 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
         private void f207_SetTarget_Load(object sender, EventArgs e)
         {
             var lsTargets = dt207_TargetsBUS.Instance.GetList();
-            activeDepartments = dm_DeptBUS.Instance.GetActiveList();
+            var allDepartments = dm_DeptBUS.Instance.GetList();
+            var departmentsByChild = allDepartments
+                .Where(r => r.IdChild.HasValue)
+                .GroupBy(r => r.IdChild.Value)
+                .ToDictionary(g => g.Key, g => g.First());
+
+            activeDepartments = dm_DeptBUS.Instance.GetActiveList()
+                .Where(r => GetHierarchyLevel(r, departmentsByChild) <= MaxTargetHierarchyLevel)
+                .ToList();
 
             var targetMap = lsTargets
                 .GroupBy(r => r.IdDept)
@@ -63,6 +72,39 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             treeTargets.ParentFieldName = nameof(TargetKnowedge.IdParent);
             treeTargets.ExpandAll();
             treeTargets.BestFitColumns();
+        }
+
+        private static int GetHierarchyLevel(
+            dm_Departments department,
+            IReadOnlyDictionary<int, dm_Departments> departmentsByChild)
+        {
+            int level = 1;
+            var visited = new HashSet<int>();
+            var current = department;
+
+            if (current.IdChild.HasValue)
+            {
+                visited.Add(current.IdChild.Value);
+            }
+
+            while (current.IdParent.HasValue &&
+                   departmentsByChild.TryGetValue(current.IdParent.Value, out dm_Departments parent))
+            {
+                if (!parent.IdChild.HasValue || !visited.Add(parent.IdChild.Value))
+                {
+                    return int.MaxValue;
+                }
+
+                level++;
+                if (level > MaxTargetHierarchyLevel)
+                {
+                    return level;
+                }
+
+                current = parent;
+            }
+
+            return level;
         }
 
         private void RecalculateParentTargets(List<TargetKnowedge> rows)

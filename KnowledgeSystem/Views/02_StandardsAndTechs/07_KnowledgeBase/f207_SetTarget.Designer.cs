@@ -229,7 +229,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             // 
             // barHint
             // 
-            this.barHint.Caption = "提示：請在最下層部門輸入目標；上層目標將自動加總。";
+            this.barHint.Caption = "提示：僅顯示啟用中的前三層部門；最下層可輸入目標，上層將自動加總。";
             this.barHint.Id = 3;
             this.barHint.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 11F);
             this.barHint.ItemAppearance.Normal.ForeColor = System.Drawing.Color.DimGray;
