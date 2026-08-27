@@ -1,9 +1,8 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid.Views.Base;
-using DevExpress.XtraGrid.Views.Grid;
 using DevExpress.XtraSplashScreen;
+using DevExpress.XtraTreeList;
 using KnowledgeSystem.Helpers;
 using OfficeOpenXml;
 using OfficeOpenXml.Drawing.Chart;
@@ -37,9 +36,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
 
         private class DataStatisticsChart
         {
+            public string NodeId { get; set; }
+            public string ParentNodeId { get; set; }
             public string DisplayName { get; set; }
             public int Achieve { get; set; }
             public int Target { get; set; }
+            public int Progress => GetProgress(this);
+            public string Remark => GetStatus(this);
             public bool IsLeaf;
             public bool IsUser;
         }
@@ -108,10 +111,10 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
 
         private void CreateRuleGV()
         {
-            gvData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(220, 235, 252), ForeColor = Color.FromArgb(25, 85, 150) }, $"[Remark] = \'{NAME_UPPER}\'");
-            gvData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(224, 242, 228), ForeColor = Color.FromArgb(30, 120, 55) }, $"[Remark] = \'{NAME_EQUAL}\'");
-            gvData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(252, 230, 230), ForeColor = Color.FromArgb(190, 45, 45) }, $"[Remark] = \'{NAME_LOWER}\'");
-            gvData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(238, 238, 238), ForeColor = Color.DimGray }, $"[Remark] = \'{NAME_NOT_SET}\'");
+            gcData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(220, 235, 252), ForeColor = Color.FromArgb(25, 85, 150) }, $"[Remark] = \'{NAME_UPPER}\'");
+            gcData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(224, 242, 228), ForeColor = Color.FromArgb(30, 120, 55) }, $"[Remark] = \'{NAME_EQUAL}\'");
+            gcData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(252, 230, 230), ForeColor = Color.FromArgb(190, 45, 45) }, $"[Remark] = \'{NAME_LOWER}\'");
+            gcData.FormatRules.AddExpressionRule(gColRemark, new DevExpress.Utils.AppearanceDefault { BackColor = Color.FromArgb(238, 238, 238), ForeColor = Color.DimGray }, $"[Remark] = \'{NAME_NOT_SET}\'");
         }
 
         private int GetHierarchyLevel(dm_Departments department)
@@ -241,11 +244,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             string displayName,
             IReadOnlyDictionary<string, int> targetMap,
             List<DocumentStatistic> documents,
-            bool isSummaryLeaf)
+            bool isSummaryLeaf,
+            string parentNodeId)
         {
             var departmentIds = GetActiveDepartmentIdsInBranch(department);
             lsDataStatistic.Add(new DataStatisticsChart
             {
+                NodeId = "D:" + department.Id,
+                ParentNodeId = parentNodeId,
                 DisplayName = displayName,
                 Achieve = documents.Count(r => departmentIds.Contains(r.DepartmentId)),
                 Target = targetMap.TryGetValue(department.Id, out int target) ? target : 0,
@@ -320,7 +326,16 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
                 gColType.Caption = NAME_DEPARTMENT;
                 foreach (var department in lsDepts)
                 {
-                    AddDepartmentStatistic(department, GetIndentedDepartmentName(department), targetMap, lsDoc, !HasDisplayedChildren(department));
+                    var visibleParent = department.IdParent.HasValue
+                        ? lsDepts.FirstOrDefault(r => r.IdChild == department.IdParent.Value)
+                        : null;
+                    AddDepartmentStatistic(
+                        department,
+                        department.DisplayName,
+                        targetMap,
+                        lsDoc,
+                        !HasDisplayedChildren(department),
+                        visibleParent == null ? null : "D:" + visibleParent.Id);
                 }
             }
             else
@@ -337,7 +352,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
                     gColType.Caption = NAME_CLASS;
                     foreach (var child in children)
                     {
-                        AddDepartmentStatistic(child, child.DisplayName, targetMap, lsDoc, true);
+                        AddDepartmentStatistic(child, child.DisplayName, targetMap, lsDoc, true, null);
                     }
 
                     lsDataStatistic.Sort((left, right) =>
@@ -359,6 +374,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
                         .OrderBy(r => r.Key)
                         .Select(r => new DataStatisticsChart
                         {
+                            NodeId = "U:" + r.Key,
                             DisplayName = r.Key,
                             Achieve = r.Count(),
                             IsLeaf = true,
@@ -371,7 +387,18 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             gColProgress.Visible = !showUsers;
             gColRemark.Visible = !showUsers;
             source.ResetBindings(false);
-            gvData.BestFitColumns();
+            gcData.RefreshDataSource();
+            gcData.ExpandAll();
+            gcData.BestFitColumns();
+
+            var summaryRows = lsDataStatistic.Where(r => r.IsLeaf).ToList();
+            int totalAchieve = summaryRows.Sum(r => r.Achieve);
+            int totalTarget = summaryRows.Sum(r => r.Target);
+            int configuredCount = summaryRows.Count(r => r.Target > 0);
+            int achievedCount = summaryRows.Count(r => r.Target > 0 && r.Achieve >= r.Target);
+            label1.Text = showUsers
+                ? "資料上傳統計"
+                : $"資料上傳統計　｜　總進度 {totalAchieve}/{totalTarget}　｜　達標 {achievedCount}/{configuredCount}";
         }
 
         #endregion
@@ -379,16 +406,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
         private void uc207_DataStatistics_Load(object sender, EventArgs e)
         {
             source.DataSource = lsDataStatistic;
+            gcData.KeyFieldName = nameof(DataStatisticsChart.NodeId);
+            gcData.ParentFieldName = nameof(DataStatisticsChart.ParentNodeId);
             gcData.DataSource = source;
 
             CreateRuleGV();
-            gColType.Summary.Add(DevExpress.Data.SummaryItemType.Count, "DisplayName", "共 {0} 筆");
-            gColAchieve.Summary.Add(DevExpress.Data.SummaryItemType.Custom, "Achieve", "合計：{0}");
-            gColTarget.Summary.Add(DevExpress.Data.SummaryItemType.Custom, "Target", "合計：{0}");
-            gColProgress.Summary.Add(DevExpress.Data.SummaryItemType.Custom, "Progress", "總進度：{0}");
-            gColRemark.Summary.Add(DevExpress.Data.SummaryItemType.Custom, "Remark", "{0}");
-            gvData.CustomSummaryCalculate += gvData_CustomSummaryCalculate;
-            gvData.RowStyle += gvData_RowStyle;
+            gcData.NodeCellStyle += gcData_NodeCellStyle;
             LoadData();
 
             btnExcel.Text = "導出\r\nExcel";
@@ -402,71 +425,17 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             DateTime lastDayOfMonth = new DateTime(DateTime.Today.Year, DateTime.Today.Month, DateTime.DaysInMonth(DateTime.Today.Year, DateTime.Today.Month));
             txbToDate.EditValue = lastDayOfMonth;
 
-            gcData.ForceInitialize();
-
-            gvData.CustomUnboundColumnData += gvData_CustomUnboundColumnData;
             StatisticsData();
         }
 
-        private void gvData_CustomUnboundColumnData(object sender, CustomColumnDataEventArgs e)
+        private void gcData_NodeCellStyle(object sender, GetCustomNodeCellStyleEventArgs e)
         {
-            GridView view = sender as GridView;
-
-            if (!e.IsGetData) return;
-
-            var row = view.GetRow(view.GetRowHandle(e.ListSourceRowIndex)) as DataStatisticsChart;
-            if (row == null) return;
-
-            if (e.Column.FieldName == "Progress")
-            {
-                e.Value = GetProgress(row);
-            }
-            else if (e.Column.FieldName == "Remark")
-            {
-                e.Value = GetStatus(row);
-            }
-        }
-
-        private void gvData_RowStyle(object sender, RowStyleEventArgs e)
-        {
-            if (e.RowHandle < 0) return;
-
-            var row = gvData.GetRow(e.RowHandle) as DataStatisticsChart;
+            var row = gcData.GetDataRecordByNode(e.Node) as DataStatisticsChart;
             if (row != null && !row.IsLeaf && !row.IsUser)
             {
                 e.Appearance.BackColor = Color.FromArgb(235, 243, 250);
                 e.Appearance.ForeColor = Color.FromArgb(55, 79, 107);
                 e.Appearance.FontStyleDelta = FontStyle.Bold;
-            }
-        }
-
-        private void gvData_CustomSummaryCalculate(object sender, DevExpress.Data.CustomSummaryEventArgs e)
-        {
-            if (e.SummaryProcess != DevExpress.Data.CustomSummaryProcess.Finalize) return;
-
-            var rows = lsDataStatistic.Where(r => r.IsLeaf).ToList();
-            int totalAchieve = rows.Sum(r => r.Achieve);
-            int totalTarget = rows.Sum(r => r.Target);
-            var summaryItem = e.Item as DevExpress.XtraGrid.GridSummaryItem;
-
-            switch (summaryItem?.FieldName)
-            {
-                case "Achieve":
-                    e.TotalValue = totalAchieve;
-                    break;
-                case "Target":
-                    e.TotalValue = totalTarget;
-                    break;
-                case "Progress":
-                    e.TotalValue = totalTarget <= 0
-                        ? "0%"
-                        : Math.Min(100, (int)Math.Round(totalAchieve * 100.0 / totalTarget)) + "%";
-                    break;
-                case "Remark":
-                    int configuredCount = rows.Count(r => r.Target > 0);
-                    int achievedCount = rows.Count(r => r.Target > 0 && r.Achieve >= r.Target);
-                    e.TotalValue = $"達標：{achievedCount}/{configuredCount}";
-                    break;
             }
         }
 
