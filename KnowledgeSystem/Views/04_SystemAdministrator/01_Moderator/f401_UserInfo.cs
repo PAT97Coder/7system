@@ -1079,7 +1079,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             GridColumn gcol1 = new GridColumn() { Caption = "部門代號", FieldName = "Id", Visible = true, VisibleIndex = 0 };
             GridColumn gcol2 = new GridColumn() { Caption = "部門名稱", FieldName = "DisplayName", Visible = true, VisibleIndex = 1 };
 
-            var lsDepts = dm_DeptBUS.Instance.GetList().Select(r => new dm_Departments
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList().Select(r => new dm_Departments
             {
                 Id = r.Id,
                 DisplayName = $"{r.Id,-5}{r.DisplayName}"

@@ -36,18 +36,19 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
         private void f207_SetTarget_Load(object sender, EventArgs e)
         {
             var lsTargets = dt207_TargetsBUS.Instance.GetList();
-            var lsDepts = dm_DeptBUS.Instance.GetList();
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList();
+            var allDepts = dm_DeptBUS.Instance.GetList();
 
-            dm_Departments gradeDel = lsDepts.FirstOrDefault(r => r.Id == "7");
+            dm_Departments gradeDel = allDepts.FirstOrDefault(r => r.Id == "7");
 
             var lsDeptTargets = (from data in lsDepts
-                                 join names in lsDepts
+                                 join names in allDepts
                                  on data.IdParent equals names.IdChild into dgt
                                  from d in dgt.DefaultIfEmpty()
                                  select new TargetKnowedge
                                  {
                                      Id = data.Id,
-                                     Grade = d?.DisplayName ?? gradeDel.DisplayName,
+                                     Grade = d?.DisplayName ?? gradeDel?.DisplayName ?? string.Empty,
                                      Class = data.DisplayName,
                                  }
                                  into dtDept
