@@ -75,14 +75,15 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
 
         private void LoadData()
         {
-            lsDepts = dm_DeptBUS.Instance.GetList();
-            var lsGrade = lsDepts;
+            lsDepts = dm_DeptBUS.Instance.GetActiveList();
 
             cbbGrade.Properties.DataSource = lsDepts;
             cbbGrade.Properties.DisplayMember = "DisplayName"; ;
             cbbGrade.Properties.ValueMember = "Id";
 
-            cbbGrade.EditValue = "7";
+            cbbGrade.EditValue = lsDepts.Any(r => r.Id == "7")
+                ? "7"
+                : lsDepts.FirstOrDefault()?.Id;
         }
 
         private void CreateRuleGV()
@@ -97,7 +98,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             gvData.FocusedRowHandle = GridControl.AutoFilterRowHandle;
 
             string nameType = gColType.Caption;
-            string idDept = cbbGrade.EditValue.ToString();
+            string idDept = cbbGrade.EditValue?.ToString();
+
+            if (string.IsNullOrWhiteSpace(idDept))
+            {
+                XtraMessageBox.Show("找不到啟用中的部門資料！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             DateTime fromDate = txbFromDate.DateTime.Date;
             DateTime toDate = txbToDate.DateTime.Date.AddDays(1).AddSeconds(-1);
@@ -228,7 +235,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
 
         private void cbbGrade_EditValueChanged(object sender, EventArgs e)
         {
-            string idGrade = cbbGrade.EditValue.ToString();
+            string idGrade = cbbGrade.EditValue?.ToString();
+            if (string.IsNullOrWhiteSpace(idGrade)) return;
 
             var idParent = lsDepts.First(r => r.Id == idGrade).IdChild;
             var lsGrade = lsDepts.Where(r => r.IdParent == idParent).ToList();
