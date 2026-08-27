@@ -1,19 +1,12 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
-using DevExpress.ClipboardSource.SpreadsheetML;
-using DevExpress.Pdf.Native.BouncyCastle.Asn1.X509;
 using DevExpress.XtraEditors;
-using DevExpress.XtraGrid;
 using KnowledgeSystem.Helpers;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Data.Entity.Migrations;
 using System.Drawing;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
@@ -25,52 +18,51 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
         public f207_SetTarget()
         {
             InitializeComponent();
-            gvData.ShowingEditor += gvData_ShowingEditor;
-            gvData.CellValueChanged += gvData_CellValueChanged;
-            gvData.RowCellStyle += gvData_RowCellStyle;
+            btnConfirm.ImageOptions.SvgImage = TPSvgimages.Confirm;
+            treeTargets.ShowingEditor += treeTargets_ShowingEditor;
+            treeTargets.CellValueChanged += treeTargets_CellValueChanged;
+            treeTargets.NodeCellStyle += treeTargets_NodeCellStyle;
         }
 
         private class TargetKnowedge
         {
             public string Id { get; set; }
-            public string Grade { get; set; }
+            public int? IdChild { get; set; }
+            public int? IdParent { get; set; }
             public string Class { get; set; }
             public int Targets { get; set; }
             public bool IsCalculated { get; set; }
+            public string TargetMode => IsCalculated ? "自動加總" : "手動設定";
         }
 
         private void f207_SetTarget_Load(object sender, EventArgs e)
         {
             var lsTargets = dt207_TargetsBUS.Instance.GetList();
             activeDepartments = dm_DeptBUS.Instance.GetActiveList();
-            var allDepts = dm_DeptBUS.Instance.GetList();
 
-            dm_Departments gradeDel = allDepts.FirstOrDefault(r => r.Id == "7");
+            var targetMap = lsTargets
+                .GroupBy(r => r.IdDept)
+                .ToDictionary(g => g.Key, g => g.First().Targets, StringComparer.OrdinalIgnoreCase);
 
-            var lsDeptTargets = (from data in activeDepartments
-                                 join names in allDepts
-                                 on data.IdParent equals names.IdChild into dgt
-                                 from d in dgt.DefaultIfEmpty()
-                                 select new TargetKnowedge
-                                 {
-                                     Id = data.Id,
-                                     Grade = d?.DisplayName ?? gradeDel?.DisplayName ?? string.Empty,
-                                     Class = data.DisplayName,
-                                 }
-                                 into dtDept
-                                 join targets in lsTargets on dtDept.Id equals targets.IdDept into dgt
-                                 from g in dgt.DefaultIfEmpty()
-                                 select new TargetKnowedge
-                                 {
-                                     Id = dtDept.Id,
-                                     Grade = dtDept.Grade,
-                                     Class = dtDept.Class,
-                                     Targets = g?.Targets ?? 0
-                                 }
-                                 ).ToList();
+            var lsDeptTargets = activeDepartments
+                .OrderBy(r => r.IdParent)
+                .ThenBy(r => r.IdChild)
+                .Select(r => new TargetKnowedge
+                {
+                    Id = r.Id,
+                    IdChild = r.IdChild,
+                    IdParent = r.IdParent,
+                    Class = r.DisplayName,
+                    Targets = targetMap.TryGetValue(r.Id, out int target) ? target : 0
+                })
+                .ToList();
 
             RecalculateParentTargets(lsDeptTargets);
-            gcData.DataSource = lsDeptTargets;
+            treeTargets.DataSource = lsDeptTargets;
+            treeTargets.KeyFieldName = nameof(TargetKnowedge.IdChild);
+            treeTargets.ParentFieldName = nameof(TargetKnowedge.IdParent);
+            treeTargets.ExpandAll();
+            treeTargets.BestFitColumns();
         }
 
         private void RecalculateParentTargets(List<TargetKnowedge> rows)
@@ -130,42 +122,50 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             }
         }
 
-        private void gvData_ShowingEditor(object sender, CancelEventArgs e)
+        private void treeTargets_ShowingEditor(object sender, CancelEventArgs e)
         {
-            var row = gvData.GetFocusedRow() as TargetKnowedge;
-            if (gvData.FocusedColumn == gridColumn4 && row?.IsCalculated == true)
+            var row = treeTargets.GetDataRecordByNode(treeTargets.FocusedNode) as TargetKnowedge;
+            if (treeTargets.FocusedColumn == tColTarget && row?.IsCalculated == true)
             {
                 e.Cancel = true;
             }
         }
 
-        private void gvData_CellValueChanged(object sender, DevExpress.XtraGrid.Views.Base.CellValueChangedEventArgs e)
+        private void treeTargets_CellValueChanged(object sender, DevExpress.XtraTreeList.CellValueChangedEventArgs e)
         {
-            if (e.Column != gridColumn4) return;
+            if (e.Column != tColTarget) return;
 
-            var rows = gcData.DataSource as List<TargetKnowedge>;
+            var rows = treeTargets.DataSource as List<TargetKnowedge>;
             RecalculateParentTargets(rows);
-            gcData.RefreshDataSource();
+            treeTargets.RefreshDataSource();
         }
 
-        private void gvData_RowCellStyle(object sender, DevExpress.XtraGrid.Views.Grid.RowCellStyleEventArgs e)
+        private void treeTargets_NodeCellStyle(object sender, DevExpress.XtraTreeList.GetCustomNodeCellStyleEventArgs e)
         {
-            if (e.Column != gridColumn4) return;
-
-            var row = gvData.GetRow(e.RowHandle) as TargetKnowedge;
+            var row = treeTargets.GetDataRecordByNode(e.Node) as TargetKnowedge;
             if (row?.IsCalculated == true)
             {
-                e.Appearance.BackColor = Color.Gainsboro;
+                e.Appearance.BackColor = Color.FromArgb(235, 243, 250);
+                e.Appearance.ForeColor = Color.FromArgb(55, 79, 107);
                 e.Appearance.FontStyleDelta = FontStyle.Italic;
             }
         }
 
+        private void btnExpandAll_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            treeTargets.ExpandAll();
+        }
+
+        private void btnCollapseAll_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            treeTargets.CollapseAll();
+        }
+
         private void btnConfirm_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            gvData.PostEditor();
-            gvData.UpdateCurrentRow();
+            treeTargets.PostEditor();
 
-            List<TargetKnowedge> lsSource = gcData.DataSource as List<TargetKnowedge>;
+            List<TargetKnowedge> lsSource = treeTargets.DataSource as List<TargetKnowedge>;
             RecalculateParentTargets(lsSource);
 
             List<dt207_Targets> lsTargetsUpdate = (from data in lsSource
