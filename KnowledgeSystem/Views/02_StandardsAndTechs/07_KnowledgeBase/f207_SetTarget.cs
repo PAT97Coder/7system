@@ -189,7 +189,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             {
                 e.Appearance.BackColor = Color.FromArgb(235, 243, 250);
                 e.Appearance.ForeColor = Color.FromArgb(55, 79, 107);
-                e.Appearance.FontStyleDelta = FontStyle.Italic;
             }
         }
 
