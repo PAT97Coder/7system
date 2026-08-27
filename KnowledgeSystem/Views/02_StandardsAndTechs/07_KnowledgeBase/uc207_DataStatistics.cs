@@ -31,7 +31,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
         dt207_BaseBUS _dt207_BaseBUS = new dt207_BaseBUS();
 
         List<dm_Departments> lsDepts;
-        List<dm_Departments> allActiveDepts;
         Dictionary<int, dm_Departments> departmentsByChild;
 
         private class DataStatisticsChart
@@ -60,7 +59,9 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             public string UserUploadName { get; set; }
         }
 
+        const int MIN_DEPARTMENT_LEVEL = 2;
         const int MAX_DEPARTMENT_LEVEL = 3;
+        const string STATISTICS_ROOT_DEPARTMENT_ID = "7";
         const string ALL_DEPARTMENTS_ID = "__ALL__";
         const string NAME_DEPARTMENT = "部門";
         const string NAME_CLASS = "課別";
@@ -87,9 +88,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
                 .GroupBy(r => r.IdChild.Value)
                 .ToDictionary(g => g.Key, g => g.First());
 
-            allActiveDepts = dm_DeptBUS.Instance.GetActiveList();
-            lsDepts = OrderDepartments(allActiveDepts
-                .Where(r => GetHierarchyLevel(r) <= MAX_DEPARTMENT_LEVEL)
+            var activeDepartments = dm_DeptBUS.Instance.GetActiveList();
+            lsDepts = OrderDepartments(activeDepartments
+                .Where(r => IsInStatisticsBranch(r))
+                .Where(r =>
+                {
+                    int level = GetHierarchyLevel(r);
+                    return level >= MIN_DEPARTMENT_LEVEL && level <= MAX_DEPARTMENT_LEVEL;
+                })
                 .ToList());
 
             var departmentLookup = new List<DepartmentLookup>
@@ -100,7 +106,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             {
                 Id = r.Id,
                 Code = r.Id,
-                DisplayName = GetIndentedDepartmentName(r)
+                DisplayName = r.DisplayName
             }));
 
             cbbGrade.Properties.DataSource = departmentLookup;
@@ -141,6 +147,28 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             }
 
             return level;
+        }
+
+        private bool IsInStatisticsBranch(dm_Departments department)
+        {
+            var current = department;
+            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+
+            while (current != null && visited.Add(current.Id))
+            {
+                if (string.Equals(current.Id, STATISTICS_ROOT_DEPARTMENT_ID, StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
+
+                if (!current.IdParent.HasValue ||
+                    !departmentsByChild.TryGetValue(current.IdParent.Value, out current))
+                {
+                    return false;
+                }
+            }
+
+            return false;
         }
 
         private List<dm_Departments> OrderDepartments(List<dm_Departments> departments)
@@ -188,25 +216,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
             return result;
         }
 
-        private string GetIndentedDepartmentName(dm_Departments department)
-        {
-            int level = 1;
-            var current = department;
-            var visited = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { department.Id };
-
-            while (current.IdParent.HasValue)
-            {
-                var visibleParent = lsDepts.FirstOrDefault(r => r.IdChild == current.IdParent.Value);
-                if (visibleParent == null || !visited.Add(visibleParent.Id)) break;
-
-                level++;
-                current = visibleParent;
-            }
-
-            string prefix = level == 1 ? string.Empty : new string('　', level - 1) + "└ ";
-            return prefix + department.DisplayName;
-        }
-
         private HashSet<string> GetActiveDepartmentIdsInBranch(dm_Departments department)
         {
             var result = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { department.Id };
@@ -221,7 +230,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._07_KnowledgeBase
                 int parentId = pendingParents.Dequeue();
                 if (!visitedParents.Add(parentId)) continue;
 
-                foreach (var child in allActiveDepts.Where(r => r.IdParent == parentId))
+                foreach (var child in lsDepts.Where(r => r.IdParent == parentId))
                 {
                     result.Add(child.Id);
                     if (child.IdChild.HasValue)
