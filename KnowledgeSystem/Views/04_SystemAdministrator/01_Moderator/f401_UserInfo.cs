@@ -384,8 +384,21 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
             LockControl();
 
-            var lsDepts = dm_DeptBUS.Instance.GetList().Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id,-5}{r.DisplayName}" }).ToList();
-            cbbDept.Properties.DataSource = lsDepts;
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList();
+            if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.IdDepartment) && !lsDepts.Any(r => r.Id == userInfo.IdDepartment))
+            {
+                var currentDept = dm_DeptBUS.Instance.GetItemById(userInfo.IdDepartment);
+                if (currentDept != null)
+                {
+                    lsDepts.Add(currentDept);
+                }
+            }
+
+            var deptDataSource = lsDepts
+                .OrderBy(r => r.Id)
+                .Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id,-5}{r.DisplayName}{(r.IsActive ? "" : "（停用）")}" })
+                .ToList();
+            cbbDept.Properties.DataSource = deptDataSource;
             cbbDept.Properties.DisplayMember = "DisplayName";
             cbbDept.Properties.ValueMember = "Id";
 

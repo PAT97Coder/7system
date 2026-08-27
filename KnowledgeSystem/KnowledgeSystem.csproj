@@ -1272,6 +1272,18 @@
     <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_JobTitle.Designer.cs">
       <DependentUpon>uc401_JobTitle.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_DepartmentManage.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\uc401_DepartmentManage.Designer.cs">
+      <DependentUpon>uc401_DepartmentManage.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_DepartmentInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\04_SystemAdministrator\01_Moderator\f401_DepartmentInfo.Designer.cs">
+      <DependentUpon>f401_DepartmentInfo.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\01_SafetyCertificate\uc301_SafetyCertMain.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -1816,6 +1828,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamInfo.resx">
       <DependentUpon>f314_HskExamInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\04_SystemAdministrator\01_Moderator\f401_DepartmentInfo.resx">
+      <DependentUpon>f401_DepartmentInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignInfo.resx">
       <DependentUpon>f402_SignInfo.cs</DependentUpon>
