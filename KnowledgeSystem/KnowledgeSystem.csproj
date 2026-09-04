@@ -651,6 +651,18 @@
     <Compile Include="Views\03_DepartmentManage\15_InterviewAssessment\uc315_Interview.Designer.cs">
       <DependentUpon>uc315_Interview.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\uc316_ImpartialityAudit.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\uc316_ImpartialityAudit.Designer.cs">
+      <DependentUpon>uc316_ImpartialityAudit.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_UpdateSop.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_UpdateSop.Designer.cs">
+      <DependentUpon>f316_UpdateSop.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -1672,6 +1684,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\15_InterviewAssessment\uc315_Interview.resx">
       <DependentUpon>uc315_Interview.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\16_ImpartialityAudit\uc316_ImpartialityAudit.resx">
+      <DependentUpon>uc316_ImpartialityAudit.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.resx">
       <DependentUpon>uc307_JobTitleSetting.cs</DependentUpon>

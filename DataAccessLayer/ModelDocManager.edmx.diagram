@@ -156,6 +156,8 @@
         <AssociationConnector Association="DBDocumentManagementSystemModel.FK_dt315_InterviewCandidate_Report" />
         <AssociationConnector Association="DBDocumentManagementSystemModel.FK_dt315_InterviewDefaultInterviewer_Report" />
         <AssociationConnector Association="DBDocumentManagementSystemModel.FK_dt315_InterviewScoreAudit_Score" />
+        <EntityTypeShape EntityType="DBDocumentManagementSystemModel.dt316_document" Width="1.5" PointX="0.625" PointY="92.125" />
+        <EntityTypeShape EntityType="DBDocumentManagementSystemModel.dt316_plans" Width="1.5" PointX="2.25" PointY="92.125" />
         </Diagram>
     </edmx:Diagrams>
   </edmx:Designer>

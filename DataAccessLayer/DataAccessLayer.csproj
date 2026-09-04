@@ -470,6 +470,12 @@
     <Compile Include="dt315_InterviewScoreAudit.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt316_document.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt316_plans.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt403_04_HardnessStandardLog.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>

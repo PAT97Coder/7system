@@ -130,8 +130,8 @@ namespace KnowledgeSystem
 
                 //Application.Run(new f00_DesignReport());
                 //Application.Run(new f00_FluentFrame(17));
-                Application.Run(new f00_FluentFrame(62));
-                //Application.Run(new f00_Main());
+                //Application.Run(new f00_FluentFrame(34));
+                Application.Run(new f00_Main());
 #else
                 Application.Run(new f00_Main());
 #endif
