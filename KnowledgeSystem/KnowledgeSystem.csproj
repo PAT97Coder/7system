@@ -663,6 +663,12 @@
     <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_UpdateSop.Designer.cs">
       <DependentUpon>f316_UpdateSop.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_Add.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_Add.Designer.cs">
+      <DependentUpon>f316_Add.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.cs">
       <SubType>UserControl</SubType>
     </Compile>
@@ -1687,6 +1693,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\16_ImpartialityAudit\uc316_ImpartialityAudit.resx">
       <DependentUpon>uc316_ImpartialityAudit.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\16_ImpartialityAudit\f316_Add.resx">
+      <DependentUpon>f316_Add.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.resx">
       <DependentUpon>uc307_JobTitleSetting.cs</DependentUpon>

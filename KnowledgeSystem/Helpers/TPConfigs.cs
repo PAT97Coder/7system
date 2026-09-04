@@ -50,6 +50,7 @@ namespace KnowledgeSystem.Helpers
         public static string Folder313 { get; set; }
         public static string Folder315 { get; set; }
         public static string Folder315InterviewReports { get; set; }
+        public static string Folder316 { get; set; }
         public static string Folder403 { get; set; }
         public static string Folder40304 { get; set; }
         public static string Folder40305 { get; set; }
@@ -97,6 +98,7 @@ namespace KnowledgeSystem.Helpers
             Folder313 = Path.Combine(FolderData, "313");
             Folder315 = Path.Combine(FolderData, "315");
             Folder315InterviewReports = Path.Combine(Folder315, "InterviewReports");
+            Folder316 = Path.Combine(FolderData, "316");
             Folder403 = Path.Combine(FolderData, "403");
             Folder40304 = Path.Combine(FolderData, "40304");
             Folder40305 = Path.Combine(FolderData, "40305");

@@ -12,18 +12,11 @@ namespace DataAccessLayer
     using System;
     using System.Collections.Generic;
     
-    public partial class dt316_document
+    public partial class dt316_PlanUser
     {
         public int Id { get; set; }
-        public string NameVN { get; set; }
-        public string NameTW { get; set; }
-        public string VersionNO { get; set; }
-        public int IdAttachment { get; set; }
-        public System.DateTime CreateAt { get; set; }
-        public string CreateBy { get; set; }
-        public Nullable<System.DateTime> RemoveAt { get; set; }
-        public string RemoveBy { get; set; }
-        public Nullable<bool> IsSOP { get; set; }
-        public Nullable<int> IdPlan { get; set; }
+        public int IdPlan { get; set; }
+        public string IdUser { get; set; }
+        public string IdDept { get; set; }
     }
 }

@@ -107,21 +107,28 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvReport.OptionsView.ColumnAutoWidth = false;
             this.gvReport.OptionsView.ShowGroupPanel = false;
             this.gvReport.OptionsView.ShowIndicator = false;
+            this.gvReport.MasterRowEmpty += new DevExpress.XtraGrid.Views.Grid.MasterRowEmptyEventHandler(this.gvReport_MasterRowEmpty);
+            this.gvReport.MasterRowExpanded += new DevExpress.XtraGrid.Views.Grid.CustomMasterRowEventHandler(this.gridView_MasterRowExpanded);
+            this.gvReport.MasterRowGetChildList += new DevExpress.XtraGrid.Views.Grid.MasterRowGetChildListEventHandler(this.gvReport_MasterRowGetChildList);
+            this.gvReport.MasterRowGetRelationName += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventHandler(this.gvReport_MasterRowGetRelationName);
+            this.gvReport.MasterRowGetRelationCount += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventHandler(this.gvReport_MasterRowGetRelationCount);
+            this.gvReport.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvReport_PopupMenuShowing);
+            this.gvReport.DoubleClick += new System.EventHandler(this.gridView_ExpandMasterRow);
             // 
             // gridColumn7
             // 
             this.gridColumn7.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn7.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn7.Caption = "季度";
-            this.gridColumn7.FieldName = "Index";
+            this.gridColumn7.Caption = "單位";
+            this.gridColumn7.FieldName = "IdDept";
             this.gridColumn7.Name = "gridColumn7";
             this.gridColumn7.Visible = true;
             this.gridColumn7.VisibleIndex = 0;
             // 
             // gridColumn8
             // 
-            this.gridColumn8.Caption = "7810";
-            this.gridColumn8.FieldName = "Content";
+            this.gridColumn8.Caption = "建立時間";
+            this.gridColumn8.FieldName = "CreateAt";
             this.gridColumn8.Name = "gridColumn8";
             this.gridColumn8.Visible = true;
             this.gridColumn8.VisibleIndex = 1;
@@ -130,8 +137,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             // 
             this.gridColumn9.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn9.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn9.Caption = "7820";
-            this.gridColumn9.FieldName = "ExpectedDate";
+            this.gridColumn9.Caption = "建立人員";
+            this.gridColumn9.FieldName = "CreateBy";
             this.gridColumn9.Name = "gridColumn9";
             this.gridColumn9.Visible = true;
             this.gridColumn9.VisibleIndex = 2;
@@ -141,7 +148,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gColCloseRp.AppearanceCell.Options.UseTextOptions = true;
             this.gColCloseRp.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gColCloseRp.Caption = "是否上傳";
-            this.gColCloseRp.FieldName = "UploadDate";
+            this.gColCloseRp.FieldName = "IsUploaded";
             this.gColCloseRp.Name = "gColCloseRp";
             this.gColCloseRp.Visible = true;
             this.gColCloseRp.VisibleIndex = 3;
@@ -198,7 +205,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvData.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
             this.gColId,
             this.gridColumn3,
-            this.gridColumn1,
             this.gridColumn2,
             this.gridColumn4,
             this.gColEnterDate,
@@ -218,6 +224,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvData.OptionsView.EnableAppearanceOddRow = true;
             this.gvData.OptionsView.ShowAutoFilterRow = true;
             this.gvData.OptionsView.ShowGroupPanel = false;
+            this.gvData.MasterRowEmpty += new DevExpress.XtraGrid.Views.Grid.MasterRowEmptyEventHandler(this.gvData_MasterRowEmpty);
+            this.gvData.MasterRowExpanded += new DevExpress.XtraGrid.Views.Grid.CustomMasterRowEventHandler(this.gridView_MasterRowExpanded);
+            this.gvData.MasterRowGetChildList += new DevExpress.XtraGrid.Views.Grid.MasterRowGetChildListEventHandler(this.gvData_MasterRowGetChildList);
+            this.gvData.MasterRowGetRelationName += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventHandler(this.gvData_MasterRowGetRelationName);
+            this.gvData.MasterRowGetRelationCount += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventHandler(this.gvData_MasterRowGetRelationCount);
+            this.gvData.DoubleClick += new System.EventHandler(this.gridView_ExpandMasterRow);
             // 
             // gColId
             // 
@@ -232,7 +244,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn3.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn3.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gridColumn3.Caption = "年度";
-            this.gridColumn3.FieldName = "IdDept";
+            this.gridColumn3.FieldName = "DisplayName";
             this.gridColumn3.Name = "gridColumn3";
             this.gridColumn3.Visible = true;
             this.gridColumn3.VisibleIndex = 0;
@@ -242,7 +254,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn1.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn1.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gridColumn1.Caption = "檢驗公正性查核計劃";
-            this.gridColumn1.FieldName = "IdUser";
+            this.gridColumn1.FieldName = "NamePlan";
             this.gridColumn1.Name = "gridColumn1";
             this.gridColumn1.Visible = true;
             this.gridColumn1.VisibleIndex = 1;
@@ -309,6 +321,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvAttachment.OptionsView.ShowColumnHeaders = false;
             this.gvAttachment.OptionsView.ShowGroupPanel = false;
             this.gvAttachment.OptionsView.ShowIndicator = false;
+            this.gvAttachment.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvAttachment_PopupMenuShowing);
+            this.gvAttachment.DoubleClick += new System.EventHandler(this.gvAttachment_DoubleClick);
             // 
             // gColActualName
             // 
@@ -420,6 +434,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.btnAdd.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAdd.ItemAppearance.Normal.Options.UseFont = true;
             this.btnAdd.Name = "btnAdd";
+            this.btnAdd.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnAdd_ItemClick);
             // 
             // btnReload
             // 
@@ -431,6 +446,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.btnReload.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnReload.ItemAppearance.Normal.Options.UseFont = true;
             this.btnReload.Name = "btnReload";
+            this.btnReload.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnReload_ItemClick);
             // 
             // btnSop
             // 
@@ -507,6 +523,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.Controls.Add(this.barDockControlTop);
             this.Name = "uc316_ImpartialityAudit";
             this.Size = new System.Drawing.Size(1087, 597);
+            this.Load += new System.EventHandler(this.uc316_ImpartialityAudit_Load);
             ((System.ComponentModel.ISupportInitialize)(this.gvReport)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvData)).EndInit();
