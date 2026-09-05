@@ -207,5 +207,34 @@ namespace BusinessLayer
                 return false;
             }
         }
+
+        public bool ReplaceByPlan(int idPlan, List<dt316_PlanUser> items)
+        {
+            try
+            {
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    // CSDL/LINQ: thay toàn bộ người tham gia của một kế hoạch trong
+                    // cùng transaction để không bị mất dữ liệu nếu bước thêm thất bại.
+                    var oldItems = context.dt316_PlanUser
+                        .Where(r => r.IdPlan == idPlan)
+                        .ToList();
+                    context.dt316_PlanUser.RemoveRange(oldItems);
+
+                    if (items != null && items.Count > 0)
+                        context.dt316_PlanUser.AddRange(items);
+
+                    context.SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                return false;
+            }
+        }
     }
 }

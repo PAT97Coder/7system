@@ -97,7 +97,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvReport.OptionsCustomization.AllowSort = false;
             this.gvReport.OptionsDetail.EnableMasterViewMode = false;
             this.gvReport.OptionsView.AllowCellMerge = true;
-            this.gvReport.OptionsView.ColumnAutoWidth = true;
+            this.gvReport.OptionsView.ColumnAutoWidth = false;
             this.gvReport.OptionsView.ShowGroupPanel = false;
             this.gvReport.OptionsView.ShowIndicator = false;
             this.gvReport.CellMerge += new DevExpress.XtraGrid.Views.Grid.CellMergeEventHandler(this.gvReport_CellMerge);

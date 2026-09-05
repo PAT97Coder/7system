@@ -148,6 +148,32 @@ namespace BusinessLayer
             }
         }
 
+        public bool UpdateDisplayName(int id, string displayName)
+        {
+            try
+            {
+                using (var context = new DBDocumentManagementSystemEntities())
+                {
+                    // CSDL/LINQ: chỉ tìm và ghi đè bản Plan đã có theo khóa chính.
+                    // Không dùng AddOrUpdate để tránh phát sinh bản ghi mới khi sửa.
+                    var item = context.dt316_Plan.FirstOrDefault(r => r.Id == id);
+                    if (item == null) return false;
+
+                    // Không đổi 年度 vẫn là cập nhật hợp lệ; SaveChanges lúc này sẽ trả 0.
+                    if (item.DisplayName == displayName) return true;
+
+                    item.DisplayName = displayName;
+                    context.SaveChanges();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                return false;
+            }
+        }
+
         public bool RemoveById(int id, string userRemove)
         {
             try

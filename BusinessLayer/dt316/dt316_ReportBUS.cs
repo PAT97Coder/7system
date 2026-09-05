@@ -185,6 +185,30 @@ namespace BusinessLayer
             }
         }
 
+        public bool ClearAttachment(int idReport)
+        {
+            try
+            {
+                using (var context = new DBDocumentManagementSystemEntities())
+                {
+                    // CSDL/LINQ: giữ lại dòng report theo IdPlan + IdDept và chỉ xóa
+                    // liên kết PDF, để đơn vị có thể tải lại báo cáo sau này.
+                    var item = context.dt316_Report.FirstOrDefault(r => r.Id == idReport);
+                    if (item == null) return false;
+                    if (!item.IdAdt.HasValue) return true;
+
+                    item.IdAdt = null;
+                    context.SaveChanges();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                return false;
+            }
+        }
+
         public bool RemoveById(int id, string userRemove)
         {
             try
