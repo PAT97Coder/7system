@@ -18,12 +18,15 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 {
     public partial class uc316_ImpartialityAudit : XtraUserControl
     {
+        private const string PlanFileDept = "PLAN";
         private readonly BindingSource sourcePlans = new BindingSource();
         private readonly RefreshHelper helper;
 
         // Nạp một lần trong LoadData và dùng lại cho ba GridView như uc302.
         // Việc cache này tránh gọi CSDL lặp lại trong từng sự kiện master-detail.
         private List<dt316_Report> reports = new List<dt316_Report>();
+        private List<dt316_PlanUser> planUsers = new List<dt316_PlanUser>();
+        private List<dm_User> users = new List<dm_User>();
         private List<dm_Attachment> attachments = new List<dm_Attachment>();
         public string PendingSopPdfPath { get; private set; }
 
@@ -70,13 +73,29 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 // kế hoạch, tài liệu chưa bị xóa mềm (RemoveAt == null).
                 var plans = dt316_PlanBUS.Instance.GetList();
                 reports = dt316_ReportBUS.Instance.GetList();
+                planUsers = dt316_PlanUserBUS.Instance.GetList();
+                users = dm_UserBUS.Instance.GetList();
 
                 // CSDL: chỉ lấy attachment thuộc mô-đun 316, tương tự Thread = "302" của uc302.
                 attachments = dm_AttachmentBUS.Instance.GetListByThread("316");
 
-                // LINQ: tạo DataSource cho GridView cấp 1. Thuộc tính của object kết quả
-                // tương ứng với FieldName trong Designer: Id, Year và NamePlan.
-                sourcePlans.DataSource = plans;
+                // LINQ: PDF kế hoạch dùng dòng Report kỹ thuật IdDept = PLAN và chỉ
+                // hiển thị ở cột 計劃 của gvData, tách biệt report 7810/7820.
+                sourcePlans.DataSource = plans.Select(plan =>
+                {
+                    var planReport = reports.FirstOrDefault(r =>
+                        r.IdPlan == plan.Id && r.IdDept == PlanFileDept);
+                    var attachment = planReport?.IdAdt == null
+                        ? null
+                        : attachments.FirstOrDefault(r => r.Id == planReport.IdAdt.Value);
+
+                    return new
+                    {
+                        plan.Id,
+                        plan.DisplayName,
+                        PlanFileName = attachment?.ActualName ?? "尚未上傳"
+                    };
+                }).ToList();
                 helper.LoadViewInfo();
 
                 gvData.BestFitColumns();
@@ -93,9 +112,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             gvData.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
 
             gvReport.ReadOnlyGridView();
-            gvReport.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
-
-            gvAttachment.ReadOnlyGridView();
+            gvReport.OptionsView.AllowCellMerge = true;
 
             LoadData();
             gcData.DataSource = sourcePlans;
@@ -128,7 +145,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             GridView view = sender as GridView;
             int idPlan = Convert.ToInt32(view.GetRowCellValue(e.RowHandle, gColId));
 
-            e.IsEmpty = !reports.Any(r => r.IdPlan == idPlan);
+            e.IsEmpty = !planUsers.Any(r => r.IdPlan == idPlan);
         }
 
         private void gvData_MasterRowGetChildList(object sender, MasterRowGetChildListEventArgs e)
@@ -136,17 +153,35 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             GridView view = sender as GridView;
             int idPlan = Convert.ToInt32(view.GetRowCellValue(e.RowHandle, gColId));
 
-            // LINQ: lọc báo cáo theo IdPlan và kiểm tra attachment qua IdAdt.
-            e.ChildList = reports
-                .Where(r => r.IdPlan == idPlan)
-                .Select(r => new
-                {
-                    r.Id,
-                    r.IdDept,
-                    r.CreateAt,
-                    r.CreateBy,
-                    IsUploaded = r.IdAdt.HasValue && attachments.Any(a => a.Id == r.IdAdt.Value)
-                }).ToList();
+            // LINQ: mỗi người của kế hoạch là một dòng. Report và file được ghép
+            // theo IdPlan + đơn vị để gvReport có dạng: 單位 | 查核人員 | 報告檔案.
+            var planReports = reports.Where(r => r.IdPlan == idPlan).ToList();
+
+            e.ChildList = (from planUser in planUsers
+                           where planUser.IdPlan == idPlan
+                           let idDept = GetAuditDept(planUser.IdDept)
+                           let user = users.FirstOrDefault(r => r.Id == planUser.IdUser)
+                           let report = planReports.FirstOrDefault(r => r.IdDept == idDept)
+                           let attachment = report?.IdAdt == null
+                               ? null
+                               : attachments.FirstOrDefault(r => r.Id == report.IdAdt.Value)
+                           orderby idDept, planUser.IdUser
+                           select new
+                           {
+                               Id = report?.Id ?? 0,
+                               IdDept = idDept,
+                               UserName = user == null
+                                   ? planUser.IdUser
+                                   : $"{planUser.IdUser} {user.DisplayName}",
+                               ActualName = attachment?.ActualName ?? "尚未上傳"
+                           }).ToList();
+        }
+
+        private string GetAuditDept(string idDept)
+        {
+            if (idDept?.StartsWith("7810") == true) return "7810";
+            if (idDept?.StartsWith("7820") == true) return "7820";
+            return idDept ?? string.Empty;
         }
 
         private void gvData_MasterRowGetRelationCount(object sender, MasterRowGetRelationCountEventArgs e)
@@ -157,44 +192,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
         private void gvData_MasterRowGetRelationName(object sender, MasterRowGetRelationNameEventArgs e)
         {
             e.RelationName = "報告進度";
-        }
-
-        // Master-detail cấp 2: dt316_Report -> dm_Attachment.
-        private void gvReport_MasterRowEmpty(object sender, MasterRowEmptyEventArgs e)
-        {
-            GridView view = sender as GridView;
-            int idReport = Convert.ToInt32(view.GetRowCellValue(e.RowHandle, gColIdReport));
-
-            var report = reports.FirstOrDefault(r => r.Id == idReport);
-            e.IsEmpty = report?.IdAdt == null || !attachments.Any(r => r.Id == report.IdAdt.Value);
-        }
-
-        private void gvReport_MasterRowGetChildList(object sender, MasterRowGetChildListEventArgs e)
-        {
-            GridView view = sender as GridView;
-            int idReport = Convert.ToInt32(view.GetRowCellValue(e.RowHandle, gColIdReport));
-
-            // LINQ JOIN: dt316_Report.IdAdt -> dm_Attachment.Id.
-            e.ChildList = (from report in reports
-                           join attachment in attachments
-                               on report.IdAdt equals (int?)attachment.Id
-                           where report.Id == idReport
-                           select new
-                           {
-                               attachment.Id,
-                               attachment.EncryptionName,
-                               attachment.ActualName
-                           }).ToList();
-        }
-
-        private void gvReport_MasterRowGetRelationCount(object sender, MasterRowGetRelationCountEventArgs e)
-        {
-            e.RelationCount = 1;
-        }
-
-        private void gvReport_MasterRowGetRelationName(object sender, MasterRowGetRelationNameEventArgs e)
-        {
-            e.RelationName = "附件";
         }
 
         private void gridView_MasterRowExpanded(object sender, CustomMasterRowEventArgs e)
@@ -225,14 +222,74 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 e.Menu.Items.Add(itemViewFile);
         }
 
-        private void gvAttachment_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
+        private void gvData_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell)
-            {
-                GridView view = sender as GridView;
-                view.FocusedRowHandle = e.HitInfo.RowHandle;
+            if (!e.HitInfo.InRowCell) return;
+
+            GridView view = sender as GridView;
+            view.FocusedRowHandle = e.HitInfo.RowHandle;
+            int idPlan = Convert.ToInt32(view.GetRowCellValue(e.HitInfo.RowHandle, gColId));
+
+            if (GetPlanAttachmentId(idPlan).HasValue)
                 e.Menu.Items.Add(itemViewFile);
+        }
+
+        private void gvReport_CellMerge(object sender, CellMergeEventArgs e)
+        {
+            if (e.Column.FieldName != "IdDept" && e.Column.FieldName != "ActualName")
+            {
+                e.Merge = false;
+                e.Handled = true;
+                return;
             }
+
+            GridView view = sender as GridView;
+            string dept1 = view.GetRowCellValue(e.RowHandle1, "IdDept")?.ToString();
+            string dept2 = view.GetRowCellValue(e.RowHandle2, "IdDept")?.ToString();
+
+            e.Merge = dept1 == dept2;
+            if (e.Column.FieldName == "ActualName")
+            {
+                string file1 = view.GetRowCellValue(e.RowHandle1, "ActualName")?.ToString();
+                string file2 = view.GetRowCellValue(e.RowHandle2, "ActualName")?.ToString();
+                e.Merge = e.Merge && file1 == file2;
+            }
+            e.Handled = true;
+        }
+
+        private void gvReport_DoubleClick(object sender, EventArgs e)
+        {
+            GridView view = sender as GridView;
+            if (view == null || view.FocusedRowHandle < 0) return;
+
+            int idReport = Convert.ToInt32(
+                view.GetRowCellValue(view.FocusedRowHandle, gColIdReport));
+            var report = reports.FirstOrDefault(r => r.Id == idReport);
+            if (report?.IdAdt != null) OpenAttachment(report.IdAdt.Value);
+        }
+
+        private void gvData_DoubleClick(object sender, EventArgs e)
+        {
+            GridView view = sender as GridView;
+            if (view == null || view.FocusedRowHandle < 0) return;
+
+            var hitInfo = view.CalcHitInfo(view.GridControl.PointToClient(Control.MousePosition));
+            if (hitInfo.InRowCell && hitInfo.Column == gridColumn1)
+            {
+                int idPlan = Convert.ToInt32(
+                    view.GetRowCellValue(view.FocusedRowHandle, gColId));
+                int? idAttachment = GetPlanAttachmentId(idPlan);
+                if (idAttachment.HasValue) OpenAttachment(idAttachment.Value);
+                return;
+            }
+
+            view.ExpandMasterRow(view.FocusedRowHandle);
+        }
+
+        private int? GetPlanAttachmentId(int idPlan)
+        {
+            return reports.FirstOrDefault(r =>
+                r.IdPlan == idPlan && r.IdDept == PlanFileDept)?.IdAdt;
         }
 
         private void ItemViewFile_Click(object sender, EventArgs e)
@@ -240,36 +297,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             GridView focusedView = gcData.FocusedView as GridView;
             if (focusedView == null || focusedView.FocusedRowHandle < 0) return;
 
-            int idAttachment;
-            // Detail GridView của DevExpress có thể là một bản clone của gvAttachment,
-            // vì vậy nhận diện theo FieldName thay vì so sánh trực tiếp instance.
-            bool isAttachmentView = focusedView.Columns.ColumnByFieldName("ActualName") != null;
-            if (isAttachmentView)
+            int? idAttachment;
+            if (focusedView.Columns.ColumnByFieldName("PlanFileName") != null)
             {
-                idAttachment = Convert.ToInt32(
-                    focusedView.GetRowCellValue(focusedView.FocusedRowHandle, gColIdAttach));
+                int idPlan = Convert.ToInt32(
+                    focusedView.GetRowCellValue(focusedView.FocusedRowHandle, gColId));
+                idAttachment = GetPlanAttachmentId(idPlan);
             }
             else
             {
                 int idReport = Convert.ToInt32(
                     focusedView.GetRowCellValue(focusedView.FocusedRowHandle, gColIdReport));
-
-                var report = reports.FirstOrDefault(r => r.Id == idReport);
-                if (report?.IdAdt == null) return;
-                idAttachment = report.IdAdt.Value;
+                idAttachment = reports.FirstOrDefault(r => r.Id == idReport)?.IdAdt;
             }
 
-            OpenAttachment(idAttachment);
-        }
-
-        private void gvAttachment_DoubleClick(object sender, EventArgs e)
-        {
-            GridView view = sender as GridView;
-            if (view == null || view.FocusedRowHandle < 0) return;
-
-            int idAttachment = Convert.ToInt32(
-                view.GetRowCellValue(view.FocusedRowHandle, gColIdAttach));
-            OpenAttachment(idAttachment);
+            if (idAttachment.HasValue) OpenAttachment(idAttachment.Value);
         }
 
         private void OpenAttachment(int idAttachment)

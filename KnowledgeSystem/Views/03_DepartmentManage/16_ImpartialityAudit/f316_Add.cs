@@ -10,6 +10,7 @@ using KnowledgeSystem.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -31,6 +32,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
         private List<dm_User> users;
         private List<dm_JobTitle> jobTitles;
+        private Attachment attachment;
+
+        private class Attachment : dm_Attachment
+        {
+            public string FullPath { get; set; }
+        }
 
         private class PlanUserItem
         {
@@ -51,6 +58,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             btnEdit.ImageOptions.SvgImage = TPSvgimages.Edit;
             btnDelete.ImageOptions.SvgImage = TPSvgimages.Remove;
             btnConfirm.ImageOptions.SvgImage = TPSvgimages.Confirm;
+            txbAtt.Properties.Buttons[0].ImageOptions.SvgImage = TPSvgimages.Search;
+            txbAtt.Properties.Buttons[1].ImageOptions.SvgImage = TPSvgimages.Copy;
         }
 
         private void f316_Add_Load(object sender, EventArgs e)
@@ -129,10 +138,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             gvFiles.UpdateCurrentRow();
 
             string displayName = txbTitle.Text.Trim();
-            if (string.IsNullOrWhiteSpace(displayName))
+            if (string.IsNullOrWhiteSpace(displayName) ||
+                attachment == null ||
+                !File.Exists(attachment.FullPath))
             {
                 MsgTP.MsgShowInfomation(
-                    "<font='Microsoft JhengHei UI' size=14>請輸入計劃名稱。</font>");
+                    "<font='Microsoft JhengHei UI' size=14>請填寫年度並選擇PDF檔案。</font>");
                 return false;
             }
 
@@ -177,6 +188,36 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
             using (var handle = SplashScreenManager.ShowOverlayForm(this))
             {
+                var attachmentData = new dm_Attachment
+                {
+                    Thread = attachment.Thread,
+                    ActualName = attachment.ActualName,
+                    EncryptionName = attachment.EncryptionName
+                };
+
+                // CSDL: tạo attachment trước để lấy IdAdt cho dt316_Report.
+                int idAttachment = dm_AttachmentBUS.Instance.Add(attachmentData);
+                if (idAttachment < 0)
+                {
+                    MsgTP.MsgError("儲存附件失敗！");
+                    return;
+                }
+
+                string destinationPath = Path.Combine(TPConfigs.Folder316, attachment.EncryptionName);
+                try
+                {
+                    if (!Directory.Exists(TPConfigs.Folder316))
+                        Directory.CreateDirectory(TPConfigs.Folder316);
+
+                    File.Copy(attachment.FullPath, destinationPath, true);
+                }
+                catch
+                {
+                    dm_AttachmentBUS.Instance.RemoveById(idAttachment);
+                    MsgTP.MsgError("複製附件失敗！");
+                    return;
+                }
+
                 // CSDL: thêm kế hoạch cha và nhận khóa chính Id.
                 int idPlan = dt316_PlanBUS.Instance.Add(new dt316_Plan
                 {
@@ -187,6 +228,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
                 if (idPlan < 0)
                 {
+                    RemoveAttachment(idAttachment, destinationPath);
                     MsgTP.MsgError("新增計劃失敗！");
                     return;
                 }
@@ -208,15 +250,95 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 // CSDL: ghi một lần toàn bộ người của hai tab.
                 if (!dt316_PlanUserBUS.Instance.AddRange(mappings))
                 {
-                    // Hoàn tác kế hoạch bằng xóa mềm nếu lưu danh sách người thất bại.
                     dt316_PlanBUS.Instance.RemoveById(idPlan, TPConfigs.LoginUser.Id);
+                    RemoveAttachment(idAttachment, destinationPath);
                     MsgTP.MsgError("儲存計劃人員失敗！");
+                    return;
+                }
+
+                // CSDL: PDF chọn tại form Add là file kế hoạch, lưu ở dòng PLAN.
+                // Report 7810/7820 là hai loại PDF riêng và chưa có file khi tạo plan.
+                var reports = new List<dt316_Report>
+                {
+                    CreateReport(idPlan, "PLAN", idAttachment),
+                    CreateReport(idPlan, "7810", null),
+                    CreateReport(idPlan, "7820", null)
+                };
+
+                if (!dt316_ReportBUS.Instance.AddRange(reports))
+                {
+                    dt316_PlanUserBUS.Instance.RemoveByPlan(idPlan);
+                    dt316_PlanBUS.Instance.RemoveById(idPlan, TPConfigs.LoginUser.Id);
+                    RemoveAttachment(idAttachment, destinationPath);
+                    MsgTP.MsgError("儲存報告失敗！");
                     return;
                 }
 
                 DialogResult = DialogResult.OK;
                 Close();
             }
+        }
+
+        private dt316_Report CreateReport(int idPlan, string idDept, int? idAttachment)
+        {
+            return new dt316_Report
+            {
+                IdPlan = idPlan,
+                IdDept = idDept,
+                IdAdt = idAttachment,
+                CreateAt = DateTime.Now,
+                CreateBy = TPConfigs.LoginUser.Id
+            };
+        }
+
+        private void RemoveAttachment(int idAttachment, string filePath)
+        {
+            dm_AttachmentBUS.Instance.RemoveById(idAttachment);
+            if (File.Exists(filePath)) File.Delete(filePath);
+        }
+
+        private void txbAtt_ButtonClick(object sender, ButtonPressedEventArgs e)
+        {
+            string filePath = null;
+
+            if (e.Button == txbAtt.Properties.Buttons[1])
+            {
+                if (Clipboard.ContainsFileDropList())
+                {
+                    var pdfFiles = Clipboard.GetFileDropList()
+                        .Cast<string>()
+                        .Where(path => File.Exists(path) &&
+                                       string.Equals(Path.GetExtension(path), ".pdf",
+                                           StringComparison.OrdinalIgnoreCase))
+                        .ToList();
+
+                    if (pdfFiles.Count == 1) filePath = pdfFiles[0];
+                }
+            }
+            else
+            {
+                using (var dialog = new OpenFileDialog { Filter = "Pdf|*.pdf" })
+                {
+                    if (dialog.ShowDialog(this) == DialogResult.OK)
+                        filePath = dialog.FileName;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(filePath))
+            {
+                XtraMessageBox.Show("請選擇一個PDF檔案", TPConfigs.SoftNameTW,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            attachment = new Attachment
+            {
+                Thread = "316",
+                ActualName = Path.GetFileName(filePath),
+                EncryptionName = EncryptionHelper.EncryptionFileName(filePath),
+                FullPath = filePath
+            };
+            txbAtt.Text = attachment.ActualName;
         }
 
         private void gvProgress_CellValueChanged(

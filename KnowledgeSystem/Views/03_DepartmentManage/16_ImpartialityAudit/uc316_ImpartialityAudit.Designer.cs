@@ -30,7 +30,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
         {
             this.components = new System.ComponentModel.Container();
             DevExpress.XtraGrid.GridLevelNode gridLevelNode1 = new DevExpress.XtraGrid.GridLevelNode();
-            DevExpress.XtraGrid.GridLevelNode gridLevelNode2 = new DevExpress.XtraGrid.GridLevelNode();
             DevExpress.XtraGrid.GridFormatRule gridFormatRule1 = new DevExpress.XtraGrid.GridFormatRule();
             DevExpress.XtraEditors.FormatConditionRuleExpression formatConditionRuleExpression1 = new DevExpress.XtraEditors.FormatConditionRuleExpression();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(uc316_ImpartialityAudit));
@@ -38,7 +37,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn7 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn8 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn9 = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColCloseRp = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gColIdReport = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gcData = new DevExpress.XtraGrid.GridControl();
             this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -52,10 +50,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn5 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn11 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gColDesc = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gvAttachment = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gColActualName = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColEncryptName = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColIdAttach = new DevExpress.XtraGrid.Columns.GridColumn();
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
             this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
@@ -73,7 +67,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.gvReport)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvData)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gvAttachment)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
@@ -97,23 +90,19 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn7,
             this.gridColumn8,
             this.gridColumn9,
-            this.gColCloseRp,
             this.gColIdReport});
             this.gvReport.GridControl = this.gcData;
             this.gvReport.Name = "gvReport";
             this.gvReport.OptionsCustomization.AllowFilter = false;
             this.gvReport.OptionsCustomization.AllowSort = false;
-            this.gvReport.OptionsDetail.ShowDetailTabs = false;
-            this.gvReport.OptionsView.ColumnAutoWidth = false;
+            this.gvReport.OptionsDetail.EnableMasterViewMode = false;
+            this.gvReport.OptionsView.AllowCellMerge = true;
+            this.gvReport.OptionsView.ColumnAutoWidth = true;
             this.gvReport.OptionsView.ShowGroupPanel = false;
             this.gvReport.OptionsView.ShowIndicator = false;
-            this.gvReport.MasterRowEmpty += new DevExpress.XtraGrid.Views.Grid.MasterRowEmptyEventHandler(this.gvReport_MasterRowEmpty);
-            this.gvReport.MasterRowExpanded += new DevExpress.XtraGrid.Views.Grid.CustomMasterRowEventHandler(this.gridView_MasterRowExpanded);
-            this.gvReport.MasterRowGetChildList += new DevExpress.XtraGrid.Views.Grid.MasterRowGetChildListEventHandler(this.gvReport_MasterRowGetChildList);
-            this.gvReport.MasterRowGetRelationName += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventHandler(this.gvReport_MasterRowGetRelationName);
-            this.gvReport.MasterRowGetRelationCount += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventHandler(this.gvReport_MasterRowGetRelationCount);
+            this.gvReport.CellMerge += new DevExpress.XtraGrid.Views.Grid.CellMergeEventHandler(this.gvReport_CellMerge);
             this.gvReport.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvReport_PopupMenuShowing);
-            this.gvReport.DoubleClick += new System.EventHandler(this.gridView_ExpandMasterRow);
+            this.gvReport.DoubleClick += new System.EventHandler(this.gvReport_DoubleClick);
             // 
             // gridColumn7
             // 
@@ -122,36 +111,32 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn7.Caption = "單位";
             this.gridColumn7.FieldName = "IdDept";
             this.gridColumn7.Name = "gridColumn7";
+            this.gridColumn7.OptionsColumn.AllowMerge = DevExpress.Utils.DefaultBoolean.True;
             this.gridColumn7.Visible = true;
             this.gridColumn7.VisibleIndex = 0;
+            this.gridColumn7.Width = 120;
             // 
             // gridColumn8
             // 
-            this.gridColumn8.Caption = "建立時間";
-            this.gridColumn8.FieldName = "CreateAt";
+            this.gridColumn8.Caption = "查核人員";
+            this.gridColumn8.FieldName = "UserName";
             this.gridColumn8.Name = "gridColumn8";
+            this.gridColumn8.OptionsColumn.AllowMerge = DevExpress.Utils.DefaultBoolean.False;
             this.gridColumn8.Visible = true;
             this.gridColumn8.VisibleIndex = 1;
+            this.gridColumn8.Width = 350;
             // 
             // gridColumn9
             // 
             this.gridColumn9.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn9.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn9.Caption = "建立人員";
-            this.gridColumn9.FieldName = "CreateBy";
+            this.gridColumn9.Caption = "報告檔案";
+            this.gridColumn9.FieldName = "ActualName";
             this.gridColumn9.Name = "gridColumn9";
+            this.gridColumn9.OptionsColumn.AllowMerge = DevExpress.Utils.DefaultBoolean.True;
             this.gridColumn9.Visible = true;
             this.gridColumn9.VisibleIndex = 2;
-            // 
-            // gColCloseRp
-            // 
-            this.gColCloseRp.AppearanceCell.Options.UseTextOptions = true;
-            this.gColCloseRp.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gColCloseRp.Caption = "是否上傳";
-            this.gColCloseRp.FieldName = "IsUploaded";
-            this.gColCloseRp.Name = "gColCloseRp";
-            this.gColCloseRp.Visible = true;
-            this.gColCloseRp.VisibleIndex = 3;
+            this.gridColumn9.Width = 300;
             // 
             // gColIdReport
             // 
@@ -168,10 +153,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gcData.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
             this.gcData.EmbeddedNavigator.Buttons.Remove.Visible = false;
             gridLevelNode1.LevelTemplate = this.gvReport;
-            gridLevelNode2.LevelTemplate = this.gvAttachment;
-            gridLevelNode2.RelationName = "附件";
-            gridLevelNode1.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
-            gridLevelNode2});
             gridLevelNode1.RelationName = "報告進度";
             this.gcData.LevelTree.Nodes.AddRange(new DevExpress.XtraGrid.GridLevelNode[] {
             gridLevelNode1});
@@ -183,7 +164,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gcData.UseEmbeddedNavigator = true;
             this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvData,
-            this.gvAttachment,
             this.gvReport});
             // 
             // gvData
@@ -205,6 +185,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvData.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
             this.gColId,
             this.gridColumn3,
+            this.gridColumn1,
             this.gridColumn2,
             this.gridColumn4,
             this.gColEnterDate,
@@ -229,7 +210,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gvData.MasterRowGetChildList += new DevExpress.XtraGrid.Views.Grid.MasterRowGetChildListEventHandler(this.gvData_MasterRowGetChildList);
             this.gvData.MasterRowGetRelationName += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventHandler(this.gvData_MasterRowGetRelationName);
             this.gvData.MasterRowGetRelationCount += new DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventHandler(this.gvData_MasterRowGetRelationCount);
-            this.gvData.DoubleClick += new System.EventHandler(this.gridView_ExpandMasterRow);
+            this.gvData.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvData_PopupMenuShowing);
+            this.gvData.DoubleClick += new System.EventHandler(this.gvData_DoubleClick);
             // 
             // gColId
             // 
@@ -253,8 +235,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             // 
             this.gridColumn1.AppearanceCell.Options.UseTextOptions = true;
             this.gridColumn1.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridColumn1.Caption = "檢驗公正性查核計劃";
-            this.gridColumn1.FieldName = "NamePlan";
+            this.gridColumn1.Caption = "計劃";
+            this.gridColumn1.FieldName = "PlanFileName";
             this.gridColumn1.Name = "gridColumn1";
             this.gridColumn1.Visible = true;
             this.gridColumn1.VisibleIndex = 1;
@@ -304,45 +286,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gColDesc.Caption = "備註";
             this.gColDesc.FieldName = "Describe";
             this.gColDesc.Name = "gColDesc";
-            // 
-            // gvAttachment
-            // 
-            this.gvAttachment.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gvAttachment.Appearance.Row.ForeColor = System.Drawing.Color.Black;
-            this.gvAttachment.Appearance.Row.Options.UseFont = true;
-            this.gvAttachment.Appearance.Row.Options.UseForeColor = true;
-            this.gvAttachment.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
-            this.gColActualName,
-            this.gColEncryptName,
-            this.gColIdAttach});
-            this.gvAttachment.GridControl = this.gcData;
-            this.gvAttachment.Name = "gvAttachment";
-            this.gvAttachment.OptionsView.ColumnAutoWidth = false;
-            this.gvAttachment.OptionsView.ShowColumnHeaders = false;
-            this.gvAttachment.OptionsView.ShowGroupPanel = false;
-            this.gvAttachment.OptionsView.ShowIndicator = false;
-            this.gvAttachment.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvAttachment_PopupMenuShowing);
-            this.gvAttachment.DoubleClick += new System.EventHandler(this.gvAttachment_DoubleClick);
-            // 
-            // gColActualName
-            // 
-            this.gColActualName.Caption = "gColActualName";
-            this.gColActualName.FieldName = "ActualName";
-            this.gColActualName.Name = "gColActualName";
-            this.gColActualName.Visible = true;
-            this.gColActualName.VisibleIndex = 0;
-            // 
-            // gColEncryptName
-            // 
-            this.gColEncryptName.Caption = "gColEncryptName";
-            this.gColEncryptName.FieldName = "EncryptionName";
-            this.gColEncryptName.Name = "gColEncryptName";
-            // 
-            // gColIdAttach
-            // 
-            this.gColIdAttach.Caption = "gridColumn14";
-            this.gColIdAttach.FieldName = "Id";
-            this.gColIdAttach.Name = "gColIdAttach";
             // 
             // layoutControl1
             // 
@@ -527,7 +470,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.gvReport)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvData)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gvAttachment)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
             this.layoutControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
@@ -567,14 +509,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn7;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn8;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn9;
-        private DevExpress.XtraGrid.Columns.GridColumn gColCloseRp;
         private DevExpress.XtraGrid.Columns.GridColumn gColIdReport;
-        private DevExpress.XtraGrid.Views.Grid.GridView gvAttachment;
-        private DevExpress.XtraGrid.Columns.GridColumn gColActualName;
-        private DevExpress.XtraGrid.Columns.GridColumn gColEncryptName;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn5;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn11;
-        private DevExpress.XtraGrid.Columns.GridColumn gColIdAttach;
         private DevExpress.XtraGrid.Columns.GridColumn gColDesc;
     }
 }

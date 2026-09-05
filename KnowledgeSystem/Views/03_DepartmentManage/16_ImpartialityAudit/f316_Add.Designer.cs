@@ -50,6 +50,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gridColumn6 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.btnDelProg = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             this.txbTitle = new DevExpress.XtraEditors.TextEdit();
+            this.txbAtt = new DevExpress.XtraEditors.ButtonEdit();
             this.gcFiles = new DevExpress.XtraGrid.GridControl();
             this.gvFiles = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gridColumn11 = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -61,6 +62,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.btnDelFile = new DevExpress.XtraEditors.Repository.RepositoryItemButtonEdit();
             this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
             this.lcTitle = new DevExpress.XtraLayout.LayoutControlItem();
+            this.lcAtt = new DevExpress.XtraLayout.LayoutControlItem();
             this.tabbedControlGroup1 = new DevExpress.XtraLayout.TabbedControlGroup();
             this.layoutControlGroup1 = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
@@ -75,6 +77,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemGridLookUpEdit1View)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDelProg)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbTitle.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txbAtt.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcFiles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvFiles)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lookupUser7810)).BeginInit();
@@ -82,15 +85,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.btnDelFile)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcTitle)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lcAtt)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tabbedControlGroup1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tabAttachments)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem5)).BeginInit();
             this.SuspendLayout();
-            // 
+            //
             // barManagerTP
-            // 
+            //
             this.barManagerTP.Bars.AddRange(new DevExpress.XtraBars.Bar[] {
             this.bar2});
             this.barManagerTP.DockControls.Add(this.barDockControlTop);
@@ -104,9 +108,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.btnConfirm});
             this.barManagerTP.MainMenu = this.bar2;
             this.barManagerTP.MaxItemId = 4;
-            // 
+            //
             // bar2
-            // 
+            //
             this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.bar2.BarAppearance.Disabled.Options.UseFont = true;
             this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
@@ -195,6 +199,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             // 
             this.layoutControl1.Controls.Add(this.gcProgress);
             this.layoutControl1.Controls.Add(this.txbTitle);
+            this.layoutControl1.Controls.Add(this.txbAtt);
             this.layoutControl1.Controls.Add(this.gcFiles);
             this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.layoutControl1.Location = new System.Drawing.Point(0, 49);
@@ -207,7 +212,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             // 
             // gcProgress
             // 
-            this.gcProgress.Location = new System.Drawing.Point(20, 167);
+            this.gcProgress.Location = new System.Drawing.Point(20, 203);
             this.gcProgress.MainView = this.gvProgress;
             this.gcProgress.MenuManager = this.barManagerTP;
             this.gcProgress.Name = "gcProgress";
@@ -215,7 +220,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gcProgress.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.lookupUser,
             this.btnDelProg});
-            this.gcProgress.Size = new System.Drawing.Size(628, 243);
+            this.gcProgress.Size = new System.Drawing.Size(628, 207);
             this.gcProgress.TabIndex = 14;
             this.gcProgress.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvProgress});
@@ -347,9 +352,26 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.txbTitle.StyleController = this.layoutControl1;
             this.txbTitle.TabIndex = 11;
             // 
+            // txbAtt
+            //
+            this.txbAtt.Location = new System.Drawing.Point(128, 48);
+            this.txbAtt.Name = "txbAtt";
+            this.txbAtt.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.txbAtt.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
+            this.txbAtt.Properties.Appearance.Options.UseFont = true;
+            this.txbAtt.Properties.Appearance.Options.UseForeColor = true;
+            this.txbAtt.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Search),
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Glyph)});
+            this.txbAtt.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.txbAtt.Size = new System.Drawing.Size(528, 32);
+            this.txbAtt.StyleController = this.layoutControl1;
+            this.txbAtt.TabIndex = 12;
+            this.txbAtt.ButtonClick += new DevExpress.XtraEditors.Controls.ButtonPressedEventHandler(this.txbAtt_ButtonClick);
+            //
             // gcFiles
             // 
-            this.gcFiles.Location = new System.Drawing.Point(20, 167);
+            this.gcFiles.Location = new System.Drawing.Point(20, 203);
             this.gcFiles.MainView = this.gvFiles;
             this.gcFiles.MenuManager = this.barManagerTP;
             this.gcFiles.Name = "gcFiles";
@@ -357,7 +379,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.gcFiles.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
             this.lookupUser7810,
             this.btnDelFile});
-            this.gcFiles.Size = new System.Drawing.Size(628, 243);
+            this.gcFiles.Size = new System.Drawing.Size(628, 207);
             this.gcFiles.TabIndex = 21;
             this.gcFiles.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvFiles});
@@ -485,6 +507,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.Root.GroupBordersVisible = false;
             this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.lcTitle,
+            this.lcAtt,
             this.tabbedControlGroup1});
             this.Root.Name = "Root";
             this.Root.Size = new System.Drawing.Size(668, 430);
@@ -509,6 +532,20 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.lcTitle.Text = "年度<color=red>*</color>";
             this.lcTitle.TextSize = new System.Drawing.Size(104, 24);
             // 
+            // lcAtt
+            //
+            this.lcAtt.AllowHtmlStringInCaption = true;
+            this.lcAtt.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.lcAtt.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
+            this.lcAtt.AppearanceItemCaption.Options.UseFont = true;
+            this.lcAtt.AppearanceItemCaption.Options.UseForeColor = true;
+            this.lcAtt.Control = this.txbAtt;
+            this.lcAtt.Location = new System.Drawing.Point(0, 36);
+            this.lcAtt.Name = "lcAtt";
+            this.lcAtt.Size = new System.Drawing.Size(648, 36);
+            this.lcAtt.Text = "檔案<color=red>*</color>";
+            this.lcAtt.TextSize = new System.Drawing.Size(104, 24);
+            //
             // tabbedControlGroup1
             // 
             this.tabbedControlGroup1.AllowHtmlDraw = true;
@@ -518,11 +555,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.tabbedControlGroup1.AppearanceTabPage.Header.Options.UseForeColor = true;
             this.tabbedControlGroup1.AppearanceTabPage.HeaderActive.ForeColor = System.Drawing.Color.Blue;
             this.tabbedControlGroup1.AppearanceTabPage.HeaderActive.Options.UseForeColor = true;
-            this.tabbedControlGroup1.Location = new System.Drawing.Point(0, 36);
+            this.tabbedControlGroup1.Location = new System.Drawing.Point(0, 72);
             this.tabbedControlGroup1.Name = "tabbedControlGroup1";
             this.tabbedControlGroup1.Padding = new DevExpress.XtraLayout.Utils.Padding(5, 5, 5, 5);
             this.tabbedControlGroup1.SelectedTabPage = this.layoutControlGroup1;
-            this.tabbedControlGroup1.Size = new System.Drawing.Size(648, 374);
+            this.tabbedControlGroup1.Size = new System.Drawing.Size(648, 338);
             this.tabbedControlGroup1.Spacing = new DevExpress.XtraLayout.Utils.Padding(2, 2, 5, 2);
             this.tabbedControlGroup1.TabPages.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.layoutControlGroup1,
@@ -536,7 +573,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.layoutControlGroup1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlGroup1.Name = "layoutControlGroup1";
             this.layoutControlGroup1.OptionsToolTip.AllowHtmlString = DevExpress.Utils.DefaultBoolean.False;
-            this.layoutControlGroup1.Size = new System.Drawing.Size(632, 323);
+            this.layoutControlGroup1.Size = new System.Drawing.Size(632, 287);
             this.layoutControlGroup1.Text = "7820<color=red>*</color>";
             // 
             // layoutControlItem3
@@ -544,7 +581,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.layoutControlItem3.Control = this.gcProgress;
             this.layoutControlItem3.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem3.Name = "layoutControlItem3";
-            this.layoutControlItem3.Size = new System.Drawing.Size(632, 323);
+            this.layoutControlItem3.Size = new System.Drawing.Size(632, 287);
             this.layoutControlItem3.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem3.TextVisible = false;
             // 
@@ -556,7 +593,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.tabAttachments.Location = new System.Drawing.Point(0, 0);
             this.tabAttachments.Name = "tabAttachments";
             this.tabAttachments.OptionsItemText.TextToControlDistance = 4;
-            this.tabAttachments.Size = new System.Drawing.Size(632, 323);
+            this.tabAttachments.Size = new System.Drawing.Size(632, 287);
             this.tabAttachments.Text = "7810<color=red>*</color>";
             // 
             // layoutControlItem5
@@ -566,7 +603,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.layoutControlItem5.CustomizationFormText = "layoutControlItem3";
             this.layoutControlItem5.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem5.Name = "layoutControlItem5";
-            this.layoutControlItem5.Size = new System.Drawing.Size(632, 323);
+            this.layoutControlItem5.Size = new System.Drawing.Size(632, 287);
             this.layoutControlItem5.Text = "layoutControlItem3";
             this.layoutControlItem5.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem5.TextVisible = false;
@@ -598,6 +635,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.repositoryItemGridLookUpEdit1View)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.btnDelProg)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbTitle.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.txbAtt.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcFiles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvFiles)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lookupUser7810)).EndInit();
@@ -605,6 +643,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             ((System.ComponentModel.ISupportInitialize)(this.btnDelFile)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcTitle)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lcAtt)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.tabbedControlGroup1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
@@ -635,8 +674,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
         private DevExpress.XtraGrid.Views.Grid.GridView repositoryItemGridLookUpEdit1View;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn1;
         private DevExpress.XtraEditors.TextEdit txbTitle;
+        private DevExpress.XtraEditors.ButtonEdit txbAtt;
         private DevExpress.XtraLayout.LayoutControlGroup Root;
         private DevExpress.XtraLayout.LayoutControlItem lcTitle;
+        private DevExpress.XtraLayout.LayoutControlItem lcAtt;
         private DevExpress.XtraLayout.TabbedControlGroup tabbedControlGroup1;
         private DevExpress.XtraLayout.LayoutControlGroup layoutControlGroup1;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem3;
