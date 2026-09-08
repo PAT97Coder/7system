@@ -41,6 +41,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         int idBase = -1;
         dt201_Base baseData;
         bool IsDisable = false;
+        bool isCanEdit;
 
         private void InitializeIcon()
         {
@@ -81,6 +82,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void ItemDelDoc_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
                 Caption = TPConfigs.SoftNameTW,
@@ -102,6 +105,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void ItemEditDoc_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             GridView view = gvData;
             int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
@@ -133,6 +138,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         private void f201_AuditDoc_Info_Load(object sender, EventArgs e)
         {
             idBase = currentData.Id;
+            isCanEdit = Iso201Permission.CanEditCurrentUser();
 
             gvData.ReadOnlyGridView();
             gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
@@ -152,7 +158,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                     e.Menu.Items.Add(itemApprovalHis);
                 }
 
-                if (baseForm.IsProcessing != true)
+                if (isCanEdit && baseForm.IsProcessing != true)
                 {
                     itemEditDoc.BeginGroup = true;
                     e.Menu.Items.Add(itemEditDoc);
@@ -163,6 +169,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void btnReload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            isCanEdit = Iso201Permission.CanEditCurrentUser();
             LoadData();
         }
 

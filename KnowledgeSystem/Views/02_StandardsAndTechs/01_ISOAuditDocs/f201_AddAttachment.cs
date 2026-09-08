@@ -191,6 +191,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void f201_AddAttachment_Load(object sender, EventArgs e)
         {
+            if (eventInfo == EventFormInfo.Update && !Iso201Permission.EnsureCanEditCurrentUser())
+            {
+                Close();
+                return;
+            }
+
             txbDocCode.EditValue = parentData.DocCode;
             txbDisplayName.EditValue = parentData.DisplayName;
             txbDisplayNameVN.EditValue = parentData.DisplayNameVN;
@@ -290,6 +296,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void btnConfirm_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (eventInfo == EventFormInfo.Update && !Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             // Move focus away from the grid to update source
             gvProgress.FocusedRowHandle = GridControl.AutoFilterRowHandle;
 
