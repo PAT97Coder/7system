@@ -29,11 +29,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(f316_Add));
             this.barManagerTP = new DevExpress.XtraBars.BarManager(this.components);
             this.bar2 = new DevExpress.XtraBars.Bar();
-            this.btnEdit = new DevExpress.XtraBars.BarButtonItem();
-            this.btnDelete = new DevExpress.XtraBars.BarButtonItem();
             this.btnConfirm = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
@@ -103,8 +100,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.barManagerTP.DockControls.Add(this.barDockControlRight);
             this.barManagerTP.Form = this;
             this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-            this.btnEdit,
-            this.btnDelete,
             this.btnConfirm});
             this.barManagerTP.MainMenu = this.bar2;
             this.barManagerTP.MaxItemId = 4;
@@ -131,30 +126,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             this.bar2.DockRow = 0;
             this.bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
             this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnEdit, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnDelete, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnConfirm, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.bar2.OptionsBar.MultiLine = true;
             this.bar2.OptionsBar.UseWholeRow = true;
             this.bar2.Text = "Main menu";
-            // 
-            // btnEdit
-            // 
-            this.btnEdit.Caption = "編輯";
-            this.btnEdit.Id = 0;
-            this.btnEdit.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnEdit.ImageOptions.SvgImage")));
-            this.btnEdit.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnEdit.Name = "btnEdit";
-            // 
-            // btnDelete
-            // 
-            this.btnDelete.Caption = "刪除";
-            this.btnDelete.Id = 1;
-            this.btnDelete.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnDelete.Name = "btnDelete";
-            // 
             // btnConfirm
             // 
             this.btnConfirm.Caption = "確認";
@@ -658,8 +635,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
         private DevExpress.XtraBars.BarManager barManagerTP;
         private DevExpress.XtraBars.Bar bar2;
-        private DevExpress.XtraBars.BarButtonItem btnEdit;
-        private DevExpress.XtraBars.BarButtonItem btnDelete;
         private DevExpress.XtraBars.BarButtonItem btnConfirm;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
         private DevExpress.XtraBars.BarDockControl barDockControlBottom;

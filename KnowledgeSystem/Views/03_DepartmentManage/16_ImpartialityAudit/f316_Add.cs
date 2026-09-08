@@ -63,8 +63,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
         private void InitializeIcon()
         {
-            btnEdit.ImageOptions.SvgImage = TPSvgimages.Edit;
-            btnDelete.ImageOptions.SvgImage = TPSvgimages.Remove;
             btnConfirm.ImageOptions.SvgImage = TPSvgimages.Confirm;
             txbAtt.Properties.Buttons[0].ImageOptions.SvgImage = TPSvgimages.Search;
             txbAtt.Properties.Buttons[1].ImageOptions.SvgImage = TPSvgimages.Copy;
@@ -72,8 +70,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
 
         private void f316_Add_Load(object sender, EventArgs e)
         {
-            btnEdit.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
-            btnDelete.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             Text = planId.HasValue
                 ? "編輯檢驗公正性查核計劃"
                 : "新增檢驗公正性查核計劃";
@@ -254,42 +250,19 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
             if (!ValidateData()) return;
 
             if (planId.HasValue)
-            {
                 UpdatePlan(planId.Value);
-                return;
-            }
+            else
+                CreatePlan();
+        }
 
+        private void CreatePlan()
+        {
             using (var handle = SplashScreenManager.ShowOverlayForm(this))
             {
-                var attachmentData = new dm_Attachment
-                {
-                    Thread = attachment.Thread,
-                    ActualName = attachment.ActualName,
-                    EncryptionName = attachment.EncryptionName
-                };
-
                 // CSDL: tạo attachment trước để lấy IdAdt cho dt316_Report.
-                int idAttachment = dm_AttachmentBUS.Instance.Add(attachmentData);
-                if (idAttachment < 0)
-                {
-                    MsgTP.MsgError("儲存附件失敗！");
-                    return;
-                }
-
-                string destinationPath = Path.Combine(TPConfigs.Folder316, attachment.EncryptionName);
-                try
-                {
-                    if (!Directory.Exists(TPConfigs.Folder316))
-                        Directory.CreateDirectory(TPConfigs.Folder316);
-
-                    File.Copy(attachment.FullPath, destinationPath, true);
-                }
-                catch
-                {
-                    dm_AttachmentBUS.Instance.RemoveById(idAttachment);
-                    MsgTP.MsgError("複製附件失敗！");
-                    return;
-                }
+                int idAttachment;
+                string destinationPath;
+                if (!TrySaveAttachment(out idAttachment, out destinationPath)) return;
 
                 // CSDL: thêm kế hoạch cha và nhận khóa chính Id.
                 int idPlan = dt316_PlanBUS.Instance.Add(new dt316_Plan
@@ -306,19 +279,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                     return;
                 }
 
-                // LINQ/CSDL: IdPlan lấy từ Plan vừa thêm; IdUser và IdDept lấy từ dm_User.
-                var mappings = users7810.Concat(users7820)
-                    .Select(r =>
-                    {
-                        var user = users.First(u => u.Id == r.IdUsr);
-                        return new dt316_PlanUser
-                        {
-                            IdPlan = idPlan,
-                            IdUser = user.Id,
-                            IdDept = user.IdDepartment
-                        };
-                    })
-                    .ToList();
+                // LINQ/CSDL: IdUser và IdDept luôn lấy từ dm_User tại thời điểm lưu.
+                var mappings = BuildPlanUsers(idPlan);
 
                 // CSDL: ghi một lần toàn bộ người của hai tab.
                 if (!dt316_PlanUserBUS.Instance.AddRange(mappings))
@@ -332,12 +294,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 // CSDL/LINQ: PDF chọn tại form Add là file kế hoạch, lưu ở dòng PLAN.
                 // Mỗi report phòng ban dùng đúng IdDept đã ghi trong dt316_PlanUser,
                 // không tự rút gọn hoặc gán cứng mã 7810/7820.
-                var reports = mappings
-                    .Where(r => !string.IsNullOrWhiteSpace(r.IdDept))
-                    .Select(r => r.IdDept)
-                    .Distinct(StringComparer.OrdinalIgnoreCase)
-                    .Select(idDept => CreateReport(idPlan, idDept, null))
-                    .ToList();
+                var reports = BuildDepartmentReports(idPlan, mappings);
                 reports.Insert(0, CreateReport(idPlan, PlanFileDept, idAttachment));
 
                 if (!dt316_ReportBUS.Instance.AddRange(reports))
@@ -415,27 +372,42 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 .ToList();
         }
 
-        private bool UpdatePlanAttachment(int idPlan)
+        private List<dt316_Report> BuildDepartmentReports(
+            int idPlan,
+            IEnumerable<dt316_PlanUser> mappings)
         {
-            var attachmentData = new dm_Attachment
+            // LINQ/CSDL: mỗi IdDept tham gia chỉ có một dòng report của kế hoạch.
+            return mappings
+                .Where(r => !string.IsNullOrWhiteSpace(r.IdDept))
+                .Select(r => r.IdDept)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .Select(idDept => CreateReport(idPlan, idDept, null))
+                .ToList();
+        }
+
+        private bool TrySaveAttachment(out int idAttachment, out string destinationPath)
+        {
+            idAttachment = dm_AttachmentBUS.Instance.Add(new dm_Attachment
             {
                 Thread = attachment.Thread,
                 ActualName = attachment.ActualName,
                 EncryptionName = attachment.EncryptionName
-            };
-            int idAttachment = dm_AttachmentBUS.Instance.Add(attachmentData);
+            });
+            destinationPath = Path.Combine(TPConfigs.Folder316, attachment.EncryptionName);
+
             if (idAttachment < 0)
             {
                 MsgTP.MsgError("儲存附件失敗！");
                 return false;
             }
 
-            string destinationPath = Path.Combine(TPConfigs.Folder316, attachment.EncryptionName);
             try
             {
                 if (!Directory.Exists(TPConfigs.Folder316))
                     Directory.CreateDirectory(TPConfigs.Folder316);
+
                 File.Copy(attachment.FullPath, destinationPath, true);
+                return true;
             }
             catch
             {
@@ -443,6 +415,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._16_ImpartialityAudit
                 MsgTP.MsgError("複製附件失敗！");
                 return false;
             }
+        }
+
+        private bool UpdatePlanAttachment(int idPlan)
+        {
+            int idAttachment;
+            string destinationPath;
+            if (!TrySaveAttachment(out idAttachment, out destinationPath)) return false;
 
             // CSDL: PDF 計劃 vẫn dùng dòng kỹ thuật IdDept = PLAN, tách khỏi report.
             var planReport = dt316_ReportBUS.Instance
