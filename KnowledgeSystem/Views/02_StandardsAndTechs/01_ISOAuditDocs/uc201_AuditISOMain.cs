@@ -45,6 +45,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         BindingSource sourceData = new BindingSource();
         List<dm_Group> groups;
         List<dm_Departments> depts;
+        bool isCanEdit;
 
         DXMenuItem itemAddNode;
         DXMenuItem itemAddAtt;
@@ -290,6 +291,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void ItemEnable_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
                 Caption = TPConfigs.SoftNameTW,
@@ -313,6 +316,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void ItemDisable_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
                 Caption = TPConfigs.SoftNameTW,
@@ -337,6 +342,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         // Sửa Node cho treelist
         private void ItemEditNode_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             GetFocusData();
 
             if (currentData.IsFinalNode == true)
@@ -433,6 +440,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         // Xóa node
         private void ItemDeleteNote_Click(object sender, EventArgs e)
         {
+            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
                 Caption = TPConfigs.SoftNameTW,
@@ -534,6 +543,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void uc201_AuditISOMain_Load(object sender, EventArgs e)
         {
+            isCanEdit = Iso201Permission.CanEditCurrentUser();
+
             tlsData.DataSource = sourceData;
             tlsData.KeyFieldName = "data.Id";
             tlsData.ParentFieldName = "data.IdParent";
@@ -648,7 +659,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
             if (isDisable)
             {
-                if (parentData?.IsDisable != true) e.Menu.Items.Add(itemEnable);
+                if (isCanEdit && parentData?.IsDisable != true) e.Menu.Items.Add(itemEnable);
                 return;
             }
 
@@ -659,8 +670,11 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                 {
                     // Dùng cái này nếu mà cho sửa toàn bộ năm, sửa luôn disable AuditDoc_Info
                     e.Menu.Items.Add(itemAddAtt);
-                    e.Menu.Items.Add(itemEditNode);
-                    e.Menu.Items.Add(itemDelNode);
+                    if (isCanEdit)
+                    {
+                        e.Menu.Items.Add(itemEditNode);
+                        e.Menu.Items.Add(itemDelNode);
+                    }
 
                     if (groups.Select(r => r.IdDept).Contains("7820") && currentData.DisplayName == "校正證書")
                     {
@@ -679,25 +693,34 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
             else if (isRootFinalNode)
             {
                 e.Menu.Items.Add(itemAddVer);
-                e.Menu.Items.Add(itemEditNode);
                 e.Menu.Items.Add(itemClone);
-                e.Menu.Items.Add(itemDelNode);
-                e.Menu.Items.Add(itemDisable);
+                if (isCanEdit)
+                {
+                    e.Menu.Items.Add(itemEditNode);
+                    e.Menu.Items.Add(itemDelNode);
+                    e.Menu.Items.Add(itemDisable);
+                }
             }
             else if (haveChildren)
             {
                 e.Menu.Items.Add(itemAddNode);
-                e.Menu.Items.Add(itemEditNode);
-                e.Menu.Items.Add(itemDelNode);
-                e.Menu.Items.Add(itemDisable);
+                if (isCanEdit)
+                {
+                    e.Menu.Items.Add(itemEditNode);
+                    e.Menu.Items.Add(itemDelNode);
+                    e.Menu.Items.Add(itemDisable);
+                }
             }
             else
             {
                 e.Menu.Items.Add(itemAddVer);
                 e.Menu.Items.Add(itemAddNode);
-                e.Menu.Items.Add(itemEditNode);
-                e.Menu.Items.Add(itemDelNode);
-                e.Menu.Items.Add(itemDisable);
+                if (isCanEdit)
+                {
+                    e.Menu.Items.Add(itemEditNode);
+                    e.Menu.Items.Add(itemDelNode);
+                    e.Menu.Items.Add(itemDisable);
+                }
             }
         }
 
@@ -749,6 +772,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void btnReload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            isCanEdit = Iso201Permission.CanEditCurrentUser();
             LoadData();
         }
 

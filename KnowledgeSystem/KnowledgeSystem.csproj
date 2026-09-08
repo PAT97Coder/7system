@@ -236,6 +236,7 @@
     <Compile Include="Helpers\FixedProgressHelper.cs" />
     <Compile Include="Helpers\GridControlHelper.cs" />
     <Compile Include="Helpers\ImageHelper.cs" />
+    <Compile Include="Helpers\Iso201Permission.cs" />
     <Compile Include="Helpers\KeyboardHelper.cs" />
     <Compile Include="Helpers\Material309CheckPhotoHelper.cs" />
     <Compile Include="Helpers\Material309Helper.cs" />

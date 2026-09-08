@@ -97,6 +97,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void f201_AddNode_Load(object sender, EventArgs e)
         {
+            if (eventInfo == EventFormInfo.Update && !Iso201Permission.EnsureCanEditCurrentUser())
+            {
+                Close();
+                return;
+            }
+
             lcControls = new List<LayoutControlItem>() { lcDept, lcDocCode, lcDisplayName, lcDisplayNameVN, lcArticles, lcDocType, lcNotifyCycle, lcIdRecord };
             lcImpControls = new List<LayoutControlItem>() { lcDocCode, lcDisplayName, lcDisplayNameVN, lcNotifyCycle, lcIdRecord, lcArticles, lcDocType };
             foreach (var item in lcControls)
@@ -165,6 +171,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void btnConfirm_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (eventInfo == EventFormInfo.Update && !Iso201Permission.EnsureCanEditCurrentUser()) return;
+
             // Kiểm tra xem đã điền đầy đủ thông tin yêu cầu hay chưa
             bool IsValidate = true;
             foreach (var item in lcImpControls)
