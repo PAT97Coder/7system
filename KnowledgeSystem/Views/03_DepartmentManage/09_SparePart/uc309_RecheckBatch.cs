@@ -281,6 +281,179 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                 : value.ToString().Trim();
         }
 
+        private Dictionary<int, string> ReadExcelHyperlinks(string excelFilePath, int columnIndex, IEnumerable<int> rowNumbers)
+        {
+            var hyperlinks = new Dictionary<int, string>();
+
+            try
+            {
+                ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
+                using (var stream = File.Open(excelFilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                using (var package = new ExcelPackage(stream))
+                {
+                    var worksheet = package.Workbook.Worksheets.FirstOrDefault();
+                    if (worksheet == null)
+                    {
+                        return hyperlinks;
+                    }
+
+                    foreach (int rowNumber in rowNumbers.Distinct())
+                    {
+                        Uri hyperlink = worksheet.Cells[rowNumber, columnIndex].Hyperlink;
+                        if (hyperlink != null)
+                        {
+                            hyperlinks[rowNumber] = hyperlink.OriginalString;
+                        }
+                    }
+                }
+            }
+            catch
+            {
+                // Hyperlink là dữ liệu bổ sung; vẫn cho phép xử lý giá trị hiển thị trong ô.
+            }
+
+            return hyperlinks;
+        }
+
+        private string GetPhotoFileName(string reference)
+        {
+            string value = (reference ?? string.Empty).Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return string.Empty;
+            }
+
+            if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri)
+                && (uri.IsFile || uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps))
+            {
+                return Path.GetFileName(uri.IsFile ? uri.LocalPath : uri.AbsolutePath);
+            }
+
+            return Path.GetFileName(value.Replace('/', Path.DirectorySeparatorChar));
+        }
+
+        private bool TryGetLocalPhotoPath(string excelFilePath, string reference, out string localPath, out bool isRemoteUrl)
+        {
+            localPath = string.Empty;
+            isRemoteUrl = false;
+
+            string value = (reference ?? string.Empty).Trim().Trim('"');
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return false;
+            }
+
+            try
+            {
+                if (Uri.TryCreate(value, UriKind.Absolute, out Uri uri))
+                {
+                    if (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                    {
+                        isRemoteUrl = true;
+                        return false;
+                    }
+
+                    if (uri.IsFile)
+                    {
+                        localPath = uri.LocalPath;
+                        return true;
+                    }
+                }
+
+                localPath = Path.IsPathRooted(value)
+                    ? Path.GetFullPath(value)
+                    : Path.GetFullPath(Path.Combine(Path.GetDirectoryName(excelFilePath) ?? string.Empty, value));
+                return true;
+            }
+            catch
+            {
+                localPath = string.Empty;
+                return false;
+            }
+        }
+
+        private bool TryResolveCheckPhoto(
+            string excelFilePath,
+            string displayedValue,
+            string hyperlinkValue,
+            out string photoName,
+            out string photoPath,
+            out string errorMessage)
+        {
+            photoName = string.Empty;
+            photoPath = string.Empty;
+            errorMessage = string.Empty;
+
+            var references = new[] { displayedValue, hyperlinkValue }
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            if (references.Count == 0)
+            {
+                errorMessage = "圖片名稱或連結不可為空。";
+                return false;
+            }
+
+            string imagesFolder = Path.Combine(Path.GetDirectoryName(excelFilePath) ?? string.Empty, "images");
+            var fileNames = references
+                .Select(GetPhotoFileName)
+                .Where(value => !string.IsNullOrWhiteSpace(value))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            foreach (string fileName in fileNames)
+            {
+                if (!AllowedCheckPhotoExtensions.Contains(Path.GetExtension(fileName)))
+                {
+                    continue;
+                }
+
+                string imageFolderPath = Path.Combine(imagesFolder, fileName);
+                if (File.Exists(imageFolderPath))
+                {
+                    photoName = fileName;
+                    photoPath = imageFolderPath;
+                    return true;
+                }
+            }
+
+            bool hasRemoteUrl = false;
+            foreach (string reference in new[] { hyperlinkValue, displayedValue })
+            {
+                if (!TryGetLocalPhotoPath(excelFilePath, reference, out string localPath, out bool isRemoteUrl))
+                {
+                    hasRemoteUrl |= isRemoteUrl;
+                    continue;
+                }
+
+                string localFileName = Path.GetFileName(localPath);
+                if (!AllowedCheckPhotoExtensions.Contains(Path.GetExtension(localFileName)) || !File.Exists(localPath))
+                {
+                    continue;
+                }
+
+                photoName = localFileName;
+                photoPath = localPath;
+                return true;
+            }
+
+            if (fileNames.Count > 0 && fileNames.All(fileName => !AllowedCheckPhotoExtensions.Contains(Path.GetExtension(fileName))))
+            {
+                errorMessage = "圖片副檔名只支援 .jpg、.jpeg、.png。";
+            }
+            else if (hasRemoteUrl)
+            {
+                errorMessage = "不支援網路圖片連結，請使用本機檔案或 images 資料夾。";
+            }
+            else
+            {
+                errorMessage = $"找不到圖片檔案「{fileNames.FirstOrDefault() ?? displayedValue}」，請確認路徑或 images 資料夾。";
+            }
+
+            return false;
+        }
+
         private string NormalizeMaterialCode(object value)
         {
             if (value == null || value == DBNull.Value)
@@ -431,14 +604,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                 return false;
             }
 
-            string imagesFolder = Path.Combine(Path.GetDirectoryName(excelFilePath) ?? string.Empty, "images");
-            if (!isUploadAbnormal && !Directory.Exists(imagesFolder))
-            {
-                XtraMessageBox.Show("找不到與 Excel 同層的 images 資料夾。", TPConfigs.SoftNameTW,
-                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                return false;
-            }
-
             var rowInfos = table.AsEnumerable()
                 .Select((row, index) => new
                 {
@@ -448,6 +613,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                 })
                 .Where(x => !string.IsNullOrWhiteSpace(x.Code))
                 .ToList();
+
+            Dictionary<int, string> photoHyperlinks = isUploadAbnormal
+                ? new Dictionary<int, string>()
+                : ReadExcelHyperlinks(excelFilePath, photoColumn.Ordinal + 1, rowInfos.Select(x => x.RowNumber));
 
             List<string> errors = new List<string>();
 
@@ -494,32 +663,18 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                     errors.Add($"第 {rowInfo.RowNumber} 列：盤點數量格式不正確。");
                 }
 
-                string rawPhotoName = GetExcelCellString(rowInfo.Row, photoColumn);
-                if (string.IsNullOrWhiteSpace(rawPhotoName))
-                {
-                    errors.Add($"第 {rowInfo.RowNumber} 列：圖片名稱不可為空。");
-                    continue;
-                }
+                string displayedPhotoValue = GetExcelCellString(rowInfo.Row, photoColumn);
+                photoHyperlinks.TryGetValue(rowInfo.RowNumber, out string hyperlinkValue);
 
-                string photoName = rawPhotoName.Trim();
-                string photoFileName = Path.GetFileName(photoName);
-                if (!string.Equals(photoName, photoFileName, StringComparison.OrdinalIgnoreCase))
+                if (!TryResolveCheckPhoto(
+                    excelFilePath,
+                    displayedPhotoValue,
+                    hyperlinkValue,
+                    out string photoFileName,
+                    out string photoPath,
+                    out string photoError))
                 {
-                    errors.Add($"第 {rowInfo.RowNumber} 列：圖片名稱只能填寫檔名，不可包含路徑。");
-                    continue;
-                }
-
-                string extension = Path.GetExtension(photoFileName);
-                if (!AllowedCheckPhotoExtensions.Contains(extension))
-                {
-                    errors.Add($"第 {rowInfo.RowNumber} 列：圖片副檔名只支援 .jpg、.jpeg、.png。");
-                    continue;
-                }
-
-                string photoPath = Path.Combine(imagesFolder, photoFileName);
-                if (!File.Exists(photoPath))
-                {
-                    errors.Add($"第 {rowInfo.RowNumber} 列：找不到 images\\{photoFileName}。");
+                    errors.Add($"第 {rowInfo.RowNumber} 列：{photoError}");
                     continue;
                 }
 
@@ -813,18 +968,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                 ws.Cells.Style.Font.Name = "Microsoft JhengHei";
                 ws.Cells.Style.Font.Size = 14;
 
-                // Thiết lập độ rộng các cột
-                ws.Column(1).Hidden = true;
-                ws.Column(2).Width = 30;
-                ws.Column(3).Width = 50;
-                ws.Column(4).Width = 15;
-                ws.Column(5).Width = 25;
-                ws.Column(6).Width = 15;
-                ws.Column(7).Width = 15;
-                ws.Column(8).Width = 15;
-                ws.Column(9).Width = 30;
-                ws.Column(10).Width = 25;
-
                 ws.Cells["A1"].LoadFromCollection(excelDatas, true, OfficeOpenXml.Table.TableStyles.Medium2);
 
                 ws.Cells["A1"].Value = "編碼";
@@ -833,10 +976,37 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                 ws.Cells["D1"].Value = "地位";
                 ws.Cells["E1"].Value = "管理員";
                 ws.Cells["F1"].Value = "單位";
-                ws.Cells["G1"].Value = "系統上數量";
-                ws.Cells["H1"].Value = "盤點數量";
-                ws.Cells["I1"].Value = "異常說明";
-                ws.Cells["J1"].Value = "圖片名稱";
+
+                if (IsUploadAbnormal)
+                {
+                    // Bảng bất thường chỉ cần số hệ thống, số kiểm kê và giải thích.
+                    ws.DeleteColumn(10);
+                    ws.Cells["G1"].Value = "系統上數量";
+                    ws.Cells["H1"].Value = "盤點數量";
+                    ws.Cells["I1"].Value = "異常說明";
+                }
+                else
+                {
+                    // Kiểm kê lần đầu không hiện số hệ thống và chưa nhập giải thích bất thường.
+                    ws.DeleteColumn(9);
+                    ws.DeleteColumn(7);
+                    ws.Cells["G1"].Value = "盤點數量";
+                    ws.Cells["H1"].Value = "圖片名稱";
+                }
+
+                // Thiết lập độ rộng sau khi đã loại các cột không dùng.
+                ws.Column(1).Hidden = true;
+                ws.Column(2).Width = 30;
+                ws.Column(3).Width = 50;
+                ws.Column(4).Width = 15;
+                ws.Column(5).Width = 25;
+                ws.Column(6).Width = 15;
+                ws.Column(7).Width = 15;
+                ws.Column(8).Width = IsUploadAbnormal ? 15 : 25;
+                if (IsUploadAbnormal)
+                {
+                    ws.Column(9).Width = 30;
+                }
 
                 ws.Cells.Style.WrapText = true;
 
