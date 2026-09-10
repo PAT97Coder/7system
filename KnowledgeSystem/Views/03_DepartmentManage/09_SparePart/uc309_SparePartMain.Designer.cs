@@ -698,7 +698,7 @@
             // 
             // btnExcelBySpare
             // 
-            this.btnExcelBySpare.Caption = "按照備品";
+            this.btnExcelBySpare.Caption = "依據物料材編";
             this.btnExcelBySpare.Id = 14;
             this.btnExcelBySpare.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnExcelBySpare.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
@@ -710,7 +710,7 @@
             // 
             // btnExcelByMachine
             // 
-            this.btnExcelByMachine.Caption = "按照設備";
+            this.btnExcelByMachine.Caption = "依據設備種類";
             this.btnExcelByMachine.Id = 15;
             this.btnExcelByMachine.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnExcelByMachine.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
@@ -722,7 +722,7 @@
             // 
             // btnExcelByNotify
             // 
-            this.btnExcelByNotify.Caption = "提醒備品";
+            this.btnExcelByNotify.Caption = "低於安全庫存";
             this.btnExcelByNotify.Id = 16;
             this.btnExcelByNotify.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnExcelByNotify.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;

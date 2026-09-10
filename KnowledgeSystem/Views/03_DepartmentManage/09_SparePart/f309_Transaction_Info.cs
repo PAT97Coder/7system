@@ -80,6 +80,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
             cbbRecoveryOption.Properties.Items.Add(new DevExpress.XtraEditors.Controls.ImageComboBoxItem("拆出後回收入庫", RecoveryOptionRestockValue, -1));
             cbbRecoveryOption.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
             cbbRecoveryOption.EditValue = RecoveryOptionNoneValue;
+            cbbRecoveryOption.Enabled = false;
             cbbRecoveryOption.EditValueChanged += cbbRecoveryOption_EditValueChanged;
 
             sleAssignedUser = new SearchLookUpEdit();
