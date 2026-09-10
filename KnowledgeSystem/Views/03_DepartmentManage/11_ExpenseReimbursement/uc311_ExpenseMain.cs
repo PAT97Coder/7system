@@ -19,6 +19,7 @@ using DevExpress.XtraTreeList.Columns;
 using DevExpress.XtraTreeList.Data;
 using DevExpress.XtraTreeList.Nodes;
 using DevExpress.XtraTreeList.StyleFormatConditions;
+using ExcelDataReader;
 using KAutoHelper;
 using KnowledgeSystem.Helpers;
 using KnowledgeSystem.Views._00_Generals;
@@ -33,6 +34,7 @@ using Spire.Pdf.Graphics;
 using Spire.Presentation;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -86,11 +88,26 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             public decimal Quantity { get; set; }
         }
 
+        private sealed class FpgFuelImportRow
+        {
+            public int ExcelRow { get; set; }
+            public string DocId { get; set; }
+            public DateTime? FuelDate { get; set; }
+            public string LicensePlate { get; set; }
+            public string FuelFilledBy { get; set; }
+            public int? OdometerReading { get; set; }
+            public string InvoiceDisplay { get; set; }
+            public string Status { get; set; }
+            public bool CanUpdate { get; set; }
+            public dt311_Invoice MatchedInvoice { get; set; }
+        }
+
         public uc311_ExpenseMain()
         {
             InitializeComponent();
             InitializeMenuItems();
             InitializeIcon();
+            InitializeFpgImportButton();
 
             helper = new RefreshHelper(gvData, "Id");
             DevExpress.Utils.AppearanceObject.DefaultMenuFont = new System.Drawing.Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -113,6 +130,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         DXMenuItem itemAddFile;
         DXMenuItem itemViewFuelPhoto;
         DXMenuItem itemAddFuelPhoto;
+        DevExpress.XtraBars.BarButtonItem btnImportFpgFuel;
 
         DXMenuItem CreateMenuItem(string caption, EventHandler clickEvent, SvgImage svgImage)
         {
@@ -135,6 +153,27 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             btnFuelUsageStatistics.ImageOptions.SvgImage = TPSvgimages.Num2;
             btnFillFuelTablePdf.ImageOptions.SvgImage = TPSvgimages.Num3;
             btnFuelUsageStatisticsChart.ImageOptions.SvgImage = TPSvgimages.Num4;
+        }
+
+        private void InitializeFpgImportButton()
+        {
+            btnImportFpgFuel = new DevExpress.XtraBars.BarButtonItem(barManagerTP, "匯入 FPG 加油資料")
+            {
+                Name = "btnImportFpgFuel"
+            };
+            btnImportFpgFuel.ImageOptions.SvgImage = TPSvgimages.UploadFile;
+            btnImportFpgFuel.ImageOptions.SvgImageSize = new Size(32, 32);
+            btnImportFpgFuel.ItemAppearance.Hovered.ForeColor = Color.Blue;
+            btnImportFpgFuel.ItemAppearance.Hovered.Options.UseForeColor = true;
+            btnImportFpgFuel.ItemAppearance.Normal.Font = TPConfigs.fontUI14;
+            btnImportFpgFuel.ItemAppearance.Normal.ForeColor = Color.Black;
+            btnImportFpgFuel.ItemAppearance.Normal.Options.UseFont = true;
+            btnImportFpgFuel.ItemAppearance.Normal.Options.UseForeColor = true;
+            btnImportFpgFuel.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
+            btnImportFpgFuel.ItemClick += btnImportFpgFuel_ItemClick;
+
+            var link = bar2.AddItem(btnImportFpgFuel);
+            link.BeginGroup = true;
         }
 
         private void InitializeMenuItems()
@@ -354,6 +393,458 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             }
 
             LoadData();
+        }
+
+        private void btnImportFpgFuel_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            using (var dialog = new OpenFileDialog())
+            {
+                dialog.Title = "選擇 FPG 加油資料檔案";
+                dialog.Filter = "Excel files (*.xls;*.xlsx)|*.xls;*.xlsx";
+                dialog.Multiselect = false;
+
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                try
+                {
+                    List<FpgFuelImportRow> rows;
+                    using (var handle = SplashScreenManager.ShowOverlayForm(this))
+                    {
+                        rows = BuildFpgFuelImportRows(dialog.FileName);
+                    }
+
+                    if (rows.Count == 0)
+                    {
+                        XtraMessageBox.Show(
+                            "檔案中沒有「加油」資料。",
+                            "FPG 加油資料",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    if (ShowFpgFuelImportPreview(rows) != DialogResult.OK)
+                        return;
+
+                    var updates = rows
+                        .Where(row => row.CanUpdate && row.MatchedInvoice != null)
+                        .Select(row => new dt311_Invoice
+                        {
+                            TransactionID = row.MatchedInvoice.TransactionID,
+                            LicensePlate = row.LicensePlate,
+                            OdometerReading = row.OdometerReading,
+                            FuelFilledBy = row.FuelFilledBy
+                        })
+                        .ToList();
+
+                    string message;
+                    if (!dt311_InvoiceBUS.Instance.UpdateFuelInfoBatch(updates, out message))
+                    {
+                        XtraMessageBox.Show(message, "更新失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    LoadData();
+                    XtraMessageBox.Show(
+                        string.Format("已更新 {0} 筆；略過 {1} 筆。", updates.Count, rows.Count - updates.Count),
+                        "完成",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    XtraMessageBox.Show(
+                        "無法匯入 FPG 檔案：\n" + ex.Message,
+                        "匯入失敗",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private List<FpgFuelImportRow> BuildFpgFuelImportRows(string filePath)
+        {
+            DataTable table = ReadFpgWorksheet(filePath);
+            DataColumn vehicleColumn = FindFpgColumn(table, "車輛", "車牌");
+            DataColumn borrowerColumn = FindFpgColumn(table, "借用人", "使用人");
+            DataColumn departmentColumn = FindFpgColumn(table, "部門", "部門代碼");
+            DataColumn purposeColumn = FindFpgColumn(table, "借用目的", "目的");
+            DataColumn odometerColumn = FindFpgColumn(table, "結束哩程", "結束里程");
+            DataColumn dateColumn = FindFpgColumn(table, "結束時間", "起始時間");
+            DataColumn docIdColumn = FindFpgColumn(table, false, "DocId", "DocID");
+
+            var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
+            var activeUsers = dm_UserBUS.Instance.GetList()
+                .Where(user => user.Status == 0)
+                .ToDictionary(user => user.Id, StringComparer.OrdinalIgnoreCase);
+            var fuelSellerTaxes = new HashSet<string>(
+                dt311_SellerBuyerBUS.Instance.GetList()
+                    .Where(item => string.Equals(item.Type, "xang_dau", StringComparison.OrdinalIgnoreCase))
+                    .Select(item => item.Tax)
+                    .Where(tax => !string.IsNullOrWhiteSpace(tax)),
+                StringComparer.OrdinalIgnoreCase);
+            var scopedInvoices = dt311_InvoiceBUS.Instance.GetListByStartDeptId(idDept2Word)
+                .Where(invoice => !string.IsNullOrWhiteSpace(invoice.SellerTax)
+                    && fuelSellerTaxes.Contains(invoice.SellerTax))
+                .ToList();
+
+            var vehicleGroups = vehicles
+                .Where(vehicle => !string.IsNullOrWhiteSpace(vehicle.LicensePlate))
+                .GroupBy(vehicle => NormalizeLicensePlate(vehicle.LicensePlate), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var result = new List<FpgFuelImportRow>();
+            for (int index = 0; index < table.Rows.Count; index++)
+            {
+                DataRow dataRow = table.Rows[index];
+                string purpose = GetFpgCellText(dataRow, purposeColumn);
+                if (purpose.IndexOf("加油", StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+
+                var row = new FpgFuelImportRow
+                {
+                    ExcelRow = index + 2,
+                    DocId = GetFpgCellText(dataRow, docIdColumn),
+                    FuelDate = ParseFpgDate(dataRow[dateColumn]),
+                    OdometerReading = ParseFpgOdometer(dataRow[odometerColumn]),
+                    FuelFilledBy = ExtractFpgUserId(GetFpgCellText(dataRow, borrowerColumn)),
+                    LicensePlate = GetFpgCellText(dataRow, vehicleColumn)
+                };
+
+                string normalizedPlate = NormalizeLicensePlate(row.LicensePlate);
+                List<dt311_VehicleManagement> matchedVehicles = null;
+                if (string.IsNullOrEmpty(normalizedPlate)
+                    || !vehicleGroups.TryGetValue(normalizedPlate, out matchedVehicles)
+                    || matchedVehicles.Count != 1)
+                {
+                    row.Status = matchedVehicles != null && matchedVehicles.Count > 1
+                        ? "車牌在車輛主檔中重複"
+                        : "車牌未登記";
+                    result.Add(row);
+                    continue;
+                }
+
+                dt311_VehicleManagement vehicle = matchedVehicles[0];
+                row.LicensePlate = vehicle.LicensePlate;
+
+                if (string.IsNullOrWhiteSpace(row.FuelFilledBy) || !activeUsers.ContainsKey(row.FuelFilledBy))
+                {
+                    row.Status = "加油人員不存在或已停用";
+                    result.Add(row);
+                    continue;
+                }
+
+                if (!row.FuelDate.HasValue)
+                {
+                    row.Status = "日期格式不正確";
+                    result.Add(row);
+                    continue;
+                }
+
+                if (!row.OdometerReading.HasValue)
+                {
+                    row.Status = "結束哩程格式不正確";
+                    result.Add(row);
+                    continue;
+                }
+
+                string fpgDepartment = NormalizeDepartment(GetFpgCellText(dataRow, departmentColumn));
+                var candidates = scopedInvoices
+                    .Where(invoice => invoice.IssueDate.HasValue
+                        && invoice.IssueDate.Value.Date == row.FuelDate.Value.Date
+                        && DepartmentsMatch(invoice.IdDept, fpgDepartment))
+                    .ToList();
+
+                dt311_Invoice matchedInvoice = SelectFpgInvoice(candidates, normalizedPlate);
+                if (matchedInvoice == null)
+                {
+                    row.Status = candidates.Count == 0 ? "未找到對應的加油發票" : "找到多筆可能的加油發票";
+                    result.Add(row);
+                    continue;
+                }
+
+                row.MatchedInvoice = matchedInvoice;
+                row.InvoiceDisplay = FormatInvoiceDisplay(matchedInvoice);
+                string conflict = GetFpgConflict(matchedInvoice, row);
+                if (!string.IsNullOrEmpty(conflict))
+                {
+                    row.Status = "資料衝突：" + conflict;
+                    result.Add(row);
+                    continue;
+                }
+
+                bool alreadyUpdated = string.Equals(
+                        NormalizeLicensePlate(matchedInvoice.LicensePlate),
+                        NormalizeLicensePlate(row.LicensePlate),
+                        StringComparison.OrdinalIgnoreCase)
+                    && matchedInvoice.OdometerReading == row.OdometerReading
+                    && string.Equals(matchedInvoice.FuelFilledBy, row.FuelFilledBy, StringComparison.OrdinalIgnoreCase);
+
+                row.CanUpdate = !alreadyUpdated;
+                row.Status = alreadyUpdated ? "已是最新資料" : "待更新";
+                result.Add(row);
+            }
+
+            foreach (var duplicateGroup in result
+                .Where(row => row.CanUpdate && row.MatchedInvoice != null)
+                .GroupBy(row => row.MatchedInvoice.TransactionID)
+                .Where(group => group.Count() > 1))
+            {
+                foreach (FpgFuelImportRow duplicate in duplicateGroup)
+                {
+                    duplicate.CanUpdate = false;
+                    duplicate.Status = "同一發票被多筆 FPG 資料匹配";
+                }
+            }
+
+            return result;
+        }
+
+        private static DataTable ReadFpgWorksheet(string filePath)
+        {
+            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                var dataSet = reader.AsDataSet(new ExcelDataSetConfiguration
+                {
+                    ConfigureDataTable = tableReader => new ExcelDataTableConfiguration
+                    {
+                        UseHeaderRow = true
+                    }
+                });
+
+                DataTable table = dataSet.Tables.Cast<DataTable>()
+                    .FirstOrDefault(item => item.Columns.Cast<DataColumn>()
+                        .Any(column => NormalizeFpgHeader(column.ColumnName) == NormalizeFpgHeader("借用目的")));
+                if (table == null)
+                    throw new InvalidDataException("找不到包含「借用目的」欄位的工作表。");
+
+                return table;
+            }
+        }
+
+        private static DataColumn FindFpgColumn(DataTable table, params string[] aliases)
+        {
+            return FindFpgColumn(table, true, aliases);
+        }
+
+        private static DataColumn FindFpgColumn(DataTable table, bool required, params string[] aliases)
+        {
+            var normalizedAliases = new HashSet<string>(aliases.Select(NormalizeFpgHeader), StringComparer.OrdinalIgnoreCase);
+            DataColumn column = table.Columns.Cast<DataColumn>()
+                .FirstOrDefault(item => normalizedAliases.Contains(NormalizeFpgHeader(item.ColumnName)));
+
+            if (column == null && required)
+                throw new InvalidDataException("缺少必要欄位：「" + string.Join(" / ", aliases) + "」。");
+
+            return column;
+        }
+
+        private static string NormalizeFpgHeader(string value)
+        {
+            return Regex.Replace(value ?? string.Empty, @"[\s\uFEFF]+", string.Empty).Trim();
+        }
+
+        private static string GetFpgCellText(DataRow row, DataColumn column)
+        {
+            if (column == null || row[column] == null || row[column] == DBNull.Value)
+                return string.Empty;
+
+            return Convert.ToString(row[column], CultureInfo.InvariantCulture).Trim();
+        }
+
+        private static DateTime? ParseFpgDate(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return null;
+            if (value is DateTime)
+                return (DateTime)value;
+
+            double serialDate;
+            if (!(value is string)
+                && double.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any,
+                    CultureInfo.InvariantCulture, out serialDate)
+                && serialDate > 0 && serialDate < 2958466)
+            {
+                return DateTime.FromOADate(serialDate);
+            }
+
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture).Trim();
+            string[] formats =
+            {
+                "yyyyMMddHHmmss", "yyyyMMddHHmm", "yyyyMMdd",
+                "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd",
+                "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd"
+            };
+            DateTime parsed;
+            if (DateTime.TryParseExact(text, formats, CultureInfo.InvariantCulture,
+                DateTimeStyles.AllowWhiteSpaces, out parsed))
+                return parsed;
+            if (DateTime.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out parsed))
+                return parsed;
+
+            return null;
+        }
+
+        private static int? ParseFpgOdometer(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return null;
+
+            decimal parsed;
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture).Trim();
+            if (!decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed)
+                || parsed < 0 || parsed > int.MaxValue || decimal.Truncate(parsed) != parsed)
+                return null;
+
+            return decimal.ToInt32(parsed);
+        }
+
+        private static string ExtractFpgUserId(string value)
+        {
+            Match match = Regex.Match(value ?? string.Empty, @"VNW\d{7}", RegexOptions.IgnoreCase);
+            return match.Success ? match.Value.ToUpperInvariant() : string.Empty;
+        }
+
+        private static string NormalizeLicensePlate(string value)
+        {
+            return Regex.Replace((value ?? string.Empty).ToUpperInvariant(), @"[^A-Z0-9]", string.Empty);
+        }
+
+        private static string NormalizeDepartment(string value)
+        {
+            return string.Concat(Regex.Matches(value ?? string.Empty, @"\d")
+                .Cast<Match>()
+                .Select(match => match.Value));
+        }
+
+        private static bool DepartmentsMatch(string invoiceDepartment, string fpgDepartment)
+        {
+            string invoice = NormalizeDepartment(invoiceDepartment);
+            if (string.IsNullOrEmpty(invoice) || string.IsNullOrEmpty(fpgDepartment))
+                return false;
+
+            return invoice.StartsWith(fpgDepartment, StringComparison.OrdinalIgnoreCase)
+                || fpgDepartment.StartsWith(invoice, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static dt311_Invoice SelectFpgInvoice(List<dt311_Invoice> candidates, string normalizedPlate)
+        {
+            var samePlate = candidates
+                .Where(invoice => string.Equals(NormalizeLicensePlate(invoice.LicensePlate), normalizedPlate,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (samePlate.Count == 1)
+                return samePlate[0];
+            if (samePlate.Count > 1)
+                return null;
+
+            var withoutPlate = candidates.Where(invoice => string.IsNullOrWhiteSpace(invoice.LicensePlate)).ToList();
+            if (withoutPlate.Count == 1)
+                return withoutPlate[0];
+
+            return candidates.Count == 1 ? candidates[0] : null;
+        }
+
+        private static string GetFpgConflict(dt311_Invoice invoice, FpgFuelImportRow row)
+        {
+            var conflicts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(invoice.LicensePlate)
+                && !string.Equals(NormalizeLicensePlate(invoice.LicensePlate), NormalizeLicensePlate(row.LicensePlate),
+                    StringComparison.OrdinalIgnoreCase))
+                conflicts.Add("車牌");
+            if (invoice.OdometerReading.HasValue && invoice.OdometerReading != row.OdometerReading)
+                conflicts.Add("哩程");
+            if (!string.IsNullOrWhiteSpace(invoice.FuelFilledBy)
+                && !string.Equals(invoice.FuelFilledBy, row.FuelFilledBy, StringComparison.OrdinalIgnoreCase))
+                conflicts.Add("加油人員");
+
+            return string.Join("、", conflicts);
+        }
+
+        private static string FormatInvoiceDisplay(dt311_Invoice invoice)
+        {
+            if (invoice == null)
+                return string.Empty;
+
+            return string.Format("{0} {1} ({2:yyyy/MM/dd})",
+                invoice.InvoiceCode, invoice.InvoiceNumber, invoice.IssueDate).Trim();
+        }
+
+        private static DialogResult ShowFpgFuelImportPreview(List<FpgFuelImportRow> rows)
+        {
+            using (var form = new XtraForm())
+            using (var grid = new GridControl())
+            using (var view = new GridView())
+            using (var buttonPanel = new FlowLayoutPanel())
+            using (var confirmButton = new SimpleButton())
+            using (var cancelButton = new SimpleButton())
+            using (var summaryLabel = new LabelControl())
+            {
+                int updateCount = rows.Count(row => row.CanUpdate);
+                int skippedCount = rows.Count - updateCount;
+                form.Text = "FPG 加油資料匯入預覽";
+                form.StartPosition = FormStartPosition.CenterParent;
+                form.Size = new Size(1250, 650);
+                form.MinimizeBox = false;
+
+                grid.Dock = DockStyle.Fill;
+                grid.MainView = view;
+                grid.ViewCollection.Add(view);
+                grid.DataSource = rows.Select(row => new
+                {
+                    row.ExcelRow,
+                    row.DocId,
+                    FuelDate = row.FuelDate.HasValue ? row.FuelDate.Value.ToString("yyyy/MM/dd HH:mm") : string.Empty,
+                    row.LicensePlate,
+                    row.FuelFilledBy,
+                    row.OdometerReading,
+                    row.InvoiceDisplay,
+                    row.Status
+                }).ToList();
+
+                view.OptionsBehavior.Editable = false;
+                view.OptionsView.ShowGroupPanel = false;
+                view.OptionsView.ColumnAutoWidth = false;
+                view.Columns.AddVisible("ExcelRow", "Excel 列");
+                view.Columns.AddVisible("DocId", "DocId");
+                view.Columns.AddVisible("FuelDate", "加油日期");
+                view.Columns.AddVisible("LicensePlate", "車牌");
+                view.Columns.AddVisible("FuelFilledBy", "加油人員");
+                view.Columns.AddVisible("OdometerReading", "結束哩程");
+                view.Columns.AddVisible("InvoiceDisplay", "對應發票");
+                view.Columns.AddVisible("Status", "狀態");
+                view.BestFitColumns();
+
+                buttonPanel.Dock = DockStyle.Bottom;
+                buttonPanel.Height = 54;
+                buttonPanel.Padding = new Padding(10);
+                buttonPanel.FlowDirection = FlowDirection.RightToLeft;
+
+                confirmButton.Text = string.Format("更新可匹配資料 ({0})", updateCount);
+                confirmButton.Width = 180;
+                confirmButton.DialogResult = DialogResult.OK;
+                confirmButton.Enabled = updateCount > 0;
+                cancelButton.Text = "取消";
+                cancelButton.Width = 100;
+                cancelButton.DialogResult = DialogResult.Cancel;
+                summaryLabel.Text = string.Format("可更新：{0} 筆；略過：{1} 筆", updateCount, skippedCount);
+                summaryLabel.AutoSizeMode = LabelAutoSizeMode.None;
+                summaryLabel.Width = 300;
+                summaryLabel.Height = 30;
+                summaryLabel.Appearance.TextOptions.VAlignment = VertAlignment.Center;
+
+                buttonPanel.Controls.Add(confirmButton);
+                buttonPanel.Controls.Add(cancelButton);
+                buttonPanel.Controls.Add(summaryLabel);
+                form.Controls.Add(grid);
+                form.Controls.Add(buttonPanel);
+                form.AcceptButton = confirmButton;
+                form.CancelButton = cancelButton;
+
+                return form.ShowDialog();
+            }
         }
 
         private void ItemERP03_Click(object sender, EventArgs e)

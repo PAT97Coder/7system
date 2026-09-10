@@ -235,6 +235,66 @@ namespace BusinessLayer
             }
         }
 
+        public bool UpdateFuelInfoBatch(List<dt311_Invoice> items, out string message)
+        {
+            message = string.Empty;
+            if (items == null || items.Count == 0)
+            {
+                message = "沒有可更新的資料。";
+                return false;
+            }
+
+            try
+            {
+                var distinctItems = items
+                    .Where(item => item != null && !string.IsNullOrWhiteSpace(item.TransactionID))
+                    .GroupBy(item => item.TransactionID)
+                    .Select(group => group.First())
+                    .ToList();
+                if (distinctItems.Count == 0)
+                {
+                    message = "沒有有效的發票資料可更新。";
+                    return false;
+                }
+
+                var transactionIds = distinctItems.Select(item => item.TransactionID).ToList();
+
+                using (var _context = new DBDocumentManagementSystemEntities())
+                using (var transaction = _context.Database.BeginTransaction())
+                {
+                    var invoices = _context.dt311_Invoice
+                        .Where(invoice => transactionIds.Contains(invoice.TransactionID))
+                        .ToList();
+
+                    if (invoices.Count != transactionIds.Count)
+                    {
+                        message = "部分發票已不存在，未更新任何資料。請重新載入後再試。";
+                        transaction.Rollback();
+                        return false;
+                    }
+
+                    var updatesById = distinctItems.ToDictionary(item => item.TransactionID);
+                    foreach (dt311_Invoice invoice in invoices)
+                    {
+                        dt311_Invoice update = updatesById[invoice.TransactionID];
+                        invoice.LicensePlate = update.LicensePlate;
+                        invoice.OdometerReading = update.OdometerReading;
+                        invoice.FuelFilledBy = update.FuelFilledBy;
+                    }
+
+                    _context.SaveChanges();
+                    transaction.Commit();
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                message = "批次更新加油資料失敗：" + ex.Message;
+                return false;
+            }
+        }
+
         public bool RemoveById(string id)
         {
             try
