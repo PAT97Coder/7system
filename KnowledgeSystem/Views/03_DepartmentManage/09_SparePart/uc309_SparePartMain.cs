@@ -92,7 +92,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
         DXMenuItem itemMaterialIn;
         DXMenuItem itemMaterialOut;
         DXMenuItem itemMaterialTransfer;
-        DXMenuItem itemMaterialCheck;
         DXMenuItem itemMaterialGetFromOther;
         DXMenuItem itemDisable;
         DXMenuItem itemEnable;
@@ -257,8 +256,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
             itemMaterialIn = CreateMenuItem("收料", ItemMaterialIn_Click, TPSvgimages.Num1);
             itemMaterialOut = CreateMenuItem("領用", ItemMaterialOut_Click, TPSvgimages.Num2);
             itemMaterialTransfer = CreateMenuItem("轉庫", ItemMaterialTransfer_Click, TPSvgimages.Num3);
-            itemMaterialCheck = CreateMenuItem("盤點", ItemMaterialCheck_Click, TPSvgimages.Num4);
-            itemMaterialGetFromOther = CreateMenuItem("調撥", ItemMaterialGetFromOther_Click, TPSvgimages.Num5);
+            itemMaterialGetFromOther = CreateMenuItem("調撥", ItemMaterialGetFromOther_Click, TPSvgimages.Num4);
 
             itemDisable = CreateMenuItem("停用", ItemDisable_Click, TPSvgimages.Disable);
             itemEnable = CreateMenuItem("啟用", ItemEnable_Click, TPSvgimages.Confirm);
@@ -564,8 +562,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
 
         private void ItemMaterialGetFromOther_Click(object sender, EventArgs e) => HandleMaterialTransaction("調撥");
 
-        private void ItemMaterialCheck_Click(object sender, EventArgs e) => HandleMaterialTransaction("盤點");
-
         private void ItemMaterialTransfer_Click(object sender, EventArgs e) => HandleMaterialTransaction("轉庫");
 
         private void ItemMaterialOut_Click(object sender, EventArgs e) => HandleMaterialTransaction("領用");
@@ -837,7 +833,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._09_SparePart
                     dXSubMenuReports.Items.Add(itemMaterialIn);
                     dXSubMenuReports.Items.Add(itemMaterialOut);
                     dXSubMenuReports.Items.Add(itemMaterialTransfer);
-                    dXSubMenuReports.Items.Add(itemMaterialCheck);
                     dXSubMenuReports.Items.Add(itemMaterialGetFromOther);
                     dXSubMenuReports.BeginGroup = true;
 
