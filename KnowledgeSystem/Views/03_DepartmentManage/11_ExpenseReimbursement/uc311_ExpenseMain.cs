@@ -1083,10 +1083,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             // 🔹 Ghép chuỗi dữ liệu hóa đơn
             var invoiceStrings = selectedInvoices.Select(invoice =>
             {
-                // Lấy dòng đầu tiên trong InvoiceItem (nếu có)
-                var quantity = dt311_InvoiceItemBUS.Instance
-                    .GetListByInvoiceId(invoice.TransactionID)
-                    .FirstOrDefault()?.Quantity ?? 0;
+                // Cộng các dòng hàng; nếu hóa đơn cũ thiếu số lượng thì suy ra từ thành tiền / đơn giá.
+                var quantity = CalculateInvoiceFuelQuantity(
+                    dt311_InvoiceItemBUS.Instance.GetListByInvoiceId(invoice.TransactionID)) ?? 0m;
 
                 string vehicleTypeCode = (vehicle?.FuelType == "xăng/汽") ? "O" : "B";
 
@@ -1368,6 +1367,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                         }
                     }
 
+                    FillMissingInvoiceItemValues(el, item);
+
                     itemsList.Add(item);
                 }
 
@@ -1560,6 +1561,47 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (decimal.TryParse(input.Replace(",", ""), out var num))
                 return num;
             return null;
+        }
+
+        private static void FillMissingInvoiceItemValues(XElement element, dt311_InvoiceItem item)
+        {
+            if (!item.Quantity.HasValue)
+                item.Quantity = ParseDecimal(ExtractFirstLocalValue(element, "SLuong", "SoLuong", "Quantity"));
+            if (!item.UnitPrice.HasValue)
+                item.UnitPrice = ParseDecimal(ExtractFirstLocalValue(element, "DGia", "DonGia", "UnitPrice"));
+            if (!item.Amount.HasValue)
+                item.Amount = ParseDecimal(ExtractFirstLocalValue(element, "ThTien", "ThanhTien", "Amount"));
+
+            if (!item.Quantity.HasValue && item.Amount.HasValue && item.UnitPrice.HasValue && item.UnitPrice.Value > 0m)
+                item.Quantity = decimal.Round(item.Amount.Value / item.UnitPrice.Value, 3, MidpointRounding.AwayFromZero);
+        }
+
+        private static string ExtractFirstLocalValue(XElement element, params string[] localNames)
+        {
+            var names = new HashSet<string>(localNames, StringComparer.OrdinalIgnoreCase);
+            XElement matchedElement = element.DescendantsAndSelf()
+                .FirstOrDefault(item => names.Contains(item.Name.LocalName) && !string.IsNullOrWhiteSpace(item.Value));
+            return matchedElement?.Value?.Trim() ?? string.Empty;
+        }
+
+        private static decimal? CalculateInvoiceFuelQuantity(IEnumerable<dt311_InvoiceItem> invoiceItems)
+        {
+            var items = (invoiceItems ?? Enumerable.Empty<dt311_InvoiceItem>()).ToList();
+            var declaredQuantities = items
+                .Where(item => item.Quantity.HasValue)
+                .Select(item => item.Quantity.Value)
+                .ToList();
+            if (declaredQuantities.Count > 0)
+                return declaredQuantities.Sum();
+
+            var calculatedQuantities = items
+                .Where(item => item.Amount.HasValue && item.UnitPrice.HasValue && item.UnitPrice.Value > 0m)
+                .Select(item => item.Amount.Value / item.UnitPrice.Value)
+                .ToList();
+            if (calculatedQuantities.Count == 0)
+                return null;
+
+            return decimal.Round(calculatedQuantities.Sum(), 3, MidpointRounding.AwayFromZero);
         }
 
         private async void btnAdd_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -1758,7 +1800,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 var invoiceDataExcel = dt311_InvoiceBUS.Instance.GetFuelLogWithPrevious(idDept2Word, start, end);
                 var invoiceItems = dt311_InvoiceItemBUS.Instance.GetList()
                     .GroupBy(r => r.IdInvoice)
-                    .Select(g => g.First())
+                    .Select(g => new
+                    {
+                        IdInvoice = g.Key,
+                        Quantity = CalculateInvoiceFuelQuantity(g)
+                    })
                     .ToList();
                 var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
 
@@ -1836,7 +1882,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
             var invoiceItems = dt311_InvoiceItemBUS.Instance.GetList()
                     .GroupBy(r => r.IdInvoice)
-                    .Select(g => g.First())
+                    .Select(g => new
+                    {
+                        IdInvoice = g.Key,
+                        Quantity = CalculateInvoiceFuelQuantity(g),
+                        FuelName = g.Select(item => item.DisplayName)
+                            .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name))
+                    })
                     .ToList();
 
             var data = (from fuel in fuelDatas
@@ -1853,10 +1905,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                               select new
                               {
                                   Month = dt.fuel.IssueDate?.Month,
-                                  Date = dt.fuel.IssueDate?.ToString("yyyy/MM/dd"),
+                                  Date = dt.fuel.IssueDate,
                                   Invoice = dt.fuel.InvoiceCode + dt.fuel.InvoiceNumber,
                                   Plate = dt.fuel.LicensePlate,
                                   Amount = dt.item.Quantity,
+                                  FuelName = !string.IsNullOrWhiteSpace(dt.item.FuelName)
+                                      ? dt.item.FuelName
+                                      : dt.vehicle.FuelType?.Split('/').FirstOrDefault(),
                                   VehicleType = dt.vehicle.VehicleType.Split('/')[1]
                               }).OrderBy(r => r.Date).ToList();
 
@@ -1880,9 +1935,59 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 {
                     var ws = pck.Workbook.Worksheets[vehicleType];
                     var excelBySheet = dataExcels.Where(r => r.VehicleType == vehicleType).ToList();
-                    ws.Cells["D3"].LoadFromCollection(excelBySheet, false);
-
                     int startRow = 3, endRow = excelBySheet.Count + 2;
+
+                    if (excelBySheet.Count == 0)
+                        continue;
+
+                    for (int row = startRow; row <= endRow; row++)
+                    {
+                        if (row > startRow)
+                        {
+                            ws.Cells[startRow, 1, startRow, 11].Copy(ws.Cells[row, 1, row, 11]);
+                            ws.Row(row).Height = ws.Row(startRow).Height;
+                        }
+
+                        var item = excelBySheet[row - startRow];
+                        ws.Cells[row, 1].Value = TPConfigs.LoginUser.IdDepartment;
+                        ws.Cells[row, 2].Value = row - startRow + 1;
+                        ws.Cells[row, 4].Value = item.Month;
+                        ws.Cells[row, 5].Value = item.Date;
+                        ws.Cells[row, 6].Value = item.Invoice;
+                        ws.Cells[row, 7].Value = item.Plate;
+                        ws.Cells[row, 10].Value = item.FuelName;
+                        ws.Cells[row, 11].Value = item.Amount;
+                    }
+
+                    var reportRange = ws.Cells[startRow, 1, endRow, 11];
+                    reportRange.Style.Font.Name = "Microsoft JhengHei UI";
+                    reportRange.Style.Font.Size = 11;
+                    reportRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    reportRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    reportRange.Style.WrapText = true;
+                    reportRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[startRow, 5, endRow, 5].Style.Numberformat.Format = "yyyy/mm/dd";
+                    ws.Cells[startRow, 11, endRow, 11].Style.Numberformat.Format = "0.###";
+
+                    ws.Column(1).Width = 12;
+                    ws.Column(2).Width = 8;
+                    ws.Column(4).Width = 10;
+                    ws.Column(5).Width = 14;
+                    ws.Column(6).Width = 22;
+                    ws.Column(7).Width = 16;
+                    ws.Column(10).Width = 24;
+                    ws.Column(11).Width = 16;
+                    ws.View.ShowGridLines = false;
+                    ws.View.ZoomScale = 90;
+                    ws.View.FreezePanes(startRow, 1);
+                    ws.PrinterSettings.Orientation = eOrientation.Landscape;
+                    ws.PrinterSettings.FitToPage = true;
+                    ws.PrinterSettings.FitToWidth = 1;
+                    ws.PrinterSettings.FitToHeight = 0;
+                    ws.PrinterSettings.PrintArea = ws.Cells[1, 1, endRow, 11];
 
                     List<int> cols = new List<int>() { 1, 4 };
                     foreach (int col in cols)
@@ -2111,7 +2216,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var quantityByInvoice = fuelInvoices.ToDictionary(
                 r => r.TransactionID,
                 r => invoiceItemsByInvoice.TryGetValue(r.TransactionID, out List<dt311_InvoiceItem> items)
-                    ? items.Sum(item => item.Quantity ?? 0m)
+                    ? CalculateInvoiceFuelQuantity(items) ?? 0m
                     : 0m);
 
             var firstItemNameByInvoice = fuelInvoices.ToDictionary(
@@ -2406,7 +2511,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var quantityByInvoice = fuelInvoices.ToDictionary(
                 r => r.TransactionID,
                 r => invoiceItemsByInvoice.TryGetValue(r.TransactionID, out List<dt311_InvoiceItem> items)
-                    ? items.Sum(item => item.Quantity ?? 0m)
+                    ? CalculateInvoiceFuelQuantity(items) ?? 0m
                     : 0m);
 
             var firstItemNameByInvoice = fuelInvoices.ToDictionary(
