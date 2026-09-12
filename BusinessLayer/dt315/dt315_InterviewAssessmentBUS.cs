@@ -96,6 +96,19 @@ namespace BusinessLayer
         }
     }
 
+    public sealed class Interview315AssignmentOverviewRow
+    {
+        public string ReportId { get; set; }
+        public string CandidateId { get; set; }
+        public string RelativePath { get; set; }
+        public string InterviewerId { get; set; }
+        public long? ScoreId { get; set; }
+        public decimal? Total { get; set; }
+        public DateTime? SubmittedAt { get; set; }
+        public DateTime? ReopenedAt { get; set; }
+        public bool IsSubmitted => ScoreId.HasValue && (!ReopenedAt.HasValue || SubmittedAt > ReopenedAt);
+    }
+
     public class dt315_InterviewAssessmentBUS
     {
         private readonly TPLogger logger;
@@ -210,6 +223,73 @@ namespace BusinessLayer
                 foreach (var candidate in result.Candidates)
                     candidate.SubmittedCount = candidate.Assignments.Count(item => item.IsSubmitted);
                 return result;
+            }
+        }
+
+        public List<Interview315AssignmentOverviewRow> GetAssignmentOverviewRows(IEnumerable<string> reportIds)
+        {
+            var ids = (reportIds ?? Enumerable.Empty<string>()).Distinct().ToList();
+            if (!ids.Any()) return new List<Interview315AssignmentOverviewRow>();
+
+            using (var context = new DBDocumentManagementSystemEntities())
+            {
+                var candidates = context.dt315_InterviewCandidate
+                    .AsNoTracking()
+                    .Where(item => ids.Contains(item.ReportId))
+                    .Select(item => new
+                    {
+                        item.Id,
+                        item.ReportId,
+                        item.CandidateId,
+                        item.RelativePath
+                    })
+                    .ToList();
+                var candidateIds = candidates.Select(item => item.Id).ToList();
+                var assignments = context.dt315_InterviewAssignment
+                    .AsNoTracking()
+                    .Where(item => candidateIds.Contains(item.CandidateProfileId) && item.IsActive)
+                    .SelectMany(
+                        assignment => assignment.dt315_InterviewScore.DefaultIfEmpty(),
+                        (assignment, score) => new
+                        {
+                            assignment.CandidateProfileId,
+                            assignment.InterviewerId,
+                            ScoreId = score == null ? (long?)null : score.Id,
+                            Total = score == null ? (decimal?)null : score.Total,
+                            SubmittedAt = score == null ? (DateTime?)null : score.SubmittedAt,
+                            ReopenedAt = score == null ? (DateTime?)null : score.ReopenedAt
+                        })
+                    .ToList()
+                    .ToLookup(item => item.CandidateProfileId);
+
+                return candidates.SelectMany(candidate =>
+                {
+                    var rows = assignments[candidate.Id].ToList();
+                    if (!rows.Any())
+                    {
+                        return new[]
+                        {
+                            new Interview315AssignmentOverviewRow
+                            {
+                                ReportId = candidate.ReportId,
+                                CandidateId = candidate.CandidateId,
+                                RelativePath = candidate.RelativePath
+                            }
+                        };
+                    }
+
+                    return rows.Select(assignment => new Interview315AssignmentOverviewRow
+                    {
+                        ReportId = candidate.ReportId,
+                        CandidateId = candidate.CandidateId,
+                        RelativePath = candidate.RelativePath,
+                        InterviewerId = assignment.InterviewerId,
+                        ScoreId = assignment.ScoreId,
+                        Total = assignment.Total,
+                        SubmittedAt = assignment.SubmittedAt,
+                        ReopenedAt = assignment.ReopenedAt
+                    });
+                }).ToList();
             }
         }
 

@@ -382,8 +382,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             // 
             // gridColumn15
             // 
-            this.gridColumn15.Caption = "職務名稱";
-            this.gridColumn15.FieldName = "JobCode";
+            this.gridColumn15.Caption = "職務代號／名稱";
+            this.gridColumn15.FieldName = "JobName";
             this.gridColumn15.Name = "gridColumn15";
             this.gridColumn15.Visible = true;
             this.gridColumn15.VisibleIndex = 4;
@@ -478,8 +478,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             // 
             // gridColumn8
             // 
-            this.gridColumn8.Caption = "職務名稱";
-            this.gridColumn8.FieldName = "JobCode";
+            this.gridColumn8.Caption = "職務代號／名稱";
+            this.gridColumn8.FieldName = "JobName";
             this.gridColumn8.Name = "gridColumn8";
             this.gridColumn8.Visible = true;
             this.gridColumn8.VisibleIndex = 4;
