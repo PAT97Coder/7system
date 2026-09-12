@@ -26,7 +26,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             public string Id => User?.Id;
             public string DisplayName => $"{User?.DisplayName} {User?.DisplayNameVN}".Trim();
             public string IdDepartment => User?.IdDepartment;
-            public string JobCode => User?.JobCode;
+            public string JobName { get; set; }
             public bool UsesDefaultInterviewers { get; set; } = true;
             public List<string> InterviewerIds { get; set; } = new List<string>();
             public string OriginalFileName { get; set; }
@@ -47,6 +47,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
         private readonly BindingSource sourceInterviewers = new BindingSource();
         private readonly BindingSource sourceCandidates = new BindingSource();
         private readonly List<dm_User> users = new List<dm_User>();
+        private readonly Dictionary<string, string> actualJobNames = new Dictionary<string, string>();
         private List<dm_User> defaultInterviewers = new List<dm_User>();
         private List<CandidateEditorRow> candidates = new List<CandidateEditorRow>();
         private Interview315ReportDetail loadedReport;
@@ -75,19 +76,22 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
 
         private void InitializeExtraControls()
         {
-            layoutControlGroup1.Text = "預設委員";
-            layoutControlGroup2.Text = "受評人員（右鍵管理 PDF／個別委員）";
             lcDisplayName.Text = "評核名稱";
             gvInterviewee.PopupMenuShowing += CandidatePopupMenuShowing;
             gvInterviewee.DoubleClick += (s, e) => ViewCandidatePdf();
+            gvInterviewer.OptionsDetail.EnableMasterViewMode = false;
+            gvInterviewee.OptionsDetail.EnableMasterViewMode = false;
             gvInterviewee.Columns.AddVisible("PdfStatus", "PDF");
             gvInterviewee.Columns.AddVisible("AssignmentMode", "委員設定");
-            gvInterviewee.Columns.AddVisible("AssignmentText", "委員名單");
         }
 
         private void f315_Interview_Info_Load(object sender, EventArgs e)
         {
             users.AddRange(dm_UserBUS.Instance.GetList());
+            foreach (var job in dm_JobTitleBUS.Instance.GetList())
+            {
+                actualJobNames[job.Id] = job.DisplayName;
+            }
             gcInterviewer.DataSource = sourceInterviewers;
             gcInterviewee.DataSource = sourceCandidates;
             gvInterviewer.ReadOnlyGridView();
@@ -145,10 +149,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
                 user.Id,
                 DisplayName = $"{user.DisplayName} {user.DisplayNameVN}".Trim(),
                 user.IdDepartment,
-                user.JobCode
+                JobName = GetActualJobName(user)
             }).ToList();
             foreach (var candidate in candidates)
             {
+                candidate.JobName = GetActualJobName(candidate.User);
                 var ids = candidate.UsesDefaultInterviewers
                     ? defaultInterviewers.Select(item => item.Id)
                     : candidate.InterviewerIds;
@@ -161,6 +166,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             sourceCandidates.DataSource = candidates.ToList();
             gvInterviewer.BestFitColumns();
             gvInterviewee.BestFitColumns();
+        }
+
+        private string GetActualJobName(dm_User user)
+        {
+            if (user == null || string.IsNullOrWhiteSpace(user.ActualJobCode)) return "";
+            return actualJobNames.TryGetValue(user.ActualJobCode, out var jobName)
+                ? $"{user.ActualJobCode} {jobName}"
+                : user.ActualJobCode;
         }
 
         private List<dm_User> SelectUsers(List<dm_User> selected, bool fullUser)

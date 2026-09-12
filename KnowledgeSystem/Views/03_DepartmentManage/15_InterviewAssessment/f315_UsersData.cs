@@ -47,7 +47,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
                                      job,
                                      dept = department,
                                      DeptName = department == null ? user.IdDepartment : $"{department.Id}\r\n{department.DisplayName}",
-                                     DisplayName = $"{user.DisplayName}\r\n{user.DisplayNameVN}"
+                                     DisplayName = $"{user.DisplayName}\r\n{user.DisplayNameVN}",
+                                     JobName = job == null
+                                         ? user.ActualJobCode
+                                         : $"{user.ActualJobCode} {job.DisplayName}"
                                  }).ToList();
             gvData.BestFitColumns();
         }
