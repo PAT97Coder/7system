@@ -103,6 +103,10 @@ namespace BusinessLayer
         public string RelativePath { get; set; }
         public string InterviewerId { get; set; }
         public long? ScoreId { get; set; }
+        public int? ProfessionalSkill { get; set; }
+        public int? Responsiveness { get; set; }
+        public int? Communication { get; set; }
+        public int? ReportQuality { get; set; }
         public decimal? Total { get; set; }
         public DateTime? SubmittedAt { get; set; }
         public DateTime? ReopenedAt { get; set; }
@@ -255,6 +259,10 @@ namespace BusinessLayer
                             assignment.CandidateProfileId,
                             assignment.InterviewerId,
                             ScoreId = score == null ? (long?)null : score.Id,
+                            ProfessionalSkill = score == null ? (int?)null : score.ProfessionalSkill,
+                            Responsiveness = score == null ? (int?)null : score.Responsiveness,
+                            Communication = score == null ? (int?)null : score.Communication,
+                            ReportQuality = score == null ? (int?)null : score.ReportQuality,
                             Total = score == null ? (decimal?)null : score.Total,
                             SubmittedAt = score == null ? (DateTime?)null : score.SubmittedAt,
                             ReopenedAt = score == null ? (DateTime?)null : score.ReopenedAt
@@ -285,6 +293,10 @@ namespace BusinessLayer
                         RelativePath = candidate.RelativePath,
                         InterviewerId = assignment.InterviewerId,
                         ScoreId = assignment.ScoreId,
+                        ProfessionalSkill = assignment.ProfessionalSkill,
+                        Responsiveness = assignment.Responsiveness,
+                        Communication = assignment.Communication,
+                        ReportQuality = assignment.ReportQuality,
                         Total = assignment.Total,
                         SubmittedAt = assignment.SubmittedAt,
                         ReopenedAt = assignment.ReopenedAt

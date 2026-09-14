@@ -24,7 +24,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             public bool HasPdf { get; set; }
             public string Status { get; set; }
             public decimal? Total { get; set; }
+            public int? ProfessionalSkill { get; set; }
+            public int? Responsiveness { get; set; }
+            public int? Communication { get; set; }
+            public int? ReportQuality { get; set; }
             public long? ScoreId { get; set; }
+            public bool IsSubmitted { get; set; }
             public bool CanReopen { get; set; }
         }
 
@@ -87,6 +92,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             view.Columns.AddVisible(nameof(AssignmentListRow.InterviewerName), "委員");
             view.Columns.AddVisible(nameof(AssignmentListRow.Status), "評分狀態");
             view.Columns.AddVisible(nameof(AssignmentListRow.Total), "總分");
+            view.Columns.AddVisible(nameof(AssignmentListRow.ProfessionalSkill), "專業能力(40%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.Responsiveness), "臨場及應對能力(30%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.Communication), "表達能力(20%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.ReportQuality), "報告文書品質(10%)");
             view.KeyDown -= GridControlHelper.GridViewCopyCellData_KeyDown;
             view.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             view.PopupMenuShowing -= ScorePopupMenuShowing;
@@ -254,7 +263,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
                     ? "未分配委員"
                     : (row.IsSubmitted ? "已提交" : (row.ScoreId.HasValue ? "已解除鎖定" : "待評分")),
                 Total = row.Total,
+                ProfessionalSkill = row.ProfessionalSkill,
+                Responsiveness = row.Responsiveness,
+                Communication = row.Communication,
+                ReportQuality = row.ReportQuality,
                 ScoreId = row.ScoreId,
+                IsSubmitted = row.IsSubmitted,
                 CanReopen = row.IsSubmitted
             };
         }
@@ -297,8 +311,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             if (view == null || info?.Column?.FieldName != nameof(AssignmentListRow.CandidateName)) return;
 
             var candidateName = Convert.ToString(view.GetGroupRowValue(e.RowHandle, info.Column));
-            var interviewerCount = view.GetChildRowCount(e.RowHandle);
-            info.GroupText = $"受評人員: <color=Blue><b>{candidateName}</b></color>《{interviewerCount} 位委員》";
+            var assignmentRows = Enumerable.Range(0, view.GetChildRowCount(e.RowHandle))
+                .Select(index => view.GetRow(view.GetChildRowHandle(e.RowHandle, index)) as AssignmentListRow)
+                .Where(row => row != null && !string.IsNullOrWhiteSpace(row.InterviewerName))
+                .ToList();
+            var interviewerCount = assignmentRows.Count;
+            var pendingCount = assignmentRows.Count(row => !row.IsSubmitted);
+            var pendingText = pendingCount > 0
+                ? $"，<color=Red>{pendingCount} 位未評分</color>"
+                : "";
+            info.GroupText = $"受評人員: <color=Blue><b>{candidateName}</b></color>《{interviewerCount} 位委員{pendingText}》";
         }
     }
 }
