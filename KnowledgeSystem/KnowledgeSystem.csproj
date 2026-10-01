@@ -658,6 +658,25 @@
     <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.Designer.cs">
       <DependentUpon>uc317_ExamStatistics.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\Task318Draft.cs" />
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Description.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Description.Designer.cs">
+      <DependentUpon>f318_Description.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_TaskInfo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_TaskInfo.Designer.cs">
+      <DependentUpon>f318_TaskInfo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\uc318_SharedTaskManagement.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\uc318_SharedTaskManagement.Designer.cs">
+      <DependentUpon>uc318_SharedTaskManagement.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\07_Quiz\uc307_JobTitleSetting.cs">
       <SubType>UserControl</SubType>
     </Compile>

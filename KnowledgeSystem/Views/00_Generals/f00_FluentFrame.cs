@@ -94,6 +94,28 @@ namespace KnowledgeSystem.Views._00_Generals
 
             // 3️ Xây dựng menu Accordion tự động theo cây
             BuildAccordionElements(lsFunctions, fluentControl.Elements, lsPermissions, fontTW14);
+
+#if DEBUG
+            // Giai đoạn dựng giao diện module 318: thêm menu tạm, chưa ghi dm_Function/CSDL.
+            if (groupId == AppPermission.SafetyCertMain &&
+                !lsFunctions.Any(item => item.ControlName == "uc318_SharedTaskManagement"))
+            {
+                var prototypeItem = new AccordionControlElement
+                {
+                    Name = "name_uc318_SharedTaskManagement",
+                    Text = "交辦事項管理",
+                    Style = ElementStyle.Item,
+                    Hint = "交辦事項管理"
+                };
+                prototypeItem.Appearance.Default.Font = fontTW14;
+                prototypeItem.Appearance.Normal.ForeColor =
+                    DevExpress.LookAndFeel.DXSkinColors.ForeColors.Hyperlink;
+                prototypeItem.Appearance.Hovered.ForeColor =
+                    DevExpress.LookAndFeel.DXSkinColors.ForeColors.Critical;
+                prototypeItem.Click += new EventHandler(accordionElement_Click);
+                fluentControl.Elements.Add(prototypeItem);
+            }
+#endif
         }
 
         /// <summary>

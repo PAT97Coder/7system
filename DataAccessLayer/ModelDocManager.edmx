@@ -1654,6 +1654,48 @@
           <Property Name="Total" Type="numeric" Precision="5" Scale="1" Nullable="false" />
           <Property Name="SubmittedAt" Type="datetime2" Precision="0" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt318_TaskAttach">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdCongViec" Type="int" Nullable="false" />
+          <Property Name="IdDinhKem" Type="int" Nullable="false" />
+          <Property Name="LoaiDinhKem" Type="varchar" MaxLength="20" Nullable="false" />
+        </EntityType>
+        <EntityType Name="dt318_Tasks">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="ChuDe" Type="nvarchar" MaxLength="512" Nullable="false" />
+          <Property Name="GiaiThich" Type="nvarchar(max)" Nullable="false" />
+          <Property Name="NgayDenHan" Type="date" Nullable="false" />
+          <Property Name="TrangThai" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="DuongDanThuMucChung" Type="nvarchar" MaxLength="1024" Nullable="false" />
+          <Property Name="DuongDanThuMucCongViec" Type="nvarchar" MaxLength="1024" Nullable="false" />
+          <Property Name="TrangThaiOCR" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="ThongBaoOCR" Type="nvarchar" MaxLength="512" />
+          <Property Name="ThoiGianOCR" Type="datetime" />
+          <Property Name="NgayTao" Type="datetime" Nullable="false" />
+          <Property Name="NguoiTao" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="NgayCapNhat" Type="datetime" />
+          <Property Name="NguoiCapNhat" Type="varchar" MaxLength="10" />
+          <Property Name="NgayXoa" Type="datetime" />
+          <Property Name="NguoiXoa" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt318_TaskUsers">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdCongViec" Type="int" Nullable="false" />
+          <Property Name="IdNguoiDung" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="NgayTao" Type="datetime" Nullable="false" />
+          <Property Name="NguoiTao" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="NgayXoa" Type="datetime" />
+          <Property Name="NguoiXoa" Type="varchar" MaxLength="10" />
+        </EntityType>
         <EntityType Name="dt403_04_HardnessStandardLog">
           <Key>
             <PropertyRef Name="Id" />
@@ -2045,6 +2087,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt315_InterviewReport" EntityType="Self.dt315_InterviewReport" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScore" EntityType="Self.dt315_InterviewScore" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScoreAudit" EntityType="Self.dt315_InterviewScoreAudit" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_TaskAttach" EntityType="Self.dt318_TaskAttach" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_Tasks" EntityType="Self.dt318_Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_TaskUsers" EntityType="Self.dt318_TaskUsers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_HardnessStandardLog" EntityType="Self.dt403_04_HardnessStandardLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_StandardInfo" EntityType="Self.dt403_04_StandardInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_05_Standard" EntityType="Self.dt403_05_Standard" Schema="dbo" store:Type="Tables" />
@@ -2305,6 +2350,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             <End Role="dt315_InterviewScore" EntitySet="dt315_InterviewScore" />
             <End Role="dt315_InterviewScoreAudit" EntitySet="dt315_InterviewScoreAudit" />
           </AssociationSet>
+          <EntitySet Name="dt318_TaskAttach" EntityType="DBDocumentManagementSystemModel.dt318_TaskAttach" />
+          <EntitySet Name="dt318_Tasks" EntityType="DBDocumentManagementSystemModel.dt318_Tasks" />
+          <EntitySet Name="dt318_TaskUsers" EntityType="DBDocumentManagementSystemModel.dt318_TaskUsers" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -4233,6 +4281,48 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="dt318_TaskAttach">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdCongViec" Type="Int32" Nullable="false" />
+          <Property Name="IdDinhKem" Type="Int32" Nullable="false" />
+          <Property Name="LoaiDinhKem" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt318_Tasks">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="ChuDe" Type="String" Nullable="false" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="GiaiThich" Type="String" Nullable="false" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="NgayDenHan" Type="DateTime" Nullable="false" Precision="0" />
+          <Property Name="TrangThai" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="DuongDanThuMucChung" Type="String" Nullable="false" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="DuongDanThuMucCongViec" Type="String" Nullable="false" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="TrangThaiOCR" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="ThongBaoOCR" Type="String" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="ThoiGianOCR" Type="DateTime" Precision="3" />
+          <Property Name="NgayTao" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="NguoiTao" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayCapNhat" Type="DateTime" Precision="3" />
+          <Property Name="NguoiCapNhat" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayXoa" Type="DateTime" Precision="3" />
+          <Property Name="NguoiXoa" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt318_TaskUsers">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdCongViec" Type="Int32" Nullable="false" />
+          <Property Name="IdNguoiDung" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayTao" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="NguoiTao" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayXoa" Type="DateTime" Precision="3" />
+          <Property Name="NguoiXoa" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -6145,6 +6235,51 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="ActorId" ColumnName="ActorId" />
                 <ScalarProperty Name="Action" ColumnName="Action" />
                 <ScalarProperty Name="ScoreId" ColumnName="ScoreId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_TaskAttach">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_TaskAttach">
+              <MappingFragment StoreEntitySet="dt318_TaskAttach">
+                <ScalarProperty Name="LoaiDinhKem" ColumnName="LoaiDinhKem" />
+                <ScalarProperty Name="IdDinhKem" ColumnName="IdDinhKem" />
+                <ScalarProperty Name="IdCongViec" ColumnName="IdCongViec" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_Tasks">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_Tasks">
+              <MappingFragment StoreEntitySet="dt318_Tasks">
+                <ScalarProperty Name="NguoiXoa" ColumnName="NguoiXoa" />
+                <ScalarProperty Name="NgayXoa" ColumnName="NgayXoa" />
+                <ScalarProperty Name="NguoiCapNhat" ColumnName="NguoiCapNhat" />
+                <ScalarProperty Name="NgayCapNhat" ColumnName="NgayCapNhat" />
+                <ScalarProperty Name="NguoiTao" ColumnName="NguoiTao" />
+                <ScalarProperty Name="NgayTao" ColumnName="NgayTao" />
+                <ScalarProperty Name="ThoiGianOCR" ColumnName="ThoiGianOCR" />
+                <ScalarProperty Name="ThongBaoOCR" ColumnName="ThongBaoOCR" />
+                <ScalarProperty Name="TrangThaiOCR" ColumnName="TrangThaiOCR" />
+                <ScalarProperty Name="DuongDanThuMucCongViec" ColumnName="DuongDanThuMucCongViec" />
+                <ScalarProperty Name="DuongDanThuMucChung" ColumnName="DuongDanThuMucChung" />
+                <ScalarProperty Name="TrangThai" ColumnName="TrangThai" />
+                <ScalarProperty Name="NgayDenHan" ColumnName="NgayDenHan" />
+                <ScalarProperty Name="GiaiThich" ColumnName="GiaiThich" />
+                <ScalarProperty Name="ChuDe" ColumnName="ChuDe" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_TaskUsers">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_TaskUsers">
+              <MappingFragment StoreEntitySet="dt318_TaskUsers">
+                <ScalarProperty Name="NguoiXoa" ColumnName="NguoiXoa" />
+                <ScalarProperty Name="NgayXoa" ColumnName="NgayXoa" />
+                <ScalarProperty Name="NguoiTao" ColumnName="NguoiTao" />
+                <ScalarProperty Name="NgayTao" ColumnName="NgayTao" />
+                <ScalarProperty Name="IdNguoiDung" ColumnName="IdNguoiDung" />
+                <ScalarProperty Name="IdCongViec" ColumnName="IdCongViec" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
