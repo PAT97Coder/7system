@@ -239,6 +239,8 @@
     <Compile Include="Helpers\KeyboardHelper.cs" />
     <Compile Include="Helpers\Material309CheckPhotoHelper.cs" />
     <Compile Include="Helpers\Material309Helper.cs" />
+    <Compile Include="Helpers\OxpsParser.cs" />
+    <Compile Include="Helpers\Task318FolderImportService.cs" />
     <Compile Include="Helpers\PCInfoHelper.cs" />
     <Compile Include="Helpers\PdfHelper.cs" />
     <Compile Include="Helpers\RefreshHelper.cs" />
@@ -1835,6 +1837,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\14_ChineseExam\f314_HskExamInfo.resx">
       <DependentUpon>f314_HskExamInfo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_TaskInfo.resx">
+      <DependentUpon>f318_TaskInfo.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\04_SystemAdministrator\02_SystemAdmin\f402_SignInfo.resx">
       <DependentUpon>f402_SignInfo.cs</DependentUpon>

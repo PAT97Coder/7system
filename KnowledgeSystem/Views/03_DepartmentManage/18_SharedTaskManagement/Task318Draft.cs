@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 
 namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
 {
@@ -24,7 +23,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         public string SharedRootPath { get; set; }
         public string TargetFolderPath { get; set; }
         public DateTime CreatedAt { get; set; }
-        public Image SourceImage { get; set; }
+        public string SourceOxpsPath { get; set; }
         public BindingList<Task318Attachment> Attachments { get; } =
             new BindingList<Task318Attachment>();
 

@@ -2,7 +2,6 @@ using DevExpress.XtraEditors;
 using KnowledgeSystem.Helpers;
 using System;
 using System.ComponentModel;
-using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Windows.Forms;
@@ -14,6 +13,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private readonly Task318Draft editingTask;
         private readonly BindingList<Task318Attachment> attachments =
             new BindingList<Task318Attachment>();
+        private string sourceOxpsPath;
 
         public Task318Draft Draft { get; private set; }
 
@@ -33,7 +33,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private void InitializeIcon()
         {
             btnConfirm.ImageOptions.SvgImage = TPSvgimages.Confirm;
-            btnPasteImage.ImageOptions.SvgImage = TPSvgimages.Copy;
+            btnSelectOxps.ImageOptions.SvgImage = TPSvgimages.Copy;
             btnRecognize.ImageOptions.SvgImage = TPSvgimages.Bot;
             btnPasteAttachment.ImageOptions.SvgImage = TPSvgimages.Attach;
             btnAddAttachment.ImageOptions.SvgImage = TPSvgimages.Add;
@@ -62,9 +62,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             gvAttachments.Columns.AddVisible(nameof(Task318Attachment.SizeText), "大小").Width = 100;
             gvAttachments.Columns.AddVisible(nameof(Task318Attachment.SourcePath), "來源路徑").Width = 450;
 
-            picSource.Properties.NullText = "請按 Ctrl+V 或點選「貼上圖片」";
-            picSource.Properties.SizeMode = DevExpress.XtraEditors.Controls.PictureSizeMode.Squeeze;
-            lblOcrStatus.Text = "辨識狀態：尚未辨識";
+            lblReadStatus.Text = "讀取狀態：尚未讀取";
         }
 
         private void LoadTask(Task318Draft task)
@@ -82,8 +80,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             dtDueDate.DateTime = task.DueDate;
             cbAssignee.Text = task.Assignee;
             txbSharedRoot.Text = task.SharedRootPath;
-            if (task.SourceImage != null)
-                picSource.Image = new Bitmap(task.SourceImage);
+            if (!string.IsNullOrWhiteSpace(task.SourceOxpsPath))
+                LoadOxpsFile(task.SourceOxpsPath, false);
 
             foreach (var attachment in task.Attachments)
                 attachments.Add(new Task318Attachment
@@ -97,28 +95,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             UpdateTargetFolderPreview();
         }
 
-        private void btnPasteImage_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        private void btnSelectOxps_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            PasteImageFromClipboard();
+            SelectOxpsFile();
         }
 
         private void btnRecognize_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            if (picSource.Image == null)
-            {
-                XtraMessageBox.Show("請先貼上工作截圖。", TPConfigs.SoftNameTW,
-                    MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-
-            // Giai đoạn giao diện: giữ điểm nối OCR tại đây, chưa gửi ảnh ra dịch vụ ngoài.
-            lblOcrStatus.Text = "辨識狀態：介面已準備，尚未連接OCR服務";
-            XtraMessageBox.Show(
-                "圖片已接收。OCR服務將在下一階段接入；目前請手動確認主旨與說明。",
-                TPConfigs.SoftNameTW,
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
-            txbSubject.Focus();
+            if (string.IsNullOrWhiteSpace(sourceOxpsPath))
+                SelectOxpsFile();
+            else
+                ReadOxpsContent();
         }
 
         private void btnPasteAttachment_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -159,9 +146,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             task.SharedRootPath = txbSharedRoot.Text.Trim();
             task.TargetFolderPath = txbTargetFolder.Text.Trim();
 
-            if (task.SourceImage != null)
-                task.SourceImage.Dispose();
-            task.SourceImage = picSource.Image == null ? null : new Bitmap(picSource.Image);
+            task.SourceOxpsPath = sourceOxpsPath;
             task.ReplaceAttachments(attachments.Select(item => new Task318Attachment
             {
                 FileName = item.FileName,
@@ -177,9 +162,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
 
         private bool ValidateData()
         {
-            if (picSource.Image == null)
+            if (string.IsNullOrWhiteSpace(sourceOxpsPath) || !File.Exists(sourceOxpsPath))
             {
-                XtraMessageBox.Show("請貼上包含主旨與說明的圖片。", TPConfigs.SoftNameTW,
+                XtraMessageBox.Show("請選擇包含主旨與說明的 OXPS 檔案。", TPConfigs.SoftNameTW,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -209,19 +194,93 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             return true;
         }
 
-        private void PasteImageFromClipboard()
+        private void SelectOxpsFile()
         {
-            if (!Clipboard.ContainsImage())
+            using (var dialog = new OpenFileDialog
             {
-                XtraMessageBox.Show("剪貼簿中沒有圖片。", TPConfigs.SoftNameTW,
+                Title = "選擇 OXPS 檔案",
+                Filter = "OXPS File (*.oxps)|*.oxps",
+                CheckFileExists = true,
+                Multiselect = false
+            })
+            {
+                if (dialog.ShowDialog(this) != DialogResult.OK) return;
+                LoadOxpsFile(dialog.FileName, true);
+            }
+        }
+
+        private void PasteOxpsFromClipboard()
+        {
+            if (!Clipboard.ContainsFileDropList())
+            {
+                XtraMessageBox.Show("剪貼簿中沒有 OXPS 檔案。", TPConfigs.SoftNameTW,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            var clipboardImage = Clipboard.GetImage();
-            if (clipboardImage == null) return;
-            picSource.Image = new Bitmap(clipboardImage);
-            lblOcrStatus.Text = "辨識狀態：圖片已貼上，等待辨識";
+            string path = Clipboard.GetFileDropList()
+                .Cast<string>()
+                .FirstOrDefault(IsOxpsFile);
+            if (path == null)
+            {
+                XtraMessageBox.Show("剪貼簿中沒有 OXPS 檔案。", TPConfigs.SoftNameTW,
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            LoadOxpsFile(path, true);
+        }
+
+        private void LoadOxpsFile(string path, bool readContent)
+        {
+            if (!IsOxpsFile(path))
+            {
+                XtraMessageBox.Show("只支援 OXPS 檔案。", TPConfigs.SoftNameTW,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            sourceOxpsPath = Path.GetFullPath(path);
+            txbOxpsSource.Text = sourceOxpsPath;
+
+            if (readContent)
+                ReadOxpsContent();
+            else
+                lblReadStatus.Text = "讀取狀態：已載入 OXPS";
+        }
+
+        private void ReadOxpsContent()
+        {
+            if (string.IsNullOrWhiteSpace(sourceOxpsPath) || !File.Exists(sourceOxpsPath))
+            {
+                XtraMessageBox.Show("請先選擇 OXPS 檔案。", TPConfigs.SoftNameTW,
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            try
+            {
+                UseWaitCursor = true;
+                lblReadStatus.Text = "讀取狀態：正在讀取 OXPS...";
+                var result = OxpsParser.ReadSubjectAndDescription(sourceOxpsPath);
+
+                txbSubject.Text = result.Subject;
+                memDescription.Text = result.Description;
+                if (result.DueDate.HasValue)
+                    dtDueDate.DateTime = result.DueDate.Value;
+                lblReadStatus.Text = "讀取狀態：讀取完成";
+                txbSubject.Focus();
+            }
+            catch (Exception ex)
+            {
+                lblReadStatus.Text = "讀取狀態：讀取失敗";
+                XtraMessageBox.Show(ex.Message, TPConfigs.SoftNameTW,
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            finally
+            {
+                UseWaitCursor = false;
+            }
         }
 
         private void PasteAttachmentsFromClipboard()
@@ -308,31 +367,36 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         {
             if (!e.Control || e.KeyCode != Keys.V) return;
 
-            if (Clipboard.ContainsImage())
-                PasteImageFromClipboard();
-            else if (Clipboard.ContainsFileDropList())
-                PasteAttachmentsFromClipboard();
+            if (Clipboard.ContainsFileDropList())
+            {
+                var paths = Clipboard.GetFileDropList().Cast<string>().ToList();
+                if (paths.Any(IsOxpsFile))
+                    PasteOxpsFromClipboard();
+                else
+                    AddAttachmentFiles(paths);
+            }
 
             e.Handled = true;
             e.SuppressKeyPress = true;
         }
 
-        private void picSource_DragEnter(object sender, DragEventArgs e)
+        private void txbOxpsSource_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            SelectOxpsFile();
+        }
+
+        private void txbOxpsSource_DragEnter(object sender, DragEventArgs e)
+        {
+            var files = e.Data.GetData(DataFormats.FileDrop) as string[];
+            if (files != null && files.Any(IsOxpsFile))
                 e.Effect = DragDropEffects.Copy;
         }
 
-        private void picSource_DragDrop(object sender, DragEventArgs e)
+        private void txbOxpsSource_DragDrop(object sender, DragEventArgs e)
         {
             var files = e.Data.GetData(DataFormats.FileDrop) as string[];
-            string imagePath = files?.FirstOrDefault(path =>
-                File.Exists(path) && IsImageFile(path));
-            if (imagePath == null) return;
-
-            using (var image = Image.FromFile(imagePath))
-                picSource.Image = new Bitmap(image);
-            lblOcrStatus.Text = "辨識狀態：圖片已載入，等待辨識";
+            string oxpsPath = files?.FirstOrDefault(IsOxpsFile);
+            if (oxpsPath != null) LoadOxpsFile(oxpsPath, true);
         }
 
         private void gcAttachments_DragEnter(object sender, DragEventArgs e)
@@ -347,11 +411,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             if (files != null) AddAttachmentFiles(files);
         }
 
-        private static bool IsImageFile(string path)
+        private static bool IsOxpsFile(string path)
         {
-            string extension = Path.GetExtension(path);
-            return new[] { ".png", ".jpg", ".jpeg", ".bmp", ".gif" }
-                .Contains(extension, StringComparer.OrdinalIgnoreCase);
+            return File.Exists(path)
+                && string.Equals(Path.GetExtension(path), ".oxps", StringComparison.OrdinalIgnoreCase);
         }
     }
 }

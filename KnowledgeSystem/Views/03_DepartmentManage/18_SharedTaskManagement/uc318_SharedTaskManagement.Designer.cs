@@ -14,7 +14,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         {
             this.components = new System.ComponentModel.Container();
             this.barManagerTP = new DevExpress.XtraBars.BarManager(this.components);
-            this.barMain = new DevExpress.XtraBars.Bar();
+            this.bar2 = new DevExpress.XtraBars.Bar();
             this.btnAdd = new DevExpress.XtraBars.BarButtonItem();
             this.btnReload = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
@@ -23,14 +23,24 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
             this.gcData = new DevExpress.XtraGrid.GridControl();
             this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.gColDueDate = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gColSubject = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gColAssignee = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvData)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
+            this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             this.SuspendLayout();
             //
             // barManagerTP
             //
-            this.barManagerTP.Bars.AddRange(new DevExpress.XtraBars.Bar[] { this.barMain });
+            this.barManagerTP.Bars.AddRange(new DevExpress.XtraBars.Bar[] { this.bar2 });
             this.barManagerTP.DockControls.Add(this.barDockControlTop);
             this.barManagerTP.DockControls.Add(this.barDockControlBottom);
             this.barManagerTP.DockControls.Add(this.barDockControlLeft);
@@ -38,23 +48,38 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.barManagerTP.Form = this;
             this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
                 this.btnAdd, this.btnReload });
-            this.barManagerTP.MainMenu = this.barMain;
+            this.barManagerTP.MainMenu = this.bar2;
             this.barManagerTP.MaxItemId = 2;
             //
-            // barMain
+            // bar2
             //
-            this.barMain.BarAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.barMain.BarAppearance.Normal.Options.UseFont = true;
-            this.barMain.BarName = "Main menu";
-            this.barMain.DockCol = 0;
-            this.barMain.DockRow = 0;
-            this.barMain.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
-            this.barMain.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.bar2.BarAppearance.Disabled.Options.UseFont = true;
+            this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
+            this.bar2.BarAppearance.Hovered.Options.UseFont = true;
+            this.bar2.BarAppearance.Hovered.Options.UseForeColor = true;
+            this.bar2.BarAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.bar2.BarAppearance.Normal.ForeColor = System.Drawing.Color.Black;
+            this.bar2.BarAppearance.Normal.Options.UseFont = true;
+            this.bar2.BarAppearance.Normal.Options.UseForeColor = true;
+            this.bar2.BarAppearance.Pressed.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.bar2.BarAppearance.Pressed.ForeColor = System.Drawing.Color.Black;
+            this.bar2.BarAppearance.Pressed.Options.UseFont = true;
+            this.bar2.BarAppearance.Pressed.Options.UseForeColor = true;
+            this.bar2.BarName = "Main menu";
+            this.bar2.CanDockStyle = DevExpress.XtraBars.BarCanDockStyle.Top;
+            this.bar2.DockCol = 0;
+            this.bar2.DockRow = 0;
+            this.bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
+            this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
                 new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnAdd, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
                 new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph) });
-            this.barMain.OptionsBar.AllowQuickCustomization = false;
-            this.barMain.OptionsBar.DrawDragBorder = false;
-            this.barMain.OptionsBar.UseWholeRow = true;
+            this.bar2.OptionsBar.AllowQuickCustomization = false;
+            this.bar2.OptionsBar.DrawDragBorder = false;
+            this.bar2.OptionsBar.MultiLine = true;
+            this.bar2.OptionsBar.UseWholeRow = true;
+            this.bar2.Text = "Main menu";
             //
             // btnAdd
             //
@@ -90,47 +115,125 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             //
             // gcData
             //
-            this.gcData.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.gcData.Location = new System.Drawing.Point(0, 49);
+            this.gcData.EmbeddedNavigator.Buttons.Append.Visible = false;
+            this.gcData.EmbeddedNavigator.Buttons.CancelEdit.Visible = false;
+            this.gcData.EmbeddedNavigator.Buttons.Edit.Visible = false;
+            this.gcData.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
+            this.gcData.EmbeddedNavigator.Buttons.Remove.Visible = false;
+            this.gcData.Location = new System.Drawing.Point(12, 12);
             this.gcData.MainView = this.gvData;
             this.gcData.Name = "gcData";
-            this.gcData.Size = new System.Drawing.Size(1100, 651);
-            this.gcData.TabIndex = 4;
+            this.gcData.Size = new System.Drawing.Size(1076, 627);
+            this.gcData.TabIndex = 6;
+            this.gcData.UseEmbeddedNavigator = true;
             this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] { this.gvData });
             //
             // gvData
             //
             this.gvData.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.gvData.Appearance.HeaderPanel.ForeColor = DevExpress.LookAndFeel.DXSkinColors.ForeColors.Question;
+            this.gvData.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
             this.gvData.Appearance.HeaderPanel.Options.UseFont = true;
             this.gvData.Appearance.HeaderPanel.Options.UseForeColor = true;
+            this.gvData.Appearance.HeaderPanel.Options.UseTextOptions = true;
+            this.gvData.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gvData.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            this.gvData.Appearance.Row.ForeColor = System.Drawing.Color.Black;
             this.gvData.Appearance.Row.Options.UseFont = true;
+            this.gvData.Appearance.Row.Options.UseForeColor = true;
+            this.gvData.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
+            this.gColDueDate,
+            this.gColSubject,
+            this.gColAssignee});
             this.gvData.GridControl = this.gcData;
             this.gvData.Name = "gvData";
+            this.gvData.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
+            this.gvData.OptionsView.ColumnAutoWidth = false;
+            this.gvData.OptionsView.EnableAppearanceOddRow = true;
+            this.gvData.OptionsView.ShowAutoFilterRow = true;
+            this.gvData.OptionsView.ShowGroupPanel = false;
             this.gvData.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvData_PopupMenuShowing);
-            this.gvData.DoubleClick += new System.EventHandler(this.gvData_DoubleClick);
+            //
+            // gColDueDate
+            //
+            this.gColDueDate.Caption = "到期日";
+            this.gColDueDate.FieldName = "DueDate";
+            this.gColDueDate.Name = "gColDueDate";
+            this.gColDueDate.Visible = true;
+            this.gColDueDate.VisibleIndex = 0;
+            this.gColDueDate.Width = 140;
+            //
+            // gColSubject
+            //
+            this.gColSubject.Caption = "主旨";
+            this.gColSubject.FieldName = "Subject";
+            this.gColSubject.Name = "gColSubject";
+            this.gColSubject.Visible = true;
+            this.gColSubject.VisibleIndex = 1;
+            this.gColSubject.Width = 700;
+            //
+            // gColAssignee
+            //
+            this.gColAssignee.Caption = "負責人";
+            this.gColAssignee.FieldName = "Assignee";
+            this.gColAssignee.Name = "gColAssignee";
+            this.gColAssignee.Visible = true;
+            this.gColAssignee.VisibleIndex = 2;
+            this.gColAssignee.Width = 180;
+            //
+            // layoutControl1
+            //
+            this.layoutControl1.Controls.Add(this.gcData);
+            this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.layoutControl1.Location = new System.Drawing.Point(0, 49);
+            this.layoutControl1.Name = "layoutControl1";
+            this.layoutControl1.Root = this.Root;
+            this.layoutControl1.Size = new System.Drawing.Size(1100, 651);
+            this.layoutControl1.TabIndex = 8;
+            this.layoutControl1.Text = "layoutControl1";
+            //
+            // Root
+            //
+            this.Root.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
+            this.Root.GroupBordersVisible = false;
+            this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.layoutControlItem1 });
+            this.Root.Name = "Root";
+            this.Root.Size = new System.Drawing.Size(1100, 651);
+            this.Root.TextVisible = false;
+            //
+            // layoutControlItem1
+            //
+            this.layoutControlItem1.Control = this.gcData;
+            this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
+            this.layoutControlItem1.Name = "layoutControlItem1";
+            this.layoutControlItem1.Size = new System.Drawing.Size(1080, 631);
+            this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
+            this.layoutControlItem1.TextVisible = false;
             //
             // uc318_SharedTaskManagement
             //
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.Controls.Add(this.gcData);
+            this.Controls.Add(this.layoutControl1);
             this.Controls.Add(this.barDockControlLeft);
             this.Controls.Add(this.barDockControlRight);
             this.Controls.Add(this.barDockControlBottom);
             this.Controls.Add(this.barDockControlTop);
             this.Name = "uc318_SharedTaskManagement";
             this.Size = new System.Drawing.Size(1100, 700);
+            this.Load += new System.EventHandler(this.uc318_SharedTaskManagement_Load);
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gvData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
+            this.layoutControl1.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
         }
 
         private DevExpress.XtraBars.BarManager barManagerTP;
-        private DevExpress.XtraBars.Bar barMain;
+        private DevExpress.XtraBars.Bar bar2;
         private DevExpress.XtraBars.BarButtonItem btnAdd;
         private DevExpress.XtraBars.BarButtonItem btnReload;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
@@ -139,5 +242,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private DevExpress.XtraBars.BarDockControl barDockControlRight;
         private DevExpress.XtraGrid.GridControl gcData;
         private DevExpress.XtraGrid.Views.Grid.GridView gvData;
+        private DevExpress.XtraGrid.Columns.GridColumn gColDueDate;
+        private DevExpress.XtraGrid.Columns.GridColumn gColSubject;
+        private DevExpress.XtraGrid.Columns.GridColumn gColAssignee;
+        private DevExpress.XtraLayout.LayoutControl layoutControl1;
+        private DevExpress.XtraLayout.LayoutControlGroup Root;
+        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;
     }
 }

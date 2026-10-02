@@ -30,5 +30,7 @@ namespace DataAccessLayer
         public string NguoiCapNhat { get; set; }
         public Nullable<System.DateTime> NgayXoa { get; set; }
         public string NguoiXoa { get; set; }
+        public string DuongDanThuMucNguon { get; set; }
+        public string MaNguon { get; set; }
     }
 }
