@@ -144,7 +144,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             btnRefresh.ImageOptions.SvgImage = TPSvgimages.Reload;
             btnExportExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
             btnExportReportExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
-            btnManageDeptHeadcount.ImageOptions.SvgImage = TPSvgimages.Dept;
         }
 
         private void InitializeControl()
@@ -307,14 +306,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             Process.Start(filePath);
         }
 
-        private void btnManageDeptHeadcount_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            using (var form = new DepartmentHeadcountManageForm())
-            {
-                form.ShowDialog(this);
-            }
-        }
-
         private bool TryPromptMonthRange(out DateTime startMonth, out DateTime endMonth)
         {
             startMonth = default(DateTime);
@@ -387,16 +378,28 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 summaryDepartments = GetDepartmentsForExport(allDepts).Where(r => !string.IsNullOrWhiteSpace(r.Id)).OrderBy(r => r.Id).ToList();
             }
 
+            var sheet2Departments = summaryDepartments
+                .Where(r => r.IsActive != false)
+                .ToList();
+            var activeDepartmentIds = new HashSet<string>(
+                GetDepartmentsForExport(allDepts)
+                    .Where(r => r.IsActive != false && !string.IsNullOrWhiteSpace(r.Id))
+                    .Select(r => r.Id),
+                StringComparer.OrdinalIgnoreCase);
+            var sheet2DepartmentPrefixes = sheet2Departments.Select(r => r.Id).ToList();
+            var sheet2Users = scopedUsers
+                .Where(r => activeDepartmentIds.Contains(r.IdDepartment ?? "")
+                    && sheet2DepartmentPrefixes.Any(prefix => (r.IdDepartment ?? "").StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
             string divisionPrefix = GetDivisionPrefix();
-            string divisionName = allDepts.FirstOrDefault(r => string.Equals(r.Id, divisionPrefix, StringComparison.OrdinalIgnoreCase))?.DisplayName
-                                  ?? TPConfigs.LoginUser.IdDepartment
-                                  ?? "公司";
+            string divisionName = "LG";
 
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using (var package = new ExcelPackage())
             {
                 BuildSheet1(package.Workbook.Worksheets.Add("個人資料明細表"), divisionName, scopedUsers, allJobs, allDepts);
-                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, summaryDepartments, scopedUsers);
+                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, sheet2Departments, sheet2Users);
                 BuildSheet3(package.Workbook.Worksheets.Add("每月人數統計表"), divisionName, summaryDepartments, scopedUsers, startMonth, endMonth);
 
                 package.SaveAs(new FileInfo(filePath));
