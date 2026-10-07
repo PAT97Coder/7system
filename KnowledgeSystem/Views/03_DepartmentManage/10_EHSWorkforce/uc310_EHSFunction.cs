@@ -263,18 +263,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             using (var handle = SplashScreenManager.ShowOverlayForm(treeFunctions))
             {
                 // ── 1. Chuẩn bị dữ liệu ──────────────────────────────────────────────
-                List<dm_Departments> GetAncestors(dm_Departments dept)
+                string GetDepartmentName(string deptId)
                 {
-                    var ancestors = new List<dm_Departments>();
-                    var current = dept;
-                    while (current != null && current.IdParent != -1 && current.IdParent != null)
-                    {
-                        var parent = depts.FirstOrDefault(r => r.IdChild == current.IdParent);
-                        if (parent == null) break;
-                        ancestors.Insert(0, parent);
-                        current = parent;
-                    }
-                    return ancestors;
+                    return depts.FirstOrDefault(r => r.Id == deptId)?.DisplayName ?? "";
                 }
 
                 var exportRows = EHSFuncs
@@ -282,30 +273,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                     {
                         var funcObj = funcs.FirstOrDefault(r => r.Id == org.FunctionId);
                         var userObj = users.FirstOrDefault(r => r.Id == org.EmployeeId);
-                        var deptObj = depts.FirstOrDefault(r => r.Id == org.DeptId);
+                        var employeeDeptId = userObj?.IdDepartment?.Trim() ?? "";
+                        var divisionId = employeeDeptId.Length >= 1 ? employeeDeptId.Substring(0, 1) : "";
+                        var plantId = employeeDeptId.Length >= 2 ? employeeDeptId.Substring(0, 2) : "";
+                        var sectionId = employeeDeptId.Length >= 4 ? employeeDeptId.Substring(0, 4) : "";
 
-                        var ancestors = deptObj != null ? GetAncestors(deptObj) : new List<dm_Departments>();
-
-                        int deptLen = org.DeptId?.Length ?? 0;
-                        string colDiv   = "";
-                        string colPlant = "";
-                        string colSect  = "";
-
-                        if (deptLen <= 1)
-                        {
-                            colDiv = deptObj?.DisplayName ?? "";
-                        }
-                        else if (deptLen == 2)
-                        {
-                            colDiv   = ancestors.Count >= 1 ? ancestors[0].DisplayName : "";
-                            colPlant = deptObj?.DisplayName ?? "";
-                        }
-                        else
-                        {
-                            colDiv   = ancestors.Count >= 1 ? ancestors[0].DisplayName : "";
-                            colPlant = ancestors.Count >= 2 ? ancestors[1].DisplayName : "";
-                            colSect  = deptObj?.DisplayName ?? "";
-                        }
+                        string colDiv = GetDepartmentName(divisionId);
+                        string colPlant = GetDepartmentName(plantId);
+                        string colSect = GetDepartmentName(sectionId);
 
                         var jobTitle = jobTitles.FirstOrDefault(j => j.Id == userObj?.JobCode);
 
@@ -314,7 +289,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                             事業部 = colDiv,
                             廠處   = colPlant,
                             課組   = colSect,
-                            部門代號 = org.DeptId,
+                            部門代號 = employeeDeptId,
                             人員代號 = userObj?.Id ?? "",
                             人員名稱 = userObj?.DisplayName ?? "",
                             類別   = funcObj?.DisplayName ?? "",    // chức năng EHS
