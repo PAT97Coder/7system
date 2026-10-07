@@ -36,12 +36,13 @@
             this.btnExcel = new DevExpress.XtraEditors.SimpleButton();
             this.txbToDate = new DevExpress.XtraEditors.DateEdit();
             this.label1 = new System.Windows.Forms.Label();
-            this.gcData = new DevExpress.XtraGrid.GridControl();
-            this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gColType = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColAchieve = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColTarget = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColRemark = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gcData = new DevExpress.XtraTreeList.TreeList();
+            this.gColType = new DevExpress.XtraTreeList.Columns.TreeListColumn();
+            this.gColAchieve = new DevExpress.XtraTreeList.Columns.TreeListColumn();
+            this.gColTarget = new DevExpress.XtraTreeList.Columns.TreeListColumn();
+            this.gColProgress = new DevExpress.XtraTreeList.Columns.TreeListColumn();
+            this.repositoryProgress = new DevExpress.XtraEditors.Repository.RepositoryItemProgressBar();
+            this.gColRemark = new DevExpress.XtraTreeList.Columns.TreeListColumn();
             this.txbFromDate = new DevExpress.XtraEditors.DateEdit();
             this.cbbGrade = new DevExpress.XtraEditors.GridLookUpEdit();
             this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
@@ -63,7 +64,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.txbToDate.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbToDate.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gvData)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryProgress)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbFromDate.Properties.CalendarTimeProperties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbFromDate.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbbGrade.Properties)).BeginInit();
@@ -213,38 +214,34 @@
             // 
             // gcData
             // 
-            this.gcData.Location = new System.Drawing.Point(12, 112);
-            this.gcData.MainView = this.gvData;
-            this.gcData.Name = "gcData";
-            this.gcData.Size = new System.Drawing.Size(1232, 423);
-            this.gcData.TabIndex = 4;
-            this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
-            this.gvData});
-            // 
-            // gvData
-            // 
-            this.gvData.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.gvData.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
-            this.gvData.Appearance.HeaderPanel.Options.UseFont = true;
-            this.gvData.Appearance.HeaderPanel.Options.UseForeColor = true;
-            this.gvData.Appearance.HeaderPanel.Options.UseTextOptions = true;
-            this.gvData.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gvData.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gvData.Appearance.Row.ForeColor = System.Drawing.Color.Black;
-            this.gvData.Appearance.Row.Options.UseFont = true;
-            this.gvData.Appearance.Row.Options.UseForeColor = true;
-            this.gvData.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
+            this.gcData.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.gcData.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            this.gcData.Appearance.HeaderPanel.Options.UseFont = true;
+            this.gcData.Appearance.HeaderPanel.Options.UseForeColor = true;
+            this.gcData.Appearance.HeaderPanel.Options.UseTextOptions = true;
+            this.gcData.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gcData.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            this.gcData.Appearance.Row.ForeColor = System.Drawing.Color.Black;
+            this.gcData.Appearance.Row.Options.UseFont = true;
+            this.gcData.Appearance.Row.Options.UseForeColor = true;
+            this.gcData.Columns.AddRange(new DevExpress.XtraTreeList.Columns.TreeListColumn[] {
             this.gColType,
             this.gColAchieve,
             this.gColTarget,
+            this.gColProgress,
             this.gColRemark});
-            this.gvData.GridControl = this.gcData;
-            this.gvData.Name = "gvData";
-            this.gvData.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
-            this.gvData.OptionsView.EnableAppearanceOddRow = true;
-            this.gvData.OptionsView.ShowAutoFilterRow = true;
-            this.gvData.OptionsView.ShowGroupPanel = false;
-            this.gvData.CustomDrawRowIndicator += new DevExpress.XtraGrid.Views.Grid.RowIndicatorCustomDrawEventHandler(this.gvData_CustomDrawRowIndicator);
+            this.gcData.ColumnPanelRowHeight = 38;
+            this.gcData.Location = new System.Drawing.Point(12, 112);
+            this.gcData.Name = "gcData";
+            this.gcData.OptionsBehavior.Editable = false;
+            this.gcData.OptionsView.AutoWidth = true;
+            this.gcData.OptionsView.EnableAppearanceOddRow = true;
+            this.gcData.OptionsView.ShowIndicator = false;
+            this.gcData.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
+            this.repositoryProgress});
+            this.gcData.RowHeight = 32;
+            this.gcData.Size = new System.Drawing.Size(1232, 423);
+            this.gcData.TabIndex = 4;
             // 
             // gColType
             // 
@@ -263,6 +260,8 @@
             // gColAchieve
             // 
             this.gColAchieve.AppearanceCell.Options.UseTextOptions = true;
+            this.gColAchieve.AppearanceCell.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Bold);
+            this.gColAchieve.AppearanceCell.Options.UseFont = true;
             this.gColAchieve.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gColAchieve.Caption = "已上傳次數";
             this.gColAchieve.FieldName = "Achieve";
@@ -276,26 +275,51 @@
             // gColTarget
             // 
             this.gColTarget.AppearanceCell.Options.UseTextOptions = true;
+            this.gColTarget.AppearanceCell.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Bold);
+            this.gColTarget.AppearanceCell.Options.UseFont = true;
             this.gColTarget.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gColTarget.Caption = "應上傳次數";
             this.gColTarget.FieldName = "Target";
             this.gColTarget.MaxWidth = 200;
             this.gColTarget.Name = "gColTarget";
+            this.gColTarget.OptionsColumn.AllowEdit = false;
             this.gColTarget.Visible = true;
             this.gColTarget.VisibleIndex = 2;
-            this.gColTarget.Width = 200;
+            this.gColTarget.Width = 160;
+            // 
+            // gColProgress
+            // 
+            this.gColProgress.Caption = "完成進度";
+            this.gColProgress.ColumnEdit = this.repositoryProgress;
+            this.gColProgress.FieldName = "Progress";
+            this.gColProgress.Name = "gColProgress";
+            this.gColProgress.OptionsColumn.AllowEdit = false;
+            this.gColProgress.Visible = true;
+            this.gColProgress.VisibleIndex = 3;
+            this.gColProgress.Width = 220;
+            // 
+            // repositoryProgress
+            // 
+            this.repositoryProgress.EndColor = System.Drawing.Color.FromArgb(((int)(((byte)(73)))), ((int)(((byte)(144)))), ((int)(((byte)(226)))));
+            this.repositoryProgress.Name = "repositoryProgress";
+            this.repositoryProgress.PercentView = true;
+            this.repositoryProgress.ProgressViewStyle = DevExpress.XtraEditors.Controls.ProgressViewStyle.Solid;
+            this.repositoryProgress.ShowTitle = true;
+            this.repositoryProgress.StartColor = System.Drawing.Color.FromArgb(((int)(((byte)(93)))), ((int)(((byte)(166)))), ((int)(((byte)(238)))));
             // 
             // gColRemark
             // 
-            this.gColRemark.Caption = "備註";
+            this.gColRemark.AppearanceCell.Options.UseTextOptions = true;
+            this.gColRemark.AppearanceCell.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Bold);
+            this.gColRemark.AppearanceCell.Options.UseFont = true;
+            this.gColRemark.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gColRemark.Caption = "狀態";
             this.gColRemark.FieldName = "Remark";
             this.gColRemark.Name = "gColRemark";
             this.gColRemark.OptionsColumn.AllowEdit = false;
-            this.gColRemark.ShowUnboundExpressionMenu = true;
-            this.gColRemark.UnboundDataType = typeof(string);
             this.gColRemark.Visible = true;
-            this.gColRemark.VisibleIndex = 3;
-            this.gColRemark.Width = 309;
+            this.gColRemark.VisibleIndex = 4;
+            this.gColRemark.Width = 160;
             // 
             // txbFromDate
             // 
@@ -329,7 +353,7 @@
             // 
             this.cbbGrade.Location = new System.Drawing.Point(332, 50);
             this.cbbGrade.Name = "cbbGrade";
-            this.cbbGrade.Properties.AdvancedModeOptions.Label = "組/處/課別";
+            this.cbbGrade.Properties.AdvancedModeOptions.Label = "部門篩選";
             this.cbbGrade.Properties.AdvancedModeOptions.LabelAppearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             this.cbbGrade.Properties.AdvancedModeOptions.LabelAppearance.ForeColor = System.Drawing.Color.Black;
             this.cbbGrade.Properties.AdvancedModeOptions.LabelAppearance.Options.UseFont = true;
@@ -377,7 +401,7 @@
             // gridColumn1
             // 
             this.gridColumn1.Caption = "代號";
-            this.gridColumn1.FieldName = "Id";
+            this.gridColumn1.FieldName = "Code";
             this.gridColumn1.Name = "gridColumn1";
             this.gridColumn1.Visible = true;
             this.gridColumn1.VisibleIndex = 0;
@@ -535,7 +559,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.txbToDate.Properties.CalendarTimeProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbToDate.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.gcData)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gvData)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.repositoryProgress)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbFromDate.Properties.CalendarTimeProperties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbFromDate.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbbGrade.Properties)).EndInit();
@@ -559,12 +583,13 @@
 
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private System.Windows.Forms.Label label1;
-        private DevExpress.XtraGrid.GridControl gcData;
-        private DevExpress.XtraGrid.Views.Grid.GridView gvData;
-        private DevExpress.XtraGrid.Columns.GridColumn gColType;
-        private DevExpress.XtraGrid.Columns.GridColumn gColAchieve;
-        private DevExpress.XtraGrid.Columns.GridColumn gColTarget;
-        private DevExpress.XtraGrid.Columns.GridColumn gColRemark;
+        private DevExpress.XtraTreeList.TreeList gcData;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn gColType;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn gColAchieve;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn gColTarget;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn gColProgress;
+        private DevExpress.XtraEditors.Repository.RepositoryItemProgressBar repositoryProgress;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn gColRemark;
         private DevExpress.XtraLayout.LayoutControlGroup Root;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem2;

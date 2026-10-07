@@ -65,7 +65,6 @@
             this.btnRefresh = new DevExpress.XtraBars.BarButtonItem();
             this.btnExportExcel = new DevExpress.XtraBars.BarButtonItem();
             this.btnExportReportExcel = new DevExpress.XtraBars.BarButtonItem();
-            this.btnManageDeptHeadcount = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
@@ -408,8 +407,7 @@
             this.btnCreate,
             this.btnRefresh,
             this.btnExportExcel,
-            this.btnExportReportExcel,
-            this.btnManageDeptHeadcount});
+            this.btnExportReportExcel});
             this.barManager1.MainMenu = this.bar2;
             this.barManager1.MaxItemId = 6;
             // 
@@ -435,8 +433,7 @@
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnCreate, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(this.btnRefresh, true),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportReportExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnManageDeptHeadcount, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportReportExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawBorder = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
@@ -478,14 +475,6 @@
             this.btnExportReportExcel.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnExportReportExcel.Name = "btnExportReportExcel";
             this.btnExportReportExcel.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExportReportExcel_ItemClick);
-            // 
-            // btnManageDeptHeadcount
-            // 
-            this.btnManageDeptHeadcount.Caption = "管理編制";
-            this.btnManageDeptHeadcount.Id = 4;
-            this.btnManageDeptHeadcount.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnManageDeptHeadcount.Name = "btnManageDeptHeadcount";
-            this.btnManageDeptHeadcount.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnManageDeptHeadcount_ItemClick);
             // 
             // barDockControlTop
             // 
@@ -591,6 +580,5 @@
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn20;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn19;
         private DevExpress.XtraBars.BarButtonItem btnExportReportExcel;
-        private DevExpress.XtraBars.BarButtonItem btnManageDeptHeadcount;
     }
 }

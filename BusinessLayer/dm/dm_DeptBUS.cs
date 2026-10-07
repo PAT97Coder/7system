@@ -40,6 +40,22 @@ namespace BusinessLayer
             }
         }
 
+        public List<dm_Departments> GetActiveList()
+        {
+            try
+            {
+                using (var _context = new DBDocumentManagementSystemEntities())
+                {
+                    return _context.dm_Departments.Where(r => r.IsActive != false).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                throw;
+            }
+        }
+
         public List<dm_Departments> GetListByParent(string idDept)
         {
             try
@@ -48,6 +64,25 @@ namespace BusinessLayer
                 {
                     return _context.dm_Departments.Where(d => d.IdParent == _context.dm_Departments
                                       .Where(p => p.Id == idDept)
+                                      .Select(p => p.IdChild)
+                                      .FirstOrDefault()).ToList();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                throw;
+            }
+        }
+
+        public List<dm_Departments> GetActiveListByParent(string idDept)
+        {
+            try
+            {
+                using (var _context = new DBDocumentManagementSystemEntities())
+                {
+                    return _context.dm_Departments.Where(d => d.IsActive != false && d.IdParent == _context.dm_Departments
+                                      .Where(p => p.Id == idDept && p.IsActive != false)
                                       .Select(p => p.IdChild)
                                       .FirstOrDefault()).ToList();
                 }
@@ -102,6 +137,46 @@ namespace BusinessLayer
             }
         }
 
+        public List<dm_Departments> GetActiveAllChildren(int idChildDept)
+        {
+            try
+            {
+                using (var _context = new DBDocumentManagementSystemEntities())
+                {
+                    var result = new List<dm_Departments>();
+
+                    void CollectChildren(int parentId)
+                    {
+                        var children = _context.dm_Departments
+                                               .Where(d => d.IsActive != false && d.IdParent == parentId)
+                                               .ToList();
+
+                        foreach (var child in children)
+                        {
+                            result.Add(child);
+                            if (child.IdChild != null)
+                                CollectChildren((int)child.IdChild);
+                        }
+                    }
+
+                    var root = _context.dm_Departments
+                                       .FirstOrDefault(d => d.IsActive != false && d.IdChild == idChildDept);
+                    if (root != null)
+                    {
+                        result.Add(root);
+                        CollectChildren(idChildDept);
+                    }
+
+                    return result;
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                throw;
+            }
+        }
+
 
         public dm_Departments GetItemById(string _idDept)
         {
@@ -119,6 +194,22 @@ namespace BusinessLayer
             }
         }
 
+        public dm_Departments GetActiveItemById(string _idDept)
+        {
+            try
+            {
+                using (var _context = new DBDocumentManagementSystemEntities())
+                {
+                    return _context.dm_Departments.FirstOrDefault(r => r.Id == _idDept && r.IsActive != false);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                throw;
+            }
+        }
+
         public dm_Departments GetItemByParentId(int _idParent)
         {
             try
@@ -126,6 +217,22 @@ namespace BusinessLayer
                 using (var _context = new DBDocumentManagementSystemEntities())
                 {
                     return _context.dm_Departments.FirstOrDefault(r => r.IdParent == _idParent);
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.Error(MethodBase.GetCurrentMethod().ReflectedType.Name, ex.ToString());
+                throw;
+            }
+        }
+
+        public dm_Departments GetActiveItemByParentId(int _idParent)
+        {
+            try
+            {
+                using (var _context = new DBDocumentManagementSystemEntities())
+                {
+                    return _context.dm_Departments.FirstOrDefault(r => r.IdParent == _idParent && r.IsActive != false);
                 }
             }
             catch (Exception ex)
