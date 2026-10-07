@@ -263,9 +263,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             using (var handle = SplashScreenManager.ShowOverlayForm(treeFunctions))
             {
                 // ── 1. Chuẩn bị dữ liệu ──────────────────────────────────────────────
+                var exportDepts = dm_DeptBUS.Instance.GetActiveAllChildren(0);
+
                 string GetDepartmentName(string deptId)
                 {
-                    return depts.FirstOrDefault(r => r.Id == deptId)?.DisplayName ?? "";
+                    return exportDepts.FirstOrDefault(r => r.Id == deptId)?.DisplayName ?? "";
                 }
 
                 var exportRows = EHSFuncs
