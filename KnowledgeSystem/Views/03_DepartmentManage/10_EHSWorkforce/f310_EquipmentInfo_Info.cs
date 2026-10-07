@@ -156,7 +156,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void LoadLookupData(string currentDeptId = null)
         {
-            var depts = dm_DeptBUS.Instance.GetAllChildren(0)
+            var depts = dm_DeptBUS.Instance.GetActiveAllChildren(0)
                 .Where(r => r.IsGroup != true)
                 .OrderBy(r => r.Id)
                 .Select(r => new

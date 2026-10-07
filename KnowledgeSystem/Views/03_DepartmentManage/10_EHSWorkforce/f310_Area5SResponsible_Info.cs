@@ -276,7 +276,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             itemcbbEmp.DisplayMember = "DisplayName";
             itemcbbEmp.ValueMember = "Id";
 
-            var depts = dm_DeptBUS.Instance.GetAllChildren(0).Where(r => r.IsGroup != true).Select(r => r.Id).ToList();
+            var depts = dm_DeptBUS.Instance.GetActiveAllChildren(0).Where(r => r.IsGroup != true).Select(r => r.Id).ToList();
             itemcbbDept.Items.AddRange(depts);
 
             //var funcs = dt310_FunctionBUS.Instance.GetList();
