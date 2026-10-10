@@ -95,7 +95,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
             roles = dt310_RoleBUS.Instance.GetList();
             updateLeaveUsers = dt310_UpdateLeaveUserBUS.Instance.GetList();
-            depts = dm_DeptBUS.Instance.GetAllChildren(0).Where(r => r.IsGroup != true && !TPConfigs.ExclusionDept310.Split(';').Contains(r.Id)).ToList();
+            depts = dm_DeptBUS.Instance.GetActiveAllChildren(0).Where(r => r.IsGroup != true && !TPConfigs.ExclusionDept310.Split(';').Contains(r.Id)).ToList();
             users = dm_UserBUS.Instance.GetList();
 
             var currentUserGroups = dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id);

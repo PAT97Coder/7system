@@ -99,7 +99,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void ItemRemoveItem_Click(object sender, EventArgs e)
         {
-            if (!isEHSAdmin)
+            if (!CanEditResponsibilities())
             {
                 return;
             }
@@ -264,7 +264,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 item.Text = $"<color=#000000>{item.Text}</color>";
             }
 
-            var usrs = dm_UserBUS.Instance.GetList().Where(r => r.Status == 0)
+            var usrs = dm_UserBUS.Instance.GetList().Where(r => r.Status == 0 || r.Status == 2)
                 .Select(r => new
                 {
                     DisplayName = $"LG{r.IdDepartment}/{r.DisplayName}",
@@ -276,7 +276,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             itemcbbEmp.DisplayMember = "DisplayName";
             itemcbbEmp.ValueMember = "Id";
 
-            var depts = dm_DeptBUS.Instance.GetAllChildren(0).Where(r => r.IsGroup != true).Select(r => r.Id).ToList();
+            var depts = dm_DeptBUS.Instance.GetActiveAllChildren(0).Where(r => r.IsGroup != true).Select(r => r.Id).ToList();
             itemcbbDept.Items.AddRange(depts);
 
             //var funcs = dt310_FunctionBUS.Instance.GetList();
@@ -652,7 +652,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void gvData_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
-            if (!isEHSAdmin)
+            if (!CanEditResponsibilities())
             {
                 return;
             }
@@ -684,6 +684,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 //    e.Menu.Items.Add(itemUpdateAddFuel);
                 //}
             }
+        }
+
+        private bool CanEditResponsibilities()
+        {
+            return isEHSAdmin
+                && eventInfo == EventFormInfo.Update
+                && !isEditorInfo;
         }
 
         private void pic5SArea_Paint(object sender, PaintEventArgs e)

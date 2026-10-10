@@ -123,8 +123,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             roles = dt310_RoleBUS.Instance.GetList();
             unitEHSOrgs = dt310_UnitEHSOrgBUS.Instance.GetList();
-            //depts = dm_DeptBUS.Instance.GetList();
-            depts = dm_DeptBUS.Instance.GetAllChildren(0).Where(r => r.IsGroup != true && !TPConfigs.ExclusionDept310.Split(';').Contains(r.Id)).ToList();
+            depts = dm_DeptBUS.Instance.GetActiveAllChildren(0).Where(r => r.IsGroup != true && !TPConfigs.ExclusionDept310.Split(';').Contains(r.Id)).ToList();
             users = dm_UserBUS.Instance.GetList();
             jobTitles = dm_JobTitleBUS.Instance.GetList();
 
@@ -301,57 +300,26 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             using (var handle = SplashScreenManager.ShowOverlayForm(treeFunctions))
             {
                 // ── 1. Chuẩn bị dữ liệu ──────────────────────────────────────────────
-                // Hàm lấy tổ tiên của dept (từ root đến dept cha trực tiếp)
-                List<dm_Departments> GetAncestors(dm_Departments dept)
+                var exportDepts = dm_DeptBUS.Instance.GetActiveAllChildren(0);
+
+                string GetDepartmentName(string deptId)
                 {
-                    var ancestors = new List<dm_Departments>();
-                    var current = dept;
-                    while (current != null && current.IdParent != -1 && current.IdParent != null)
-                    {
-                        var parent = depts.FirstOrDefault(r => r.IdChild == current.IdParent);
-                        if (parent == null) break;
-                        ancestors.Insert(0, parent);
-                        current = parent;
-                    }
-                    return ancestors;
+                    return exportDepts.FirstOrDefault(r => r.Id == deptId)?.DisplayName ?? "";
                 }
 
-                // Lấy tên dept theo cấp dựa vào số ký tự của DeptId:
-                //   1 ký tự → tên dept vào 事業部, 廠處 & 課組 trống
-                //   2 ký tự → tên dept vào 廠處, 事業部 = cha, 課組 trống
-                //   4 ký tự → tên dept vào 課組, 廠處 = cha, 事業部 = ông
                 var exportRows = unitEHSOrgs
                     .Select(org =>
                     {
                         var roleObj = roles.FirstOrDefault(r => r.Id == org.RoleId);
                         var userObj = users.FirstOrDefault(r => r.Id == org.EmployeeId);
-                        var deptObj = depts.FirstOrDefault(r => r.Id == org.DeptId);
+                        var employeeDeptId = userObj?.IdDepartment?.Trim() ?? "";
+                        var divisionId = employeeDeptId.Length >= 1 ? employeeDeptId.Substring(0, 1) : "";
+                        var plantId = employeeDeptId.Length >= 2 ? employeeDeptId.Substring(0, 2) : "";
+                        var sectionId = employeeDeptId.Length >= 4 ? employeeDeptId.Substring(0, 4) : "";
 
-                        var ancestors = deptObj != null ? GetAncestors(deptObj) : new List<dm_Departments>();
-
-                        int deptLen = org.DeptId?.Length ?? 0;
-                        string colDiv   = ""; // 事業部
-                        string colPlant = ""; // 廠處
-                        string colSect  = ""; // 課組
-
-                        if (deptLen <= 1)
-                        {
-                            // 1 ký tự: chỉ điền vào 事業部
-                            colDiv = deptObj?.DisplayName ?? "";
-                        }
-                        else if (deptLen == 2)
-                        {
-                            // 2 ký tự: cha → 事業部, self → 廠處
-                            colDiv   = ancestors.Count >= 1 ? ancestors[0].DisplayName : "";
-                            colPlant = deptObj?.DisplayName ?? "";
-                        }
-                        else
-                        {
-                            // 4 ký tự: ông → 事業部, cha → 廠處, self → 課組
-                            colDiv   = ancestors.Count >= 1 ? ancestors[0].DisplayName : "";
-                            colPlant = ancestors.Count >= 2 ? ancestors[1].DisplayName : "";
-                            colSect  = deptObj?.DisplayName ?? "";
-                        }
+                        string colDiv = GetDepartmentName(divisionId);
+                        string colPlant = GetDepartmentName(plantId);
+                        string colSect = GetDepartmentName(sectionId);
 
                         // 備註: chức vụ thực tế của nhân viên từ dmJob
                         var jobTitle = jobTitles.FirstOrDefault(j => j.Id == userObj?.JobCode);
@@ -361,7 +329,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                             事業部 = colDiv,
                             廠處   = colPlant,
                             課組   = colSect,
-                            部門代號 = org.DeptId,
+                            部門代號 = employeeDeptId,
                             人員代號 = userObj?.Id ?? "",
                             人員名稱 = userObj?.DisplayName ?? "",
                             職務名稱 = roleObj?.DisplayName ?? "",

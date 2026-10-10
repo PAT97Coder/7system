@@ -143,7 +143,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             area5S = dt310_Area5SBUS.Instance.GetList();
             areaResps = dt310_Area5SResponsibleBUS.Instance.GetList();
-            depts = dm_DeptBUS.Instance.GetList();
+            depts = dm_DeptBUS.Instance.GetActiveList();
             users = dm_UserBUS.Instance.GetList();
 
             source5sArea.DataSource = area5S;
