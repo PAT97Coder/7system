@@ -113,9 +113,9 @@
             this.lbVersion.BackColor = System.Drawing.Color.Transparent;
             this.lbVersion.Font = new System.Drawing.Font("Times New Roman", 14.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Italic))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.lbVersion.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(244)))), ((int)(((byte)(244)))));
-            this.lbVersion.Location = new System.Drawing.Point(302, 86);
+            this.lbVersion.Location = new System.Drawing.Point(205, 86);
             this.lbVersion.Name = "lbVersion";
-            this.lbVersion.Size = new System.Drawing.Size(153, 24);
+            this.lbVersion.Size = new System.Drawing.Size(250, 24);
             this.lbVersion.TabIndex = 2;
             this.lbVersion.Text = "Version: 0.0.0";
             this.lbVersion.TextAlign = System.Drawing.ContentAlignment.MiddleRight;

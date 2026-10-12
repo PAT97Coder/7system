@@ -9,6 +9,8 @@ Nhấp đúp `Build-Installer.bat` ở thư mục gốc, hoặc chạy:
 
 Script dùng project Advanced Installer hiện có tại `SetupDocumentSystem/SetupDocumentSystem.aip`, build `KnowledgeSystem` và các thư viện ở `Release | x64` vào `Installer/Staging`, rồi đóng gói thành `SetupDocumentSystem.exe`. Output riêng tránh lỗi khóa file khi ứng dụng đang chạy từ thư mục bin. Tên file cố định, không thêm hậu tố version hoặc DEV. Build tiếp theo ghi đè file bộ cài cùng tên.
 
+Script chuyển cả đường dẫn output của `BusinessLayer`, `DataAccessLayer` và `Logger` sang staging. Nếu project installer còn tham chiếu thư mục `bin/Debug`, script dừng để tránh đóng gói DLL Debug vào bộ cài Release. Kết nối DB hiện lấy từ `DataAccessLayer.SingleConnection`: bản Release dùng `.103`, Debug dùng `.153`; giá trị trong `App.config` không quyết định kết nối của context này.
+
 Mặc định file nằm tại `E:\01. DEV\01.7System\04. Setup files\SetupDocumentSystem.exe`. Có thể đổi thư mục bằng `-OutputDirectory 'D:\Setup'`.
 
 Version ứng dụng có dạng `yy.MM.dd.index`, tính theo ngày Việt Nam. Ngày mới bắt đầu index 1, build tiếp trong ngày tăng index. Có thể chỉ định `-BuildIndex 5` nếu index này lớn hơn lần trước. Trạng thái lưu trong `Installer/version.json` sau khi build thành công; version cũng được đồng bộ vào `AssemblyInfo.cs` và project installer.

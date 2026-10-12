@@ -112,7 +112,7 @@ try {
     }
     if (Test-Path -LiteralPath $stagingFullPath) { Remove-Item -LiteralPath $stagingFullPath -Recurse -Force }
     New-Item -ItemType Directory -Path $stagingFullPath -Force | Out-Null
-    Invoke-NativeTool $msbuild @($applicationProject, '/t:Rebuild', '/p:Configuration=Release', '/p:Platform=x64', "/p:OutDir=$stagingFullPath/", '/nologo', '/v:minimal')
+    Invoke-NativeTool $msbuild @($applicationProject, '/t:Rebuild', '/p:Configuration=Release', '/p:Platform=x64', '/p:BuildProjectReferences=true', "/p:OutDir=$stagingFullPath/", '/nologo', '/v:minimal')
     $applicationExe = Join-Path $releaseOutput 'KnowledgeSystem.exe'
     if (-not (Test-Path -LiteralPath $applicationExe)) { throw "Thiếu output: $applicationExe" }
     if ([Diagnostics.FileVersionInfo]::GetVersionInfo($applicationExe).FileVersion -ne $version) {
@@ -127,6 +127,19 @@ try {
     [IO.File]::WriteAllText($temporaryProject, $aipContent, $utf8Bom)
     # Project cũ có cả Emgu x86; bản Release x64 chỉ sinh runtime x64.
     $aipDocument = [xml]$aipContent
+    # Các thư viện project có thể trỏ thẳng tới BusinessLayer/DataAccessLayer/bin/Debug.
+    # OutDir đã gom toàn bộ output Release vào staging, nên chuyển cả các đường dẫn này.
+    foreach ($row in $aipDocument.SelectNodes('//ROW[starts-with(@Property,"AI_PROPPATH_DIR_PERBUILD_")]')) {
+        $sourceDirectory = $row.GetAttribute('Value')
+        if ($sourceDirectory -match '^\.\.\\[^\\]+\\bin\\(?:x64\\)?(?:Debug|Release)(?<suffix>\\.*)?$') {
+            $row.SetAttribute('Value', '..\Installer\Staging' + $Matches['suffix'])
+        }
+    }
+    $remainingDebugDirectories = @($aipDocument.SelectNodes('//ROW[starts-with(@Property,"AI_PROPPATH_DIR_PERBUILD_")]') |
+        Where-Object { $_.GetAttribute('Value') -match '\\bin\\(?:x64\\)?Debug(?:\\|$)' })
+    if ($remainingDebugDirectories.Count -gt 0) {
+        throw 'Project installer vẫn tham chiếu output Debug; dừng để tránh đóng gói nhầm thư viện.'
+    }
     $x86Files = @($aipDocument.SelectNodes('//ROW[starts-with(@Property,"AI_PROPPATH_DIR_PERBUILD_")]') |
         Where-Object { $_.GetAttribute('Value').EndsWith('\x86') } |
         ForEach-Object { $_.GetAttribute('Property').Substring('AI_PROPPATH_DIR_PERBUILD_'.Length) })
