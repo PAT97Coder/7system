@@ -11,6 +11,9 @@
 *.sln.docstates
 
 # Advanced Install
+/Installer/Staging/
+/tmp/installer-validation/
+/tmp/version-check/
 */SetupDocumentSystem-cache
 *.cab
 SetupDocumentSystem/
