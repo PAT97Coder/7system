@@ -299,6 +299,7 @@
     <Compile Include="dt307_Questions.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt308_ReportContact.cs" />
     <Compile Include="dt308_CheckDetail.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>

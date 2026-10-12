@@ -146,6 +146,7 @@
     <Compile Include="dt315\dt315_InterviewAssessmentBUS.cs" />
     <Compile Include="dt317\dt317_ExamStatisticsBUS.cs" />
     <Compile Include="dt308\dt308_CheckDetailBUS.cs" />
+    <Compile Include="dt308\dt308_ReportContactBUS.cs" />
     <Compile Include="dt308\dt308_CheckSessionBUS.cs" />
     <Compile Include="dt308\dt308_DiseaseBUS.cs" />
     <Compile Include="dt308\dt308_SpecialUsrCheckBUS.cs" />
