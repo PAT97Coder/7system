@@ -662,6 +662,66 @@ namespace KnowledgeSystem.Views._00_Generals
             currentSign = null;
         }
 
+        static PointF GetDisplayedPagePoint(PdfPoint point, PdfPage page)
+        {
+            double width = page.CropBox.Width;
+            double height = page.CropBox.Height;
+            switch ((page.Rotate % 360 + 360) % 360)
+            {
+                case 90:
+                    return new PointF((float)point.Y, (float)point.X);
+                case 180:
+                    return new PointF((float)(width - point.X), (float)point.Y);
+                case 270:
+                    return new PointF((float)(height - point.Y), (float)(width - point.X));
+                default:
+                    return new PointF((float)point.X, (float)(height - point.Y));
+            }
+        }
+
+        void DrawSignToPage(PdfDocumentProcessor processor, PdfPage page, GraphicsCoordinates sign)
+        {
+            using (PdfGraphics graph = processor.CreateGraphics())
+            {
+                // Lay out the image and date in the displayed page orientation.
+                PointF p1 = GetDisplayedPagePoint(sign.Point1, page);
+                PointF p2 = GetDisplayedPagePoint(sign.Point2, page);
+                RectangleF bounds = RectangleF.FromLTRB(Math.Min(p1.X, p2.X), Math.Min(p1.Y, p2.Y),
+                    Math.Max(p1.X, p2.X), Math.Max(p1.Y, p2.Y));
+
+                // Map displayed coordinates back to the unrotated graphics system.
+                switch ((page.Rotate % 360 + 360) % 360)
+                {
+                    case 90:
+                        graph.TranslateTransform(0, (float)page.CropBox.Height);
+                        graph.RotateTransform(-90);
+                        break;
+                    case 180:
+                        graph.TranslateTransform((float)page.CropBox.Width, (float)page.CropBox.Height);
+                        graph.RotateTransform(180);
+                        break;
+                    case 270:
+                        graph.TranslateTransform((float)page.CropBox.Width, 0);
+                        graph.RotateTransform(90);
+                        break;
+                }
+
+                SizeF dateSize = graph.MeasureString(sign.Descrip, font);
+                float dateHeight = string.IsNullOrWhiteSpace(sign.Descrip) ? 0 : dateSize.Height * 0.7f;
+                RectangleF imageBounds = bounds;
+                imageBounds.Height -= dateHeight;
+                graph.DrawImage(sign.ImageSign, imageBounds);
+
+                if (!string.IsNullOrWhiteSpace(sign.Descrip))
+                {
+                    PointF datePoint = new PointF(bounds.Right - dateSize.Width * 0.75f, bounds.Bottom - dateHeight);
+                    using (SolidBrush brush = new SolidBrush(Color.Black))
+                        graph.DrawString(sign.Descrip, font, brush, datePoint);
+                }
+                graph.AddToPageForeground(page, 72, 72);
+            }
+        }
+
         private void SaveDrawingAndReload()
         {
             string fileName = pdfViewer.DocumentFilePath;
@@ -682,49 +742,7 @@ namespace KnowledgeSystem.Views._00_Generals
                     processor.LoadDocument(fileName);
                     foreach (var rect in signs)
                     {
-                        // Create a PdfGraphics object
-                        using (PdfGraphics graph = processor.CreateGraphics())
-                        {
-                            PdfPage page = processor.Document.Pages[rect.PageIndex];
-                            PdfRectangle pageCropBox = page.CropBox;
-                            PdfPoint p1 = new PdfPoint(rect.Point1.X, pageCropBox.Height - rect.Point1.Y);
-                            PdfPoint p2 = new PdfPoint(rect.Point2.X, pageCropBox.Height - rect.Point2.Y);
-
-                            var image = rect.ImageSign;
-                            string desSign = rect.Descrip;
-                            SizeF sizeFont = graph.MeasureString(desSign, font);
-
-                            var desHeight = (float)(sizeFont.Height * 0.7);
-                            var desWidth = (float)(sizeFont.Width * 0.75);
-
-                            // Tạo khung vẽ vòng đỏ
-                            RectangleF recRectangle = RectangleF.FromLTRB(
-                                (float)Math.Min(p1.X, p2.X), (float)Math.Min(p1.Y, p2.Y),
-                                (float)Math.Max(p1.X, p2.X), (float)Math.Max(p1.Y, p2.Y));
-
-                            // Tạo khung vẽ chữ ký
-                            RectangleF recSignImage = RectangleF.FromLTRB(
-                               (float)Math.Min(p1.X, p2.X), (float)Math.Min(p1.Y, p2.Y),
-                               (float)Math.Max(p1.X, p2.X), (float)Math.Max(p1.Y, p2.Y) - desHeight);
-
-                            // Draw a rectangle in the created area
-                            // graph.DrawRectangle(new Pen(Color.Red), recRectangle);
-
-                            // Vẽ chữ ký
-                            recSignImage = string.IsNullOrWhiteSpace(rect.Descrip) ? recRectangle : recSignImage;
-                            graph.DrawImage(image, recSignImage);
-
-                            // Vẽ phần mô tả chữ ký (Ngày tháng)
-                            if (!string.IsNullOrWhiteSpace(rect.Descrip))
-                            {
-                                PointF point = new PointF((float)recRectangle.Right - desWidth, (float)recRectangle.Bottom - desHeight);
-                                using (SolidBrush mybrush = new SolidBrush(Color.Black))
-                                {
-                                    graph.DrawString(desSign, font, mybrush, point);
-                                }
-                            }
-                            graph.AddToPageForeground(page, 72, 72);
-                        }
+                        DrawSignToPage(processor, processor.Document.Pages[rect.PageIndex], rect);
                     }
                     // Save the document
                     if (!Directory.Exists(outDic))
