@@ -21,7 +21,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private bool busy;
         private bool loaded;
         private string UserId => TPConfigs.LoginUser.Id;
-        public uc208_LabEnvironment() { InitializeComponent(); }
+        public uc208_LabEnvironment() { Lab208Ui.InitializeLocalization(); InitializeComponent(); }
 
         private async void Module_Load(object sender, EventArgs e)
         {
@@ -73,7 +73,18 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             btnHistory.Enabled = btnConfigHistory.Enabled = !busy && selected;
             btnReload.Enabled = btnExport.Enabled = !busy && devices != null;
             cbbDept.Enabled = !busy && departments != null && departments.Rows.Count > 0;
+            cbbStatus.Enabled = !busy && devices != null;
             btnUnknown.Enabled = !busy;
+        }
+        private void Tree_PopupMenuShowing(object sender, DevExpress.XtraTreeList.PopupMenuShowingEventArgs e)
+        {
+            if (e.Menu == null || e.HitInfo?.Node == null) return;
+            treeData.FocusedNode = e.HitInfo.Node;
+            UpdateButtons();
+            if (SelectedDevice() == null) return;
+            e.Menu.Items.Add(Lab208Ui.Menu("歷史與圖表", (s, a) => OpenHistory(), Helpers.TPSvgimages.View, btnHistory.Enabled, true));
+            e.Menu.Items.Add(Lab208Ui.Menu("設定紀錄", (s, a) => ConfigHistory_Click(s, null), Helpers.TPSvgimages.Info, btnConfigHistory.Enabled));
+            if (CanEdit()) e.Menu.Items.Add(Lab208Ui.Menu("編輯設備", (s, a) => EditDevice_Click(s, null), Helpers.TPSvgimages.Edit, btnEdit.Enabled, true));
         }
         private async Task ReloadAsync()
         {
@@ -161,7 +172,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 var managers = await Task.Run(() => bus.GetManagers());
                 if (IsDisposed) return;
                 using (var form = new f208_DeviceInfo(UserId, departments, managers, cbbDept.EditValue.ToString(), row))
-                    form.ShowDialog(FindForm());
+                    if (form.ShowDialog(FindForm()) != DialogResult.OK) return;
             }
             catch (Exception ex) { ShowError(ex); }
             finally { busy = false; if (!IsDisposed) UpdateButtons(); }
@@ -182,7 +193,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         }
         private async void Unknown_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            await ShowTableAsync("未登記設備 — 請依SN新增設備", () => bus.GetUnknownDevices(UserId));
+            await ShowTableAsync("未登記設備 — 請依設備序號新增設備", () => bus.GetUnknownDevices(UserId));
         }
         private async Task ShowTableAsync(string title, Func<DataTable> load)
         {

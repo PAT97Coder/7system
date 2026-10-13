@@ -95,18 +95,39 @@ Không dùng tài khoản SQL quản trị hoặc tài khoản của ứng dụn
 ## Sử dụng
 
 - Thanh bar chọn bộ phận và trạng thái; cây **vị trí → thiết bị**. Làm mới tự động mỗi 60 giây
-  khi màn hình đang hiển thị hoặc bấm **更新**. **資料逾時** được tính theo thời điểm đo, không phải lúc nhận.
-- **新增設備 / 編輯設備**: nhập SN, người quản lý, vị trí, khoảng dưới/trên hoặc trung tâm ± dung sai,
+  khi màn hình đang hiển thị hoặc bấm **刷新**. **資料逾時** được tính theo thời điểm đo, không phải lúc nhận.
+- **新增設備** trên thanh lệnh; **編輯設備** trong menu chuột phải của thiết bị: nhập SN, người quản lý, vị trí, khoảng dưới/trên hoặc trung tâm ± dung sai,
   chu kỳ và trạng thái. SN không sửa sau khi tạo. Lý do thay đổi bắt buộc.
-- **設定紀錄**: lịch sử cấu hình. Cấu hình mới có hiệu lực khi lưu theo giờ DB.
+- **設定紀錄** trong menu chuột phải: lịch sử cấu hình. Cấu hình mới có hiệu lực khi lưu theo giờ DB.
   Màn hình chính đợi số đo thuộc cấu hình hiện tại để không trộn ngưỡng cũ và mới.
-- **歷史與圖表**: chọn ngày, xem bảng và biểu đồ có giới hạn áp dụng tại từng lần đo.
+- **歷史與圖表** trong menu chuột phải: chọn ngày, xem bảng và biểu đồ có giới hạn áp dụng tại từng lần đo.
   Tối đa 10.000 bản ghi/lần truy vấn; vượt mức cần giảm khoảng ngày. Bộ lọc **僅超限**
   chỉ lọc bảng, biểu đồ vẫn hiển thị toàn bộ số đo trong khoảng đã chọn.
-- **處理超限**: ghi nguyên nhân, biện pháp và kết quả; kết quả bắt buộc khi kết án.
+- **處理超限** trong menu chuột phải của số đo vượt giới hạn: ghi nguyên nhân, biện pháp và kết quả; kết quả bắt buộc và có xác nhận khi kết án.
   Nhật ký xử lý được thêm mới, không ghi đè các lần xử lý trước.
 - **資料衝突**: xem các giá trị app gửi khác số đo gốc tại cùng thời điểm.
 - Xuất Excel theo các hàng đang lọc; màn hình lịch sử/nhật ký hỗ trợ xem trước khi in.
+
+Giao diện 208 dùng BarManager và LayoutControl theo kiểu ISO. Thanh lệnh dùng SVG 32×32,
+font Microsoft JhengHei UI 14.25; dòng dữ liệu và menu dùng cỡ 12. Menu chuột phải giữ
+các mục mặc định, dùng localizer zh-Hant chung và chọn đúng dòng dưới con trỏ trước
+khi hiển thị thao tác. Quyền sửa và xử lý được kiểm tra trước khi bật nút/menu;
+dialog không có quyền bị khóa thao tác lưu.
+
+Thanh lệnh dùng cùng cấu hình với `uc201_AuditISOMain`: nút thêm → **刷新** → **出表**
+→ chọn **實驗室**, phân nhóm bằng vạch ngăn, chiếm toàn hàng, không có viền kéo,
+chữ hover màu xanh. Font disabled kế thừa Segoe UI 12 của bar ISO theo yêu cầu
+đồng nhất giao diện. TreeList dùng tiêu đề đen căn giữa 14.25, dữ liệu 12,
+chiều cao dòng mặc định, dòng xen kẽ và hiệu ứng hover như ISO.
+UI test đối chiếu các thuộc tính này trực tiếp với control ISO.
+
+Dialog 208 dùng mẫu `f201_AddNode`: nền RGB(244,244,244), bar xác nhận/hủy,
+font bar/editor/caption/dropdown 14.25, disabled 12, caption đen kể cả khi disabled,
+padding ngoài 10 và layout item 2. Dialog nhập liệu dùng FixedToolWindow;
+lịch sử và danh sách phụ vẫn cho phép co giãn. Các trường ngắn của dialog thiết bị
+được ghép theo hai cột; ô lý do giới hạn chiều cao 80–120 để không chiếm phần lớn
+cửa sổ. UI test mở dialog bằng dữ liệu giả, kiểm tra lề và các editor không bị cắt,
+đồng thời lưu ảnh `Lab208-DeviceDialog.png` và `Lab208-ActionDialog.png` trong thư mục tạm.
 
 Giới hạn là khoảng đóng: bằng min/max vẫn đạt. Độ ẩm và nhiệt độ được đánh giá riêng.
 Thiết bị ngừng sử dụng vẫn giữ lịch sử. Khi chuyển bộ phận, dữ liệu và cấu hình cũ chỉ hiện

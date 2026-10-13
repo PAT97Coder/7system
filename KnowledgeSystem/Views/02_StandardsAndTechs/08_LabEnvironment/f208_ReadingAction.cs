@@ -12,17 +12,20 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private readonly string userId;
         private readonly long readingId;
         private bool saving;
-        public f208_ReadingAction(string userId, long readingId)
+        private readonly bool canHandle;
+        public f208_ReadingAction(string userId, long readingId, bool canHandle = false)
         {
-            InitializeComponent(); this.userId = userId; this.readingId = readingId;
+            Lab208Ui.InitializeLocalization(); InitializeComponent(); this.userId = userId; this.readingId = readingId;
+            this.canHandle = canHandle; btnSave.Enabled = contentPanel.Enabled = canHandle;
             FormClosing += (s, e) => { if (saving) e.Cancel = true; };
         }
         private async void Save_Click(object sender, EventArgs e)
         {
-            if (saving) return;
+            if (saving || !canHandle || !btnSave.Enabled) return;
             string cause = txbCause.Text.Trim(), action = txbAction.Text.Trim(), result = txbResult.Text.Trim(); bool closed = chkClosed.Checked;
             if (cause.Length == 0 || action.Length == 0 || (closed && result.Length == 0))
             { MsgTP.MsgError("請填寫原因、處理措施；結案時須填寫處理結果。"); return; }
+            if (closed && XtraMessageBox.Show(this, "確定將此超限紀錄結案？", "確認結案", MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
             saving = true; contentPanel.Enabled = btnSave.Enabled = btnCancel.Enabled = false;
             bool saved = false;
             try { await Task.Run(() => dt208_EnvironmentBUS.Instance.AddAction(userId, readingId, cause, action, result, closed)); saved = true; }

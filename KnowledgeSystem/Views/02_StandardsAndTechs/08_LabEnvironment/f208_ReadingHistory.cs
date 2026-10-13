@@ -18,13 +18,26 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private bool busy;
         public f208_ReadingHistory(string userId, string sn)
         {
-            InitializeComponent(); this.userId = userId; this.sn = sn;
+            Lab208Ui.InitializeLocalization(); InitializeComponent(); this.userId = userId; this.sn = sn;
             Text = "溫濕度歷史 — " + sn;
-            dateFrom.DateTime = dt208_EnvironmentRules.VietnamNow.Date; dateTo.DateTime = dateFrom.DateTime;
+            dateFrom.EditValue = dt208_EnvironmentRules.VietnamNow.Date; dateTo.EditValue = dateFrom.EditValue;
             FormClosing += (s, e) => { if (busy) e.Cancel = true; };
             Load += async (s, e) => await LoadReadingsAsync();
         }
         private DataRow SelectedReading() => view.GetFocusedDataRow();
+        private void Reading_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
+        {
+            if (e.Menu == null || !e.HitInfo.InRow || !view.IsDataRow(e.HitInfo.RowHandle)) return;
+            view.FocusedRowHandle = e.HitInfo.RowHandle;
+            UpdateButtons();
+            var row = SelectedReading();
+            if (row == null) return;
+            e.Menu.Items.Add(Lab208Ui.Menu("處理紀錄", ActionHistory_Click, TPSvgimages.View, btnActionHistory.Enabled, true));
+            if (Convert.ToInt32(row["ConflictCount"]) > 0)
+                e.Menu.Items.Add(Lab208Ui.Menu("資料衝突", Conflicts_Click, TPSvgimages.Info, btnConflicts.Enabled));
+            if (!row.IsNull("CanHandle") && Convert.ToBoolean(row["CanHandle"]) && row["Status"].ToString().Contains("超限"))
+                e.Menu.Items.Add(Lab208Ui.Menu("處理超限", Action_Click, TPSvgimages.Edit, btnAction.Enabled, true));
+        }
         private void UpdateButtons()
         {
             var row = SelectedReading();
@@ -38,7 +51,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private async Task LoadReadingsAsync()
         {
             if (busy) return;
-            DateTime from = dateFrom.DateTime.Date, to = dateTo.DateTime.Date;
+            DateTime from = Convert.ToDateTime(dateFrom.EditValue).Date, to = Convert.ToDateTime(dateTo.EditValue).Date;
             if (dateFrom.EditValue == null || dateTo.EditValue == null || from > to || to >= DateTime.MaxValue.Date)
             { MsgTP.MsgError("請選擇有效的起迄日期。"); return; }
             busy = true; UpdateButtons();
@@ -48,7 +61,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 if (data.Rows.Count > 10000)
                 {
                     readings = null; grid.DataSource = null; chartTemperature.Series.Clear(); chartHumidity.Series.Clear();
-                    lblSummary.Text = "資料超過10,000筆，請縮小日期範圍。"; return;
+                    lblSummary.Caption = "資料超過10,000筆，請縮小日期範圍。"; return;
                 }
                 data.Columns.Add("Status");
                 foreach (DataRow row in data.Rows) row["Status"] = dt208_EnvironmentRules.MeasurementStatus(row);
@@ -57,7 +70,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 f208_DataList.FormatColumns(view);
                 ApplyFilter(); DrawCharts();
                 int abnormal = data.AsEnumerable().Count(r => r["Status"].ToString().Contains("超限"));
-                lblSummary.Text = $"SN {sn} | 共 {data.Rows.Count} 筆 | 超限 {abnormal} 筆 | 時間 UTC+07";
+                lblSummary.Caption = $"設備序號 {sn} | 共 {data.Rows.Count} 筆 | 超限 {abnormal} 筆 | 時間 UTC+07";
             }
             catch (Exception ex) { MsgTP.MsgError("歷史載入失敗：\r\n" + ex.Message); }
             finally { busy = false; UpdateButtons(); }
@@ -100,7 +113,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         {
             var row = SelectedReading();
             if (!btnAction.Enabled || row == null) return;
-            using (var form = new f208_ReadingAction(userId, Convert.ToInt64(row["Id"]))) form.ShowDialog(this);
+            using (var form = new f208_ReadingAction(userId, Convert.ToInt64(row["Id"]), true))
+                if (form.ShowDialog(this) != DialogResult.OK) return;
             await LoadReadingsAsync();
         }
         private async void ActionHistory_Click(object sender, EventArgs e)

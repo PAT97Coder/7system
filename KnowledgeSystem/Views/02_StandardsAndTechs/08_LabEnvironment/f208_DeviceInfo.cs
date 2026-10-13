@@ -4,6 +4,7 @@ using DevExpress.XtraEditors;
 using KnowledgeSystem.Helpers;
 using System;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
@@ -16,15 +17,20 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private readonly long configId;
         private bool saving;
         private int temperatureMode, humidityMode;
+        private readonly bool canEditOriginal;
         public f208_DeviceInfo(string userId, DataTable departments, DataTable managers, string department, DataRow current)
         {
-            InitializeComponent();
+            Lab208Ui.InitializeLocalization(); InitializeComponent();
             this.userId = userId;
             var editable = departments.Clone();
             foreach (DataRow row in departments.Rows) if (Convert.ToBoolean(row["CanEdit"])) editable.ImportRow(row);
             cbbDept.Properties.DataSource = editable;
             cbbManager.Properties.DataSource = managers;
             cbbDept.EditValue = department;
+            string originalDepartment = current == null ? department : current["IdDept"].ToString();
+            canEditOriginal = editable.Select().Any(r => r["Id"].ToString() == originalDepartment);
+            btnSave.Enabled = canEditOriginal;
+            contentPanel.Enabled = canEditOriginal;
             cbbState.Properties.Items.AddRange(dt208_EnvironmentRules.DeviceStates);
             cbbState.SelectedIndex = 0;
             tempMin.Value = 15; tempMax.Value = 25; humidityMin.Value = 50; humidityMax.Value = 70; expectedMinutes.Value = 60;
@@ -40,23 +46,24 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             }
             else txbReason.Text = "新增設備";
             temperatureFormat.SelectedIndex = 0; humidityFormat.SelectedIndex = 0;
-            temperatureFormat.SelectedIndexChanged += (s, e) => ChangeRangeMode(temperatureFormat.SelectedIndex, ref temperatureMode, tempMin, tempMax, lblTempMin, lblTempMax);
-            humidityFormat.SelectedIndexChanged += (s, e) => ChangeRangeMode(humidityFormat.SelectedIndex, ref humidityMode, humidityMin, humidityMax, lblHumidityMin, lblHumidityMax);
+            temperatureFormat.SelectedIndexChanged += (s, e) => ChangeRangeMode(temperatureFormat.SelectedIndex, ref temperatureMode, tempMin, tempMax, lblTempMin, lblTempMax, "溫度", "°C");
+            humidityFormat.SelectedIndexChanged += (s, e) => ChangeRangeMode(humidityFormat.SelectedIndex, ref humidityMode, humidityMin, humidityMax, lblHumidityMin, lblHumidityMax, "濕度", "%RH");
             Text = deviceId == 0 ? "新增溫濕度設備" : "編輯溫濕度設備";
             FormClosing += (s, e) => { if (saving) e.Cancel = true; };
         }
-        private static void ChangeRangeMode(int mode, ref int previous, SpinEdit first, SpinEdit second, LabelControl firstLabel, LabelControl secondLabel)
+        private static void ChangeRangeMode(int mode, ref int previous, SpinEdit first, SpinEdit second, DevExpress.XtraLayout.LayoutControlItem firstLabel, DevExpress.XtraLayout.LayoutControlItem secondLabel, string caption, string unit)
         {
             if (mode == previous) return;
             decimal a = first.Value, b = second.Value;
             if (mode == 1) { first.Value = (a + b) / 2; second.Value = (b - a) / 2; }
             else { first.Value = a - b; second.Value = a + b; }
-            firstLabel.Text = mode == 1 ? "中心值" : "下限"; secondLabel.Text = mode == 1 ? "公差 ±" : "上限";
+            firstLabel.Text = caption + (mode == 1 ? "中心值 " : "下限 ") + unit;
+            secondLabel.Text = caption + (mode == 1 ? "公差 ± " : "上限 ") + unit;
             previous = mode;
         }
         private async void Save_Click(object sender, EventArgs e)
         {
-            if (saving) return;
+            if (saving || !canEditOriginal || !btnSave.Enabled) return;
             var edit = new dt208_DeviceEdit
             {
                 Id = deviceId, ExpectedConfigId = configId, SN = txbSN.Text.Trim().ToUpperInvariant(), DisplayName = txbName.Text.Trim(), Model = txbModel.Text.Trim(),

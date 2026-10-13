@@ -3,82 +3,215 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
     partial class f208_DeviceInfo
     {
         private System.ComponentModel.IContainer components;
-        private System.Windows.Forms.TableLayoutPanel contentPanel;
-        private DevExpress.XtraEditors.TextEdit txbSN, txbName, txbModel, txbLocation;
+        private DevExpress.XtraBars.BarDockControl dockTop, dockBottom, dockLeft, dockRight;
+        private DevExpress.XtraLayout.LayoutControl contentPanel;
+        private DevExpress.XtraLayout.LayoutControlGroup layoutRoot;
+        private DevExpress.XtraBars.BarManager barManager;
+        private DevExpress.XtraBars.Bar toolbar;
+        private DevExpress.XtraBars.BarButtonItem btnSave, btnCancel;
+        private DevExpress.XtraEditors.TextEdit txbSN;
+        private DevExpress.XtraEditors.TextEdit txbName;
+        private DevExpress.XtraEditors.TextEdit txbModel;
+        private DevExpress.XtraEditors.LookUpEdit cbbDept;
+        private DevExpress.XtraEditors.TextEdit txbLocation;
+        private DevExpress.XtraEditors.LookUpEdit cbbManager;
+        private DevExpress.XtraEditors.ComboBoxEdit temperatureFormat;
+        private DevExpress.XtraEditors.SpinEdit tempMin;
+        private DevExpress.XtraEditors.SpinEdit tempMax;
+        private DevExpress.XtraEditors.ComboBoxEdit humidityFormat;
+        private DevExpress.XtraEditors.SpinEdit humidityMin;
+        private DevExpress.XtraEditors.SpinEdit humidityMax;
+        private DevExpress.XtraEditors.SpinEdit expectedMinutes;
+        private DevExpress.XtraEditors.ComboBoxEdit cbbState;
         private DevExpress.XtraEditors.MemoEdit txbReason;
-        private DevExpress.XtraEditors.LookUpEdit cbbDept, cbbManager;
-        private DevExpress.XtraEditors.ComboBoxEdit cbbState, temperatureFormat, humidityFormat;
-        private DevExpress.XtraEditors.SpinEdit tempMin, tempMax, humidityMin, humidityMax, expectedMinutes;
-        private DevExpress.XtraEditors.LabelControl lblTempMin, lblTempMax, lblHumidityMin, lblHumidityMax;
-        private DevExpress.XtraEditors.SimpleButton btnSave, btnCancel;
+        private DevExpress.XtraLayout.LayoutControlItem txbSNItem;
+        private DevExpress.XtraLayout.LayoutControlItem txbNameItem;
+        private DevExpress.XtraLayout.LayoutControlItem txbModelItem;
+        private DevExpress.XtraLayout.LayoutControlItem cbbDeptItem;
+        private DevExpress.XtraLayout.LayoutControlItem txbLocationItem;
+        private DevExpress.XtraLayout.LayoutControlItem cbbManagerItem;
+        private DevExpress.XtraLayout.LayoutControlItem temperatureFormatItem;
+        private DevExpress.XtraLayout.LayoutControlItem lblTempMin;
+        private DevExpress.XtraLayout.LayoutControlItem lblTempMax;
+        private DevExpress.XtraLayout.LayoutControlItem humidityFormatItem;
+        private DevExpress.XtraLayout.LayoutControlItem lblHumidityMin;
+        private DevExpress.XtraLayout.LayoutControlItem lblHumidityMax;
+        private DevExpress.XtraLayout.LayoutControlItem expectedMinutesItem;
+        private DevExpress.XtraLayout.LayoutControlItem cbbStateItem;
+        private DevExpress.XtraLayout.LayoutControlItem txbReasonItem;
         protected override void Dispose(bool disposing) { if (disposing && components != null) components.Dispose(); base.Dispose(disposing); }
         private void InitializeComponent()
         {
+            SuspendLayout();
             components = new System.ComponentModel.Container();
-            contentPanel = new System.Windows.Forms.TableLayoutPanel { Dock = System.Windows.Forms.DockStyle.Fill, ColumnCount = 2, RowCount = 13, Padding = new System.Windows.Forms.Padding(16), AutoScroll = true };
-            contentPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 140));
-            contentPanel.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100));
-            txbSN = new DevExpress.XtraEditors.TextEdit(); txbSN.Properties.MaxLength = 100;
-            txbName = new DevExpress.XtraEditors.TextEdit(); txbName.Properties.MaxLength = 200;
-            txbModel = new DevExpress.XtraEditors.TextEdit(); txbModel.Properties.MaxLength = 100;
-            txbLocation = new DevExpress.XtraEditors.TextEdit(); txbLocation.Properties.MaxLength = 200;
-            cbbDept = CreateLookup(); cbbManager = CreateLookup();
-            cbbState = new DevExpress.XtraEditors.ComboBoxEdit(); cbbState.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            temperatureFormat = CreateFormat(); humidityFormat = CreateFormat();
-            tempMin = CreateNumber(-999999, 999999, false); tempMax = CreateNumber(-999999, 999999, false);
-            humidityMin = CreateNumber(0, 100, false); humidityMax = CreateNumber(0, 100, false);
-            expectedMinutes = CreateNumber(1, 10080, true);
-            lblTempMin = new DevExpress.XtraEditors.LabelControl { Text = "下限" }; lblTempMax = new DevExpress.XtraEditors.LabelControl { Text = "上限" };
-            lblHumidityMin = new DevExpress.XtraEditors.LabelControl { Text = "下限" }; lblHumidityMax = new DevExpress.XtraEditors.LabelControl { Text = "上限" };
-            txbReason = new DevExpress.XtraEditors.MemoEdit { Height = 65 }; txbReason.Properties.MaxLength = 500;
-            AddField(0, "SN *", txbSN); AddField(1, "設備名稱 *", txbName); AddField(2, "型號", txbModel);
-            AddField(3, "部門 *", cbbDept); AddField(4, "位置 / 房間 *", txbLocation); AddField(5, "管理人 *", cbbManager);
-            AddField(6, "溫度管制 °C", CreateRangePanel(temperatureFormat, lblTempMin, tempMin, lblTempMax, tempMax));
-            AddField(7, "濕度管制 %RH", CreateRangePanel(humidityFormat, lblHumidityMin, humidityMin, lblHumidityMax, humidityMax));
-            AddField(8, "資料逾時 (分鐘)", expectedMinutes); AddField(9, "設備狀態", cbbState); AddField(10, "變更原因 *", txbReason);
-            var note = new DevExpress.XtraEditors.LabelControl { Text = "設定保存後立即生效；歷史數據保留當時的管制範圍。", AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical, Dock = System.Windows.Forms.DockStyle.Fill };
-            contentPanel.Controls.Add(note, 0, 11); contentPanel.SetColumnSpan(note, 2);
-            var buttons = new System.Windows.Forms.FlowLayoutPanel { Dock = System.Windows.Forms.DockStyle.Bottom, Height = 50, FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft, Padding = new System.Windows.Forms.Padding(8) };
-            btnSave = new DevExpress.XtraEditors.SimpleButton { Text = "保存", Width = 100, Height = 32 }; btnSave.Click += Save_Click;
-            btnCancel = new DevExpress.XtraEditors.SimpleButton { Text = "取消", Width = 100, Height = 32, DialogResult = System.Windows.Forms.DialogResult.Cancel };
-            buttons.Controls.Add(btnCancel); buttons.Controls.Add(btnSave);
-            Controls.Add(contentPanel); Controls.Add(buttons);
-            AcceptButton = btnSave; CancelButton = btnCancel;
-            Font = new System.Drawing.Font("Microsoft JhengHei UI", 11F); AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(720, 610); MinimumSize = new System.Drawing.Size(700, 620);
-            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent; MaximizeBox = false; MinimizeBox = false; Name = "f208_DeviceInfo";
-        }
-        private void AddField(int row, string caption, System.Windows.Forms.Control control)
-        {
-            contentPanel.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.AutoSize));
-            contentPanel.Controls.Add(new DevExpress.XtraEditors.LabelControl { Text = caption, Anchor = System.Windows.Forms.AnchorStyles.Left, Margin = new System.Windows.Forms.Padding(3, 10, 3, 10) }, 0, row);
-            control.Dock = System.Windows.Forms.DockStyle.Fill; control.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6); contentPanel.Controls.Add(control, 1, row);
-        }
-        private static DevExpress.XtraEditors.LookUpEdit CreateLookup()
-        {
-            var control = new DevExpress.XtraEditors.LookUpEdit();
-            control.Properties.ValueMember = "Id"; control.Properties.DisplayMember = "DisplayName"; control.Properties.NullText = "請選擇";
-            control.Properties.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("Id", "代碼"));
-            control.Properties.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("DisplayName", "名稱"));
-            control.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            return control;
-        }
-        private static DevExpress.XtraEditors.SpinEdit CreateNumber(decimal min, decimal max, bool integer)
-        {
-            var control = new DevExpress.XtraEditors.SpinEdit(); control.Properties.MinValue = min; control.Properties.MaxValue = max;
-            control.Properties.IsFloatValue = !integer; control.Properties.Mask.EditMask = integer ? "d" : "f2"; return control;
-        }
-        private static DevExpress.XtraEditors.ComboBoxEdit CreateFormat()
-        {
-            var control = new DevExpress.XtraEditors.ComboBoxEdit { Width = 125 };
-            control.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
-            control.Properties.Items.AddRange(new object[] { "上下限", "中心 ± 公差" }); return control;
-        }
-        private static System.Windows.Forms.Control CreateRangePanel(DevExpress.XtraEditors.ComboBoxEdit format, DevExpress.XtraEditors.LabelControl firstLabel, DevExpress.XtraEditors.SpinEdit first, DevExpress.XtraEditors.LabelControl secondLabel, DevExpress.XtraEditors.SpinEdit second)
-        {
-            var panel = new System.Windows.Forms.FlowLayoutPanel { AutoSize = true, WrapContents = false };
-            first.Width = second.Width = 95; firstLabel.Margin = secondLabel.Margin = new System.Windows.Forms.Padding(6, 8, 3, 3);
-            panel.Controls.AddRange(new System.Windows.Forms.Control[] { format, firstLabel, first, secondLabel, second }); return panel;
+            barManager = new DevExpress.XtraBars.BarManager(components) { Form = this };
+            toolbar = new DevExpress.XtraBars.Bar(barManager, "工具列") { DockStyle = DevExpress.XtraBars.BarDockStyle.Top };
+            toolbar.OptionsBar.AllowQuickCustomization = false;
+            Lab208Ui.StyleDialogToolbar(toolbar);
+            barManager.MainMenu = toolbar;
+            dockTop = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Top };
+            dockBottom = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Bottom };
+            dockLeft = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Left };
+            dockRight = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Right };
+            Controls.AddRange(new System.Windows.Forms.Control[] { dockTop, dockBottom, dockLeft, dockRight });
+            btnSave = new DevExpress.XtraBars.BarButtonItem(barManager, "確認") { Enabled = false };
+            btnCancel = new DevExpress.XtraBars.BarButtonItem(barManager, "取消");
+            btnSave.ImageOptions.SvgImage = Helpers.TPSvgimages.Confirm; btnCancel.ImageOptions.SvgImage = Helpers.TPSvgimages.Cancel;
+            Lab208Ui.StyleDialogBarItem(btnSave); Lab208Ui.StyleDialogBarItem(btnCancel);
+            btnSave.ItemClick += (s, e) => Save_Click(s, e); btnCancel.ItemClick += (s, e) => { DialogResult = System.Windows.Forms.DialogResult.Cancel; Close(); };
+            btnSave.ItemShortcut = new DevExpress.XtraBars.BarShortcut(System.Windows.Forms.Keys.Control | System.Windows.Forms.Keys.S);
+            btnCancel.ItemShortcut = new DevExpress.XtraBars.BarShortcut(System.Windows.Forms.Keys.Escape);
+            toolbar.AddItem(btnSave); toolbar.AddItem(btnCancel).BeginGroup = true;
+            contentPanel = new DevExpress.XtraLayout.LayoutControl { Dock = System.Windows.Forms.DockStyle.Fill, AllowCustomization = false };
+            layoutRoot = new DevExpress.XtraLayout.LayoutControlGroup { GroupBordersVisible = false, EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True, Padding = new DevExpress.XtraLayout.Utils.Padding(10, 10, 10, 10) };
+            ((System.ComponentModel.ISupportInitialize)contentPanel).BeginInit();
+            contentPanel.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)layoutRoot).BeginInit();
+            contentPanel.Root = layoutRoot;
+
+            txbSN = new DevExpress.XtraEditors.TextEdit();
+            txbSN.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbSNItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbSN, Text = "設備序號 *", Location = new System.Drawing.Point(0, 0), Size = new System.Drawing.Size(740, 42) };
+            txbSNItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbSNItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(txbSN);
+            txbName = new DevExpress.XtraEditors.TextEdit();
+            txbName.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbNameItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbName, Text = "設備名稱 *", Location = new System.Drawing.Point(0, 42), Size = new System.Drawing.Size(740, 42) };
+            txbNameItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbNameItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(txbName);
+            txbModel = new DevExpress.XtraEditors.TextEdit();
+            txbModel.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbModelItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbModel, Text = "型號", Location = new System.Drawing.Point(0, 84), Size = new System.Drawing.Size(740, 42) };
+            txbModelItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbModelItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(txbModel);
+            cbbDept = new DevExpress.XtraEditors.LookUpEdit();
+            cbbDept.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbDeptItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbDept, Text = "部門 *", Location = new System.Drawing.Point(0, 126), Size = new System.Drawing.Size(740, 42) };
+            cbbDeptItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbDeptItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(cbbDept);
+            txbLocation = new DevExpress.XtraEditors.TextEdit();
+            txbLocation.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbLocationItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbLocation, Text = "位置／房間 *", Location = new System.Drawing.Point(0, 168), Size = new System.Drawing.Size(740, 42) };
+            txbLocationItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbLocationItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(txbLocation);
+            cbbManager = new DevExpress.XtraEditors.LookUpEdit();
+            cbbManager.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbManagerItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbManager, Text = "管理人 *", Location = new System.Drawing.Point(0, 210), Size = new System.Drawing.Size(740, 42) };
+            cbbManagerItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbManagerItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(cbbManager);
+            temperatureFormat = new DevExpress.XtraEditors.ComboBoxEdit();
+            temperatureFormat.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            temperatureFormatItem = new DevExpress.XtraLayout.LayoutControlItem { Control = temperatureFormat, Text = "溫度格式", Location = new System.Drawing.Point(0, 252), Size = new System.Drawing.Size(740, 42) };
+            temperatureFormatItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            temperatureFormatItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(temperatureFormat);
+            tempMin = new DevExpress.XtraEditors.SpinEdit();
+            tempMin.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblTempMin = new DevExpress.XtraLayout.LayoutControlItem { Control = tempMin, Text = "溫度下限 °C", Location = new System.Drawing.Point(0, 294), Size = new System.Drawing.Size(740, 42) };
+            lblTempMin.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblTempMin.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(tempMin);
+            tempMax = new DevExpress.XtraEditors.SpinEdit();
+            tempMax.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblTempMax = new DevExpress.XtraLayout.LayoutControlItem { Control = tempMax, Text = "溫度上限 °C", Location = new System.Drawing.Point(0, 336), Size = new System.Drawing.Size(740, 42) };
+            lblTempMax.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblTempMax.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(tempMax);
+            humidityFormat = new DevExpress.XtraEditors.ComboBoxEdit();
+            humidityFormat.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            humidityFormatItem = new DevExpress.XtraLayout.LayoutControlItem { Control = humidityFormat, Text = "濕度格式", Location = new System.Drawing.Point(0, 378), Size = new System.Drawing.Size(740, 42) };
+            humidityFormatItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            humidityFormatItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(humidityFormat);
+            humidityMin = new DevExpress.XtraEditors.SpinEdit();
+            humidityMin.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblHumidityMin = new DevExpress.XtraLayout.LayoutControlItem { Control = humidityMin, Text = "濕度下限 %RH", Location = new System.Drawing.Point(0, 420), Size = new System.Drawing.Size(740, 42) };
+            lblHumidityMin.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblHumidityMin.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(humidityMin);
+            humidityMax = new DevExpress.XtraEditors.SpinEdit();
+            humidityMax.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblHumidityMax = new DevExpress.XtraLayout.LayoutControlItem { Control = humidityMax, Text = "濕度上限 %RH", Location = new System.Drawing.Point(0, 462), Size = new System.Drawing.Size(740, 42) };
+            lblHumidityMax.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            lblHumidityMax.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(humidityMax);
+            expectedMinutes = new DevExpress.XtraEditors.SpinEdit();
+            expectedMinutes.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            expectedMinutesItem = new DevExpress.XtraLayout.LayoutControlItem { Control = expectedMinutes, Text = "資料逾時（分鐘）", Location = new System.Drawing.Point(0, 504), Size = new System.Drawing.Size(740, 42) };
+            expectedMinutesItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            expectedMinutesItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(expectedMinutes);
+            cbbState = new DevExpress.XtraEditors.ComboBoxEdit();
+            cbbState.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbStateItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbState, Text = "設備狀態", Location = new System.Drawing.Point(0, 546), Size = new System.Drawing.Size(740, 42) };
+            cbbStateItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            cbbStateItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(cbbState);
+            txbReason = new DevExpress.XtraEditors.MemoEdit();
+            txbReason.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbReasonItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbReason, Text = "變更原因 *", Location = new System.Drawing.Point(0, 588), Size = new System.Drawing.Size(740, 42) };
+            txbReasonItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            txbReasonItem.AppearanceItemCaption.Options.UseFont = true;
+            contentPanel.Controls.Add(txbReason);
+            txbSN.Properties.MaxLength = 100; txbName.Properties.MaxLength = 200; txbModel.Properties.MaxLength = 100; txbLocation.Properties.MaxLength = 200; txbReason.Properties.MaxLength = 500;
+            foreach (var lookup in new[] { cbbDept, cbbManager })
+            {
+                lookup.Properties.ValueMember = "Id"; lookup.Properties.DisplayMember = "DisplayName"; lookup.Properties.NullText = "請選擇";
+                lookup.Properties.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("Id", "代碼"));
+                lookup.Properties.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("DisplayName", "名稱"));
+                lookup.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+                Lab208Ui.StyleRepository(lookup.Properties);
+            }
+            foreach (var combo in new[] { temperatureFormat, humidityFormat, cbbState })
+            {
+                combo.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor; Lab208Ui.StyleRepository(combo.Properties);
+            }
+            temperatureFormat.Properties.Items.AddRange(new object[] { "上下限", "中心 ± 公差" }); humidityFormat.Properties.Items.AddRange(new object[] { "上下限", "中心 ± 公差" });
+            foreach (var spin in new[] { tempMin, tempMax, humidityMin, humidityMax }) { spin.Properties.IsFloatValue = true; spin.Properties.Mask.EditMask = "f2"; }
+            tempMin.Properties.MinValue = tempMax.Properties.MinValue = -999999; tempMin.Properties.MaxValue = tempMax.Properties.MaxValue = 999999;
+            humidityMin.Properties.MinValue = humidityMax.Properties.MinValue = 0; humidityMin.Properties.MaxValue = humidityMax.Properties.MaxValue = 100;
+            expectedMinutes.Properties.MinValue = 1; expectedMinutes.Properties.MaxValue = 10080; expectedMinutes.Properties.IsFloatValue = false; expectedMinutes.Properties.Mask.EditMask = "d";
+            foreach (var editor in new DevExpress.XtraEditors.BaseEdit[] { txbSN, txbName, txbModel, cbbDept, txbLocation, cbbManager, temperatureFormat, tempMin, tempMax, humidityFormat, humidityMin, humidityMax, expectedMinutes, cbbState, txbReason })
+                Lab208Ui.StyleDialogEditor(editor, contentPanel, barManager);
+            foreach (var item in new[] { txbSNItem, txbNameItem, txbModelItem, cbbDeptItem, txbLocationItem, cbbManagerItem, temperatureFormatItem, lblTempMin, lblTempMax, humidityFormatItem, lblHumidityMin, lblHumidityMax, expectedMinutesItem, cbbStateItem, txbReasonItem })
+                Lab208Ui.StyleDialogItem(item);
+            txbSNItem.Location = new System.Drawing.Point(0, 0); txbSNItem.Size = new System.Drawing.Size(370, 36);
+            txbModelItem.Location = new System.Drawing.Point(370, 0); txbModelItem.Size = new System.Drawing.Size(370, 36);
+            txbNameItem.Location = new System.Drawing.Point(0, 36); txbNameItem.Size = new System.Drawing.Size(740, 36);
+            cbbDeptItem.Location = new System.Drawing.Point(0, 72); cbbDeptItem.Size = new System.Drawing.Size(370, 36); cbbDeptItem.Text = "實驗室 *";
+            cbbManagerItem.Location = new System.Drawing.Point(370, 72); cbbManagerItem.Size = new System.Drawing.Size(370, 36);
+            txbLocationItem.Location = new System.Drawing.Point(0, 108); txbLocationItem.Size = new System.Drawing.Size(740, 36);
+            temperatureFormatItem.Location = new System.Drawing.Point(0, 144); temperatureFormatItem.Size = new System.Drawing.Size(740, 36);
+            lblTempMin.Location = new System.Drawing.Point(0, 180); lblTempMin.Size = new System.Drawing.Size(370, 36);
+            lblTempMax.Location = new System.Drawing.Point(370, 180); lblTempMax.Size = new System.Drawing.Size(370, 36);
+            humidityFormatItem.Location = new System.Drawing.Point(0, 216); humidityFormatItem.Size = new System.Drawing.Size(740, 36);
+            lblHumidityMin.Location = new System.Drawing.Point(0, 252); lblHumidityMin.Size = new System.Drawing.Size(370, 36);
+            lblHumidityMax.Location = new System.Drawing.Point(370, 252); lblHumidityMax.Size = new System.Drawing.Size(370, 36);
+            expectedMinutesItem.Location = new System.Drawing.Point(0, 288); expectedMinutesItem.Size = new System.Drawing.Size(370, 36);
+            cbbStateItem.Location = new System.Drawing.Point(370, 288); cbbStateItem.Size = new System.Drawing.Size(370, 36);
+            txbReasonItem.Location = new System.Drawing.Point(0, 324); txbReasonItem.Size = new System.Drawing.Size(740, 100);
+            txbReasonItem.SizeConstraintsType = DevExpress.XtraLayout.SizeConstraintsType.Custom;
+            txbReasonItem.MinSize = new System.Drawing.Size(0, 80); txbReasonItem.MaxSize = new System.Drawing.Size(0, 120);
+            layoutRoot.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { txbSNItem, txbModelItem, txbNameItem, cbbDeptItem, cbbManagerItem, txbLocationItem, temperatureFormatItem, lblTempMin, lblTempMax, humidityFormatItem, lblHumidityMin, lblHumidityMax, expectedMinutesItem, cbbStateItem, txbReasonItem });
+            Controls.Add(contentPanel); contentPanel.BringToFront();
+            Appearance.BackColor = System.Drawing.Color.FromArgb(244, 244, 244);
+            Appearance.Options.UseBackColor = true;
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
+            Font = new System.Drawing.Font("Microsoft JhengHei UI", 8.25F); AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            IconOptions.Image = global::KnowledgeSystem.Properties.Resources.AppIcon;
+            ClientSize = new System.Drawing.Size(760, 493); MinimumSize = new System.Drawing.Size(760, 493);
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent; MaximizeBox = false; MinimizeBox = false; Name = "f208_DeviceInfo"; Text = "溫濕度設備";
+            ((System.ComponentModel.ISupportInitialize)layoutRoot).EndInit();
+            ((System.ComponentModel.ISupportInitialize)contentPanel).EndInit();
+            contentPanel.ResumeLayout(false);
+            ResumeLayout(false); PerformLayout();
         }
     }
 }
