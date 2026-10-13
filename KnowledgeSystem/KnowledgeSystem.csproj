@@ -2418,4 +2418,21 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.cs"><SubType>UserControl</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.Designer.cs"><DependentUpon>uc208_LabEnvironment.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.resx"><DependentUpon>uc208_LabEnvironment.cs</DependentUpon></EmbeddedResource>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DeviceInfo.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DeviceInfo.Designer.cs"><DependentUpon>f208_DeviceInfo.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DeviceInfo.resx"><DependentUpon>f208_DeviceInfo.cs</DependentUpon></EmbeddedResource>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingHistory.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingHistory.Designer.cs"><DependentUpon>f208_ReadingHistory.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingHistory.resx"><DependentUpon>f208_ReadingHistory.cs</DependentUpon></EmbeddedResource>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingAction.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingAction.Designer.cs"><DependentUpon>f208_ReadingAction.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_ReadingAction.resx"><DependentUpon>f208_ReadingAction.cs</DependentUpon></EmbeddedResource>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.Designer.cs"><DependentUpon>f208_DataList.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.resx"><DependentUpon>f208_DataList.cs</DependentUpon></EmbeddedResource>
+  </ItemGroup>
 </Project>
