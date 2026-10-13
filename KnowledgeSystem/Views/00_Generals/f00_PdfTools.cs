@@ -98,6 +98,7 @@ namespace KnowledgeSystem.Views._00_Generals
         List<GraphicsCoordinates> signs = new List<GraphicsCoordinates>();
         GraphicsCoordinates currentSign;
         GraphicsCoordinates selectedSign;
+        GraphicsCoordinates copiedSign;
         SignEditMode signEditMode = SignEditMode.None;
         PdfPoint dragStartPoint;
         PdfPoint dragStartPoint1;
@@ -106,6 +107,9 @@ namespace KnowledgeSystem.Views._00_Generals
         GraphicsCoordinates contextMenuSign;
         DXPopupMenu popupMenuSign;
         DXMenuItem itemEditSignDate;
+        DXMenuItem itemCopySign;
+        DXMenuItem itemPasteSign;
+        Point contextMenuLocation;
 
         bool fullSign = false;
         string filePath = "";
@@ -126,6 +130,10 @@ namespace KnowledgeSystem.Views._00_Generals
         private void InitializeMenuItems()
         {
             popupMenuSign = new DXPopupMenu();
+            itemCopySign = CreateMenuItem("複製簽名/印章 (Ctrl+C)", ItemCopySign_Click, TPSvgimages.Copy);
+            itemPasteSign = CreateMenuItem("貼上簽名/印章 (Ctrl+V)", ItemPasteSign_Click, TPSvgimages.Copy);
+            popupMenuSign.Items.Add(itemCopySign);
+            popupMenuSign.Items.Add(itemPasteSign);
             itemEditSignDate = CreateMenuItem("修改日期", ItemEditSignDate_Click, TPSvgimages.Edit);
             popupMenuSign.Items.Add(itemEditSignDate);
         }
@@ -150,6 +158,76 @@ namespace KnowledgeSystem.Views._00_Generals
 
             selectedSign = contextMenuSign;
             EditSelectedSignDescription();
+        }
+
+        private void ItemCopySign_Click(object sender, EventArgs e)
+        {
+            CopySelectedSign();
+        }
+
+        private void ItemPasteSign_Click(object sender, EventArgs e)
+        {
+            PasteCopiedSign(contextMenuLocation);
+        }
+
+        void CopySelectedSign()
+        {
+            if (selectedSign == null || !signs.Contains(selectedSign))
+                return;
+
+            // Snapshot the placement and date so later edits do not change the copy.
+            copiedSign = new GraphicsCoordinates(selectedSign.PageIndex,
+                selectedSign.Point1, selectedSign.Point2, selectedSign.ImageSign,
+                selectedSign.Descrip, selectedSign.SignType);
+        }
+
+        void PasteCopiedSign(Point location)
+        {
+            if (copiedSign == null || !pdfViewer.IsDocumentOpened)
+                return;
+
+            var position = pdfViewer.GetDocumentPosition(location, false);
+            if (position == null || position.PageNumber <= 0)
+                return;
+
+            // Translate PDF coordinates directly to preserve the size at any zoom.
+            double halfWidth = (copiedSign.Point2.X - copiedSign.Point1.X) / 2;
+            double halfHeight = (copiedSign.Point2.Y - copiedSign.Point1.Y) / 2;
+            var pastedSign = new GraphicsCoordinates(position.PageNumber - 1,
+                new PdfPoint(position.Point.X - halfWidth, position.Point.Y - halfHeight),
+                new PdfPoint(position.Point.X + halfWidth, position.Point.Y + halfHeight),
+                copiedSign.ImageSign, copiedSign.Descrip, copiedSign.SignType);
+
+            StopCreatingSign();
+            pdfViewer.Capture = false;
+            signs.Add(pastedSign);
+            selectedSign = pastedSign;
+            pdfViewer.Focus();
+            UpdateCursor(location);
+            pdfViewer.Invalidate();
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (pdfViewer.IsDocumentOpened && (pdfViewer.ContainsFocus || ribbonControl1.ContainsFocus))
+            {
+                if (keyData == (Keys.Control | Keys.C) && selectedSign != null)
+                {
+                    CopySelectedSign();
+                    return true;
+                }
+
+                if (keyData == (Keys.Control | Keys.V) && copiedSign != null)
+                {
+                    Point location = pdfViewer.PointToClient(System.Windows.Forms.Control.MousePosition);
+                    if (!pdfViewer.ClientRectangle.Contains(location))
+                        location = new Point(pdfViewer.ClientSize.Width / 2, pdfViewer.ClientSize.Height / 2);
+                    PasteCopiedSign(location);
+                    return true;
+                }
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
         private void DefaultSign()
@@ -759,15 +837,25 @@ namespace KnowledgeSystem.Views._00_Generals
 
         private void ShowSignPopupMenu(Point location)
         {
-            SignEditMode hitMode;
-            GraphicsCoordinates hitSign = HitTestSign(location, out hitMode);
-            if (hitSign == null || hitSign.SignType != SignInfo.Sign || string.IsNullOrWhiteSpace(hitSign.Descrip))
+            if (!pdfViewer.IsDocumentOpened)
                 return;
 
+            SignEditMode hitMode;
+            GraphicsCoordinates hitSign = HitTestSign(location, out hitMode);
+            var position = pdfViewer.GetDocumentPosition(location, false);
+            bool canPaste = copiedSign != null && position != null && position.PageNumber > 0;
+            if (hitSign == null && !canPaste)
+                return;
+
+            contextMenuLocation = location;
             contextMenuSign = hitSign;
             selectedSign = hitSign;
+            itemCopySign.Enabled = hitSign != null;
+            itemPasteSign.Enabled = canPaste;
+            itemEditSignDate.Visible = hitSign != null && hitSign.SignType == SignInfo.Sign
+                && !string.IsNullOrWhiteSpace(hitSign.Descrip);
             pdfViewer.Invalidate();
-            popupMenuSign.ShowPopup(pdfViewer, pdfViewer.PointToClient(System.Windows.Forms.Control.MousePosition));
+            popupMenuSign.ShowPopup(pdfViewer, location);
         }
 
         private void PdfViewer_KeyDown(object sender, KeyEventArgs e)
