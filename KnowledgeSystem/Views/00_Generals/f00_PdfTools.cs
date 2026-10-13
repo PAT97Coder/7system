@@ -91,6 +91,12 @@ namespace KnowledgeSystem.Views._00_Generals
             Resize
         }
 
+        class SignUndoState
+        {
+            public List<GraphicsCoordinates> Signs { get; set; }
+            public int SelectedIndex { get; set; }
+        }
+
         SignInfo signInfo = SignInfo.Sign;
         List<dm_Sign> dmSigns;
         dm_Sign signSelect = new dm_Sign();
@@ -99,6 +105,8 @@ namespace KnowledgeSystem.Views._00_Generals
         GraphicsCoordinates currentSign;
         GraphicsCoordinates selectedSign;
         GraphicsCoordinates copiedSign;
+        readonly Stack<SignUndoState> signUndoHistory = new Stack<SignUndoState>();
+        SignUndoState dragUndoState;
         SignEditMode signEditMode = SignEditMode.None;
         PdfPoint dragStartPoint;
         PdfPoint dragStartPoint1;
@@ -109,6 +117,8 @@ namespace KnowledgeSystem.Views._00_Generals
         DXMenuItem itemEditSignDate;
         DXMenuItem itemCopySign;
         DXMenuItem itemPasteSign;
+        DXMenuItem itemDeleteSign;
+        DXMenuItem itemUndoSign;
         Point contextMenuLocation;
 
         bool fullSign = false;
@@ -134,6 +144,10 @@ namespace KnowledgeSystem.Views._00_Generals
             itemPasteSign = CreateMenuItem("貼上簽名/印章 (Ctrl+V)", ItemPasteSign_Click, TPSvgimages.Copy);
             popupMenuSign.Items.Add(itemCopySign);
             popupMenuSign.Items.Add(itemPasteSign);
+            itemDeleteSign = CreateMenuItem("刪除簽名/印章 (Delete)", (s, e) => DeleteSelectedSign(), TPSvgimages.Remove);
+            itemUndoSign = CreateMenuItem("復原 (Ctrl+Z)", (s, e) => UndoSignEdit(), TPSvgimages.Reload);
+            popupMenuSign.Items.Add(itemDeleteSign);
+            popupMenuSign.Items.Add(itemUndoSign);
             itemEditSignDate = CreateMenuItem("修改日期", ItemEditSignDate_Click, TPSvgimages.Edit);
             popupMenuSign.Items.Add(itemEditSignDate);
         }
@@ -181,6 +195,81 @@ namespace KnowledgeSystem.Views._00_Generals
                 selectedSign.Descrip, selectedSign.SignType);
         }
 
+        SignUndoState CaptureSignState()
+        {
+            return new SignUndoState
+            {
+                Signs = signs.Select(sign => new GraphicsCoordinates(sign.PageIndex,
+                    sign.Point1, sign.Point2, sign.ImageSign, sign.Descrip, sign.SignType)).ToList(),
+                SelectedIndex = signs.IndexOf(selectedSign)
+            };
+        }
+
+        void RestoreSignState(SignUndoState state)
+        {
+            signs = state.Signs;
+            selectedSign = state.SelectedIndex >= 0 && state.SelectedIndex < signs.Count
+                ? signs[state.SelectedIndex] : null;
+            contextMenuSign = null;
+        }
+
+        void CompleteSignDrag()
+        {
+            if (dragUndoState == null)
+                return;
+
+            // One drag is one undo step, regardless of the number of mouse moves.
+            if (selectedSign != null && (selectedSign.Point1 != dragStartPoint1
+                || selectedSign.Point2 != dragStartPoint2))
+                signUndoHistory.Push(dragUndoState);
+            dragUndoState = null;
+        }
+
+        void DeleteSelectedSign()
+        {
+            if (selectedSign == null || !signs.Contains(selectedSign))
+                return;
+
+            CompleteSignDrag();
+            signUndoHistory.Push(CaptureSignState());
+            signs.Remove(selectedSign);
+            selectedSign = null;
+            contextMenuSign = null;
+            StopCreatingSign();
+            pdfViewer.Capture = false;
+            pdfViewer.Cursor = Cursors.Default;
+            pdfViewer.Invalidate();
+        }
+
+        void UndoSignEdit()
+        {
+            if (dragUndoState != null)
+            {
+                RestoreSignState(dragUndoState);
+                dragUndoState = null;
+            }
+            else if (currentSign == null && signUndoHistory.Count > 0)
+            {
+                RestoreSignState(signUndoHistory.Pop());
+            }
+
+            StopCreatingSign();
+            pdfViewer.Capture = false;
+            pdfViewer.Cursor = Cursors.Default;
+            pdfViewer.Invalidate();
+        }
+
+        void SetSelectedSignDescription(string description)
+        {
+            if (selectedSign == null || !signs.Contains(selectedSign) || selectedSign.Descrip == description)
+                return;
+
+            CompleteSignDrag();
+            signUndoHistory.Push(CaptureSignState());
+            selectedSign.Descrip = description;
+            pdfViewer.Invalidate();
+        }
+
         void PasteCopiedSign(Point location)
         {
             if (copiedSign == null || !pdfViewer.IsDocumentOpened)
@@ -198,8 +287,10 @@ namespace KnowledgeSystem.Views._00_Generals
                 new PdfPoint(position.Point.X + halfWidth, position.Point.Y + halfHeight),
                 copiedSign.ImageSign, copiedSign.Descrip, copiedSign.SignType);
 
+            CompleteSignDrag();
             StopCreatingSign();
             pdfViewer.Capture = false;
+            signUndoHistory.Push(CaptureSignState());
             signs.Add(pastedSign);
             selectedSign = pastedSign;
             pdfViewer.Focus();
@@ -211,6 +302,18 @@ namespace KnowledgeSystem.Views._00_Generals
         {
             if (pdfViewer.IsDocumentOpened && (pdfViewer.ContainsFocus || ribbonControl1.ContainsFocus))
             {
+                if (pdfViewer.ContainsFocus && keyData == Keys.Delete && selectedSign != null)
+                {
+                    DeleteSelectedSign();
+                    return true;
+                }
+
+                if (pdfViewer.ContainsFocus && keyData == (Keys.Control | Keys.Z))
+                {
+                    UndoSignEdit();
+                    return true;
+                }
+
                 if (keyData == (Keys.Control | Keys.C) && selectedSign != null)
                 {
                     CopySelectedSign();
@@ -549,8 +652,7 @@ namespace KnowledgeSystem.Views._00_Generals
             if (result == null)
                 return;
 
-            selectedSign.Descrip = Convert.ToDateTime(result).ToString("yyyy.MM.dd");
-            pdfViewer.Invalidate();
+            SetSelectedSignDescription(Convert.ToDateTime(result).ToString("yyyy.MM.dd"));
         }
 
         void StopCreatingSign()
@@ -645,6 +747,9 @@ namespace KnowledgeSystem.Views._00_Generals
             }
             OutFileName = outFileName;
             signs.Clear();
+            signUndoHistory.Clear();
+            dragUndoState = null;
+            contextMenuSign = null;
             currentSign = null;
             selectedSign = null;
             signEditMode = SignEditMode.None;
@@ -767,6 +872,9 @@ namespace KnowledgeSystem.Views._00_Generals
                 return;
             }
 
+            if (e.Button != MouseButtons.Left)
+                return;
+
             // Convert the retrieved coordinates to the page coordinates
             if (currentSign != null && signEditMode == SignEditMode.Create)
             {
@@ -774,6 +882,7 @@ namespace KnowledgeSystem.Views._00_Generals
                 if (!currentSign.IsEmpty && ActivateDrawing)
                 {
                     // Add coordinates to the list
+                    signUndoHistory.Push(CaptureSignState());
                     signs.Add(currentSign);
                     selectedSign = currentSign;
                     StopCreatingSign();
@@ -781,6 +890,7 @@ namespace KnowledgeSystem.Views._00_Generals
                 currentSign = null;
             }
 
+            CompleteSignDrag();
             signEditMode = SignEditMode.None;
             pdfViewer.Capture = false;
             UpdateCursor(e.Location);
@@ -811,6 +921,7 @@ namespace KnowledgeSystem.Views._00_Generals
                 dragStartPoint1 = hitSign.Point1;
                 dragStartPoint2 = hitSign.Point2;
                 dragStartClientRectangle = GetClientRectangle(hitSign);
+                dragUndoState = CaptureSignState();
                 pdfViewer.Capture = true;
                 pdfViewer.Invalidate();
                 return;
@@ -844,7 +955,7 @@ namespace KnowledgeSystem.Views._00_Generals
             GraphicsCoordinates hitSign = HitTestSign(location, out hitMode);
             var position = pdfViewer.GetDocumentPosition(location, false);
             bool canPaste = copiedSign != null && position != null && position.PageNumber > 0;
-            if (hitSign == null && !canPaste)
+            if (hitSign == null && !canPaste && signUndoHistory.Count == 0)
                 return;
 
             contextMenuLocation = location;
@@ -852,6 +963,8 @@ namespace KnowledgeSystem.Views._00_Generals
             selectedSign = hitSign;
             itemCopySign.Enabled = hitSign != null;
             itemPasteSign.Enabled = canPaste;
+            itemDeleteSign.Enabled = hitSign != null;
+            itemUndoSign.Enabled = signUndoHistory.Count > 0 || dragUndoState != null || currentSign != null;
             itemEditSignDate.Visible = hitSign != null && hitSign.SignType == SignInfo.Sign
                 && !string.IsNullOrWhiteSpace(hitSign.Descrip);
             pdfViewer.Invalidate();
@@ -892,11 +1005,16 @@ namespace KnowledgeSystem.Views._00_Generals
 
         private void btnClearSign_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            CompleteSignDrag();
+            if (signs.Count > 0)
+                signUndoHistory.Push(CaptureSignState());
             signs.Clear();
             currentSign = null;
             selectedSign = null;
+            contextMenuSign = null;
             signEditMode = SignEditMode.None;
             ActivateDrawing = false;
+            pdfViewer.Capture = false;
             pdfViewer.Invalidate();
         }
 
