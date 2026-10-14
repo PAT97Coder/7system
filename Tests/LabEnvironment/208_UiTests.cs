@@ -128,6 +128,8 @@ public static class Lab208UiTests
                 CheckIsoAppearance(module);
                 module.Load -= (EventHandler)Delegate.CreateDelegate(typeof(EventHandler), module, module.GetType().GetMethod("Module_Load", F));
                 Set(module, "busy", true); Set(module, "departments", depts); Set(module, "devices", data);
+                var deptEditor = (DevExpress.XtraEditors.Repository.RepositoryItemCheckedComboBoxEdit)Get(module, "repoDept");
+                Check(deptEditor.SelectAllItemCaption == "全選", "Department select-all is not localized");
                 ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbDept")).EditValue = "D1";
                 host.Controls.Add(module); module.Dock = DockStyle.Fill; host.Show(); Application.DoEvents();
                 Set(module, "busy", false); Call(module, "BindTree");
@@ -151,10 +153,26 @@ public static class Lab208UiTests
                 Check(tree.Appearance.HeaderPanel.Font.Size == 14.25F, "Tree header font is not standard");
                 Set(module, "busy", true);
                 ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbDept")).EditValue = "D2";
+                data.Rows[0]["IdDept"] = data.Rows[1]["IdDept"] = "D2";
                 Set(module, "busy", false); Call(module, "UpdateButtons");
                 Check(!((DevExpress.XtraBars.BarButtonItem)Get(module, "btnAdd")).Enabled && !((DevExpress.XtraBars.BarButtonItem)Get(module, "btnEdit")).Enabled, "Viewer granted edit controls");
                 menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
                 Check(!menu.Items.Any(item => item.Caption == "編輯設備") && menu.Items.Any(item => item.Caption == "歷史與圖表"), "Viewer menu permissions incorrect");
+                Set(module, "busy", true);
+                ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbDept")).EditValue = "D1, D2, DENIED";
+                data.Rows[0]["IdDept"] = "D1";
+                Set(module, "busy", false); Call(module, "BindTree");
+                Check(((string[])Call(module, "SelectedDepartments")).SequenceEqual(new[] { "D1", "D2" }), "Unauthorized department accepted by filter");
+                Check(tree.Nodes.Count == 2, "Same room in different departments merged");
+                Check(((DevExpress.XtraBars.BarButtonItem)Get(module, "btnAdd")).Enabled, "Cannot add in selected editable department");
+                menu = DeviceMenu(module, tree, tree.FindNodeByFieldValue("IdDevice", 2));
+                Check(!menu.Items.Any(item => item.Caption == "編輯設備"), "Mixed selection grants edit to read-only device");
+                menu = DeviceMenu(module, tree, tree.FindNodeByFieldValue("IdDevice", 1));
+                Check(menu.Items.Any(item => item.Caption == "編輯設備"), "Mixed selection hides edit for authorized device");
+                Set(module, "busy", true);
+                ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbDept")).EditValue = "";
+                Set(module, "busy", false); Call(module, "UpdateButtons");
+                Check(((string[])Call(module, "SelectedDepartments")).Length == 0 && !((DevExpress.XtraBars.BarButtonItem)Get(module, "btnAdd")).Enabled, "Empty department selection permits adding");
                 Check(((DevExpress.XtraBars.BarButtonItem)Get(module, "btnUnknown")).Visibility == DevExpress.XtraBars.BarItemVisibility.Never, "Admin action visible before admin permission");
             }
             using (var history = new f208_ReadingHistory("test", "LAB-001"))

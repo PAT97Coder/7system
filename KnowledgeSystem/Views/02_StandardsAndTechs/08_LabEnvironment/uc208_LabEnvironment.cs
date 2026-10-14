@@ -39,14 +39,18 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 bool admin = await Task.Run(() => bus.IsAdmin(UserId));
                 if (IsDisposed) return;
                 departments = allowed;
-                repoDept.DataSource = departments;
+                repoDept.Items.Clear();
+                repoDept.Items.AddRange(departments.AsEnumerable().Select(r => new DevExpress.XtraEditors.Controls.CheckedListBoxItem
+                {
+                    Value = r["Id"].ToString(), Description = r["Id"].ToString(), CheckState = CheckState.Checked
+                }).ToArray());
                 btnUnknown.Visibility = admin ? DevExpress.XtraBars.BarItemVisibility.Always : DevExpress.XtraBars.BarItemVisibility.Never;
                 if (departments.Rows.Count == 0)
                 {
                     lblStatus.Caption = "尚未授予任何部門的溫濕度查看權限。";
                     return;
                 }
-                cbbDept.EditValue = departments.Rows[0]["Id"];
+                cbbDept.EditValue = string.Join(", ", departments.AsEnumerable().Select(r => r["Id"].ToString()));
                 if (Parent != null) refreshTimer.Start();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -60,16 +64,25 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             int id = Convert.ToInt32(treeData.FocusedNode.GetValue("IdDevice"));
             return rows.TryGetValue(id, out DataRow row) ? row : null;
         }
-        private bool CanEdit()
+        private string[] SelectedDepartments()
         {
-            var dept = departments?.AsEnumerable().FirstOrDefault(r => r["Id"].ToString() == cbbDept.EditValue?.ToString());
+            if (departments == null) return new string[0];
+            var selected = new HashSet<string>((cbbDept.EditValue?.ToString() ?? "").Split(repoDept.SeparatorChar)
+                .Select(id => id.Trim()).Where(id => id.Length > 0));
+            return departments.AsEnumerable().Select(r => r["Id"].ToString()).Where(selected.Contains).Distinct().ToArray();
+        }
+        private bool CanEdit(string department)
+        {
+            var dept = departments?.AsEnumerable().FirstOrDefault(r => r["Id"].ToString() == department);
             return dept != null && Convert.ToBoolean(dept["CanEdit"]);
         }
+        private string NewDeviceDepartment() => SelectedDepartments().FirstOrDefault(CanEdit);
+        private bool CanEditSelectedDevice() => SelectedDevice() != null && CanEdit(SelectedDevice()["IdDept"].ToString());
         private void UpdateButtons()
         {
             bool selected = SelectedDevice() != null;
-            btnAdd.Enabled = !busy && CanEdit();
-            btnEdit.Enabled = !busy && selected && CanEdit();
+            btnAdd.Enabled = !busy && NewDeviceDepartment() != null;
+            btnEdit.Enabled = !busy && selected && CanEditSelectedDevice();
             btnHistory.Enabled = btnConfigHistory.Enabled = !busy && selected;
             btnReload.Enabled = btnExport.Enabled = !busy && devices != null;
             cbbDept.Enabled = !busy && departments != null && departments.Rows.Count > 0;
@@ -84,19 +97,29 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             if (SelectedDevice() == null) return;
             e.Menu.Items.Add(Lab208Ui.Menu("歷史與圖表", (s, a) => OpenHistory(), Helpers.TPSvgimages.View, btnHistory.Enabled, true));
             e.Menu.Items.Add(Lab208Ui.Menu("設定紀錄", (s, a) => ConfigHistory_Click(s, null), Helpers.TPSvgimages.Info, btnConfigHistory.Enabled));
-            if (CanEdit()) e.Menu.Items.Add(Lab208Ui.Menu("編輯設備", (s, a) => EditDevice_Click(s, null), Helpers.TPSvgimages.Edit, btnEdit.Enabled, true));
+            if (CanEditSelectedDevice()) e.Menu.Items.Add(Lab208Ui.Menu("編輯設備", (s, a) => EditDevice_Click(s, null), Helpers.TPSvgimages.Edit, btnEdit.Enabled, true));
         }
         private async Task ReloadAsync()
         {
-            if (busy || cbbDept.EditValue == null || IsDisposed) return;
-            string dept = cbbDept.EditValue.ToString();
+            if (busy || departments == null || IsDisposed) return;
+            string[] selectedDepartments = SelectedDepartments();
+            string userId = UserId;
             busy = true;
             UpdateButtons();
             try
             {
-                var result = await Task.Run(() => bus.GetDevices(UserId, dept));
+                var result = await Task.Run(() =>
+                {
+                    DataTable combined = null;
+                    foreach (string dept in selectedDepartments)
+                    {
+                        var data = bus.GetDevices(userId, dept);
+                        if (combined == null) combined = data; else combined.Merge(data);
+                    }
+                    return combined;
+                });
                 if (IsDisposed) return;
-                devices = result;
+                devices = result ?? devices?.Clone() ?? new DataTable();
                 BindTree();
             }
             catch (Exception ex) { ShowError(ex); }
@@ -115,7 +138,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             int next = 1;
             DateTime now = dt208_EnvironmentRules.VietnamNow;
             int abnormal = 0, stale = 0, noData = 0;
-            foreach (var group in devices.AsEnumerable().GroupBy(r => r["Location"].ToString()))
+            foreach (var group in devices.AsEnumerable().GroupBy(r => new { Department = r["IdDept"].ToString(), Location = r["Location"].ToString() }))
             {
                 int parent = next++;
                 var children = new List<DataRow>();
@@ -144,7 +167,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 }
                 if (children.Count == 0) continue;
                 var location = table.NewRow(); location["NodeId"] = parent; location["ParentId"] = 0; location["IdDevice"] = 0;
-                location["DisplayName"] = group.Key; table.Rows.Add(location);
+                location["DisplayName"] = SelectedDepartments().Length > 1 ? $"{group.Key.Department}／{group.Key.Location}" : group.Key.Location; table.Rows.Add(location);
                 foreach (var child in children) table.Rows.Add(child);
             }
             treeData.BeginUpdate();
@@ -165,13 +188,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private async void EditDevice_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e) { await EditDeviceAsync(SelectedDevice()); }
         private async Task EditDeviceAsync(DataRow row)
         {
-            if (busy || !CanEdit()) return;
+            string department = row == null ? NewDeviceDepartment() : row["IdDept"].ToString();
+            if (busy || department == null || !CanEdit(department)) return;
             busy = true; UpdateButtons();
             try
             {
                 var managers = await Task.Run(() => bus.GetManagers());
                 if (IsDisposed) return;
-                using (var form = new f208_DeviceInfo(UserId, departments, managers, cbbDept.EditValue.ToString(), row))
+                using (var form = new f208_DeviceInfo(UserId, departments, managers, department, row))
                     if (form.ShowDialog(FindForm()) != DialogResult.OK) return;
             }
             catch (Exception ex) { ShowError(ex); }

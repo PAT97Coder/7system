@@ -49,13 +49,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
 
             txbCause = new DevExpress.XtraEditors.MemoEdit();
             txbCause.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbCauseItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbCause, Text = "原因 *", Location = new System.Drawing.Point(0, 0), Size = new System.Drawing.Size(680, 42) };
+            txbCauseItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbCause, AllowHtmlStringInCaption = true, Text = "原因<color=red>*</color>", Location = new System.Drawing.Point(0, 0), Size = new System.Drawing.Size(680, 42) };
             txbCauseItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbCauseItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbCause);
             txbAction = new DevExpress.XtraEditors.MemoEdit();
             txbAction.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbActionItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbAction, Text = "處理措施 *", Location = new System.Drawing.Point(0, 42), Size = new System.Drawing.Size(680, 42) };
+            txbActionItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbAction, AllowHtmlStringInCaption = true, Text = "處理措施<color=red>*</color>", Location = new System.Drawing.Point(0, 42), Size = new System.Drawing.Size(680, 42) };
             txbActionItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbActionItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbAction);

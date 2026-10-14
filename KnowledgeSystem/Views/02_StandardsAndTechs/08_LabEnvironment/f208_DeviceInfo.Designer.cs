@@ -71,13 +71,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
 
             txbSN = new DevExpress.XtraEditors.TextEdit();
             txbSN.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbSNItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbSN, Text = "設備序號 *", Location = new System.Drawing.Point(0, 0), Size = new System.Drawing.Size(740, 42) };
+            txbSNItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbSN, AllowHtmlStringInCaption = true, Text = "設備序號<color=red>*</color>", Location = new System.Drawing.Point(0, 0), Size = new System.Drawing.Size(740, 42) };
             txbSNItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbSNItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbSN);
             txbName = new DevExpress.XtraEditors.TextEdit();
             txbName.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbNameItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbName, Text = "設備名稱 *", Location = new System.Drawing.Point(0, 42), Size = new System.Drawing.Size(740, 42) };
+            txbNameItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbName, AllowHtmlStringInCaption = true, Text = "設備名稱<color=red>*</color>", Location = new System.Drawing.Point(0, 42), Size = new System.Drawing.Size(740, 42) };
             txbNameItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbNameItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbName);
@@ -89,19 +89,19 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             contentPanel.Controls.Add(txbModel);
             cbbDept = new DevExpress.XtraEditors.LookUpEdit();
             cbbDept.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            cbbDeptItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbDept, Text = "部門 *", Location = new System.Drawing.Point(0, 126), Size = new System.Drawing.Size(740, 42) };
+            cbbDeptItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbDept, AllowHtmlStringInCaption = true, Text = "部門<color=red>*</color>", Location = new System.Drawing.Point(0, 126), Size = new System.Drawing.Size(740, 42) };
             cbbDeptItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             cbbDeptItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(cbbDept);
             txbLocation = new DevExpress.XtraEditors.TextEdit();
             txbLocation.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbLocationItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbLocation, Text = "位置／房間 *", Location = new System.Drawing.Point(0, 168), Size = new System.Drawing.Size(740, 42) };
+            txbLocationItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbLocation, AllowHtmlStringInCaption = true, Text = "位置／房間<color=red>*</color>", Location = new System.Drawing.Point(0, 168), Size = new System.Drawing.Size(740, 42) };
             txbLocationItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbLocationItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbLocation);
             cbbManager = new DevExpress.XtraEditors.LookUpEdit();
             cbbManager.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            cbbManagerItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbManager, Text = "管理人 *", Location = new System.Drawing.Point(0, 210), Size = new System.Drawing.Size(740, 42) };
+            cbbManagerItem = new DevExpress.XtraLayout.LayoutControlItem { Control = cbbManager, AllowHtmlStringInCaption = true, Text = "管理人<color=red>*</color>", Location = new System.Drawing.Point(0, 210), Size = new System.Drawing.Size(740, 42) };
             cbbManagerItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             cbbManagerItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(cbbManager);
@@ -155,7 +155,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             contentPanel.Controls.Add(cbbState);
             txbReason = new DevExpress.XtraEditors.MemoEdit();
             txbReason.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            txbReasonItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbReason, Text = "變更原因 *", Location = new System.Drawing.Point(0, 588), Size = new System.Drawing.Size(740, 42) };
+            txbReasonItem = new DevExpress.XtraLayout.LayoutControlItem { Control = txbReason, AllowHtmlStringInCaption = true, Text = "變更原因<color=red>*</color>", Location = new System.Drawing.Point(0, 588), Size = new System.Drawing.Size(740, 42) };
             txbReasonItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             txbReasonItem.AppearanceItemCaption.Options.UseFont = true;
             contentPanel.Controls.Add(txbReason);
@@ -184,7 +184,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             txbSNItem.Location = new System.Drawing.Point(0, 0); txbSNItem.Size = new System.Drawing.Size(370, 36);
             txbModelItem.Location = new System.Drawing.Point(370, 0); txbModelItem.Size = new System.Drawing.Size(370, 36);
             txbNameItem.Location = new System.Drawing.Point(0, 36); txbNameItem.Size = new System.Drawing.Size(740, 36);
-            cbbDeptItem.Location = new System.Drawing.Point(0, 72); cbbDeptItem.Size = new System.Drawing.Size(370, 36); cbbDeptItem.Text = "實驗室 *";
+            cbbDeptItem.Location = new System.Drawing.Point(0, 72); cbbDeptItem.Size = new System.Drawing.Size(370, 36); cbbDeptItem.Text = "實驗室<color=red>*</color>";
             cbbManagerItem.Location = new System.Drawing.Point(370, 72); cbbManagerItem.Size = new System.Drawing.Size(370, 36);
             txbLocationItem.Location = new System.Drawing.Point(0, 108); txbLocationItem.Size = new System.Drawing.Size(740, 36);
             temperatureFormatItem.Location = new System.Drawing.Point(0, 144); temperatureFormatItem.Size = new System.Drawing.Size(740, 36);

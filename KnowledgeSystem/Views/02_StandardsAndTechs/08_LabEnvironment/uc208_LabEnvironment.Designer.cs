@@ -6,7 +6,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private DevExpress.XtraBars.BarDockControl dockTop, dockBottom, dockLeft, dockRight;
         private DevExpress.XtraBars.BarManager barManager;
         private DevExpress.XtraBars.BarEditItem cbbDept, cbbStatus;
-        private DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit repoDept;
+        private DevExpress.XtraEditors.Repository.RepositoryItemCheckedComboBoxEdit repoDept;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox repoStatus;
         private DevExpress.XtraBars.BarButtonItem btnAdd, btnEdit, btnHistory, btnConfigHistory, btnReload, btnExport, btnUnknown;
         private DevExpress.XtraBars.BarStaticItem lblStatus;
@@ -40,9 +40,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             dockLeft = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Left };
             dockRight = new DevExpress.XtraBars.BarDockControl { Manager = barManager, Dock = System.Windows.Forms.DockStyle.Right };
             Controls.AddRange(new System.Windows.Forms.Control[] { dockTop, dockBottom, dockLeft, dockRight });
-            repoDept = new DevExpress.XtraEditors.Repository.RepositoryItemLookUpEdit { ValueMember = "Id", DisplayMember = "DisplayName", NullText = "選擇部門", TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor };
-            repoDept.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("Id", "部門代碼"));
-            repoDept.Columns.Add(new DevExpress.XtraEditors.Controls.LookUpColumnInfo("DisplayName", "部門名稱"));
+            repoDept = new DevExpress.XtraEditors.Repository.RepositoryItemCheckedComboBoxEdit { NullText = "選擇部門", SelectAllItemCaption = "全選", SeparatorChar = ',', TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor };
             repoStatus = new DevExpress.XtraEditors.Repository.RepositoryItemComboBox { TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor };
             repoStatus.Items.AddRange(new object[] { "全部", "使用中", "超限", "資料逾時", "尚無資料" });
             barManager.RepositoryItems.Add(repoDept); barManager.RepositoryItems.Add(repoStatus);
