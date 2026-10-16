@@ -166,5 +166,8 @@ namespace DataAccessLayer
         public virtual DbSet<dt315_InterviewReport> dt315_InterviewReport { get; set; }
         public virtual DbSet<dt315_InterviewScore> dt315_InterviewScore { get; set; }
         public virtual DbSet<dt315_InterviewScoreAudit> dt315_InterviewScoreAudit { get; set; }
+        public virtual DbSet<dt316_Plan> dt316_Plan { get; set; }
+        public virtual DbSet<dt316_PlanUser> dt316_PlanUser { get; set; }
+        public virtual DbSet<dt316_Report> dt316_Report { get; set; }
     }
 }
