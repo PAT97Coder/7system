@@ -46,6 +46,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         List<dm_Group> groups;
         List<dm_Departments> depts;
         bool isCanEdit;
+        bool isCanDelete;
 
         DXMenuItem itemAddNode;
         DXMenuItem itemAddAtt;
@@ -440,7 +441,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         // Xóa node
         private void ItemDeleteNote_Click(object sender, EventArgs e)
         {
-            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+            if (!Iso201Permission.EnsureCanDeleteCurrentUser()) return;
 
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
@@ -544,6 +545,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         private void uc201_AuditISOMain_Load(object sender, EventArgs e)
         {
             isCanEdit = Iso201Permission.CanEditCurrentUser();
+            isCanDelete = Iso201Permission.CanDeleteCurrentUser();
 
             tlsData.DataSource = sourceData;
             tlsData.KeyFieldName = "data.Id";
@@ -673,7 +675,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                     if (isCanEdit)
                     {
                         e.Menu.Items.Add(itemEditNode);
-                        e.Menu.Items.Add(itemDelNode);
+                        if (isCanDelete) e.Menu.Items.Add(itemDelNode);
                     }
 
                     if (groups.Select(r => r.IdDept).Contains("7820") && currentData.DisplayName == "校正證書")
@@ -697,7 +699,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                 if (isCanEdit)
                 {
                     e.Menu.Items.Add(itemEditNode);
-                    e.Menu.Items.Add(itemDelNode);
+                    if (isCanDelete) e.Menu.Items.Add(itemDelNode);
                     e.Menu.Items.Add(itemDisable);
                 }
             }
@@ -707,7 +709,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                 if (isCanEdit)
                 {
                     e.Menu.Items.Add(itemEditNode);
-                    e.Menu.Items.Add(itemDelNode);
+                    if (isCanDelete) e.Menu.Items.Add(itemDelNode);
                     e.Menu.Items.Add(itemDisable);
                 }
             }
@@ -718,7 +720,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                 if (isCanEdit)
                 {
                     e.Menu.Items.Add(itemEditNode);
-                    e.Menu.Items.Add(itemDelNode);
+                    if (isCanDelete) e.Menu.Items.Add(itemDelNode);
                     e.Menu.Items.Add(itemDisable);
                 }
             }
@@ -773,6 +775,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         private void btnReload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             isCanEdit = Iso201Permission.CanEditCurrentUser();
+            isCanDelete = Iso201Permission.CanDeleteCurrentUser();
             LoadData();
         }
 
