@@ -86,6 +86,7 @@ public static class Lab208UiTests
             var data = new DataTable();
             foreach (string field in new[] { "Id", "DeviceState", "ExpectedMinutes", "ConflictCount" }) data.Columns.Add(field, typeof(int));
             data.Columns.Add("ConfigId", typeof(long));
+            data.Columns.Add("ReadingId", typeof(long));
             foreach (string field in new[] { "MeasuredAt", "ReceivedAt", "EffectiveFrom" }) data.Columns.Add(field, typeof(DateTime));
             foreach (string field in new[] { "Temperature", "Humidity", "TempMin", "TempMax", "HumidityMin", "HumidityMax" }) data.Columns.Add(field, typeof(decimal));
             foreach (string field in new[] { "SN", "DisplayName", "Model", "IdDept", "Location", "IdManager", "ManagerName" }) data.Columns.Add(field);
@@ -95,7 +96,7 @@ public static class Lab208UiTests
                 var row = data.NewRow(); row["Id"] = i; row["ConfigId"] = (long)i; row["DeviceState"] = 0; row["ExpectedMinutes"] = 60; row["ConflictCount"] = 0;
                 row["SN"] = "LAB-00" + i; row["DisplayName"] = "溫濕度計 " + i; row["Model"] = "Model"; row["IdDept"] = "D1"; row["Location"] = "實驗室 A"; row["IdManager"] = "M1"; row["ManagerName"] = "管理人";
                 row["TempMin"] = 15m; row["TempMax"] = 25m; row["HumidityMin"] = 50m; row["HumidityMax"] = 70m; row["EffectiveFrom"] = now.Date;
-                if (i == 1) { row["Temperature"] = 26m; row["Humidity"] = 65m; row["MeasuredAt"] = now.AddMinutes(-5); row["ReceivedAt"] = now; }
+                if (i == 1) { row["ReadingId"] = 101L; row["Temperature"] = 26m; row["Humidity"] = 65m; row["MeasuredAt"] = now.AddMinutes(-5); row["ReceivedAt"] = now; }
                 data.Rows.Add(row);
             }
             using (var device = new f208_DeviceInfo("test", depts, managers, "D1", data.Rows[0]))
@@ -140,6 +141,17 @@ public static class Lab208UiTests
                 Check(((DevExpress.XtraBars.BarButtonItem)Get(module, "btnEdit")).Enabled, "Edit not enabled for granted department");
                 var menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[1]);
                 Check(menu.Items.Any(item => item.Caption == "編輯設備"), "Editor missing edit menu");
+                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Device without readings has an excursion action");
+                menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
+                Check(menu.Items.Any(item => item.Caption == "處理超限" && item.Enabled), "Handler missing direct excursion action");
+                data.Rows[0]["Temperature"] = 25m;
+                menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
+                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Normal reading has an excursion action");
+                data.Rows[0]["Temperature"] = 26m;
+                depts.Rows[0]["CanHandle"] = false;
+                menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
+                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Editor without handle permission can handle excursions");
+                depts.Rows[0]["CanHandle"] = true;
                 ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbStatus")).EditValue = "超限";
                 Check(tree.Nodes[0].Nodes.Count == 1, "Abnormal filter includes unrelated sensor");
                 ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbStatus")).EditValue = "尚無資料";
@@ -189,6 +201,14 @@ public static class Lab208UiTests
                 row["CanHandle"] = true; row["Status"] = "正常"; Call(history, "UpdateButtons");
                 Check(!((DevExpress.XtraBars.BarButtonItem)Get(history, "btnAction")).Enabled, "Handler can handle normal reading");
                 Check(((DevExpress.XtraCharts.ChartControl)Get(history, "chartTemperature")).Series.Count == 3, "Threshold series missing");
+                foreach (string name in new[] { "chartTemperature", "chartHumidity" })
+                {
+                    var chart = (DevExpress.XtraCharts.ChartControl)Get(history, name);
+                    Check(chart.CrosshairEnabled == DevExpress.Utils.DefaultBoolean.True && chart.ToolTipEnabled == DevExpress.Utils.DefaultBoolean.True, "Chart hover is disabled");
+                    Check(chart.CrosshairOptions.GroupHeaderPattern.Contains("yyyy/MM/dd HH:mm:ss"), "Crosshair omits full measurement time");
+                    foreach (DevExpress.XtraCharts.Series series in chart.Series)
+                        Check(series.ToolTipPointPattern.Contains("yyyy/MM/dd HH:mm:ss"), "Point tooltip omits full measurement time");
+                }
                 // A reading before registration must not get a fabricated threshold.
                 row["TempMin"] = DBNull.Value; row["HumidityMin"] = DBNull.Value; Call(history, "DrawCharts");
                 Check(dt208_EnvironmentRules.MeasurementStatus(row) == "未有有效設定", "Unconfigured reading evaluated as passing");

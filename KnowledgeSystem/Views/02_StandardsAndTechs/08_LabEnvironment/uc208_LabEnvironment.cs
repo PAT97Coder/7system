@@ -78,6 +78,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         }
         private string NewDeviceDepartment() => SelectedDepartments().FirstOrDefault(CanEdit);
         private bool CanEditSelectedDevice() => SelectedDevice() != null && CanEdit(SelectedDevice()["IdDept"].ToString());
+        private bool CanHandleSelectedReading()
+        {
+            var row = SelectedDevice();
+            if (row == null || row.IsNull("ReadingId")) return false;
+            var dept = departments?.AsEnumerable().FirstOrDefault(r => r["Id"].ToString() == row["IdDept"].ToString());
+            return dept != null && !dept.IsNull("CanHandle") && Convert.ToBoolean(dept["CanHandle"])
+                && dt208_EnvironmentRules.MeasurementStatus(row).Contains("超限");
+        }
         private void UpdateButtons()
         {
             bool selected = SelectedDevice() != null;
@@ -97,6 +105,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             if (SelectedDevice() == null) return;
             e.Menu.Items.Add(Lab208Ui.Menu("歷史與圖表", (s, a) => OpenHistory(), Helpers.TPSvgimages.View, btnHistory.Enabled, true));
             e.Menu.Items.Add(Lab208Ui.Menu("設定紀錄", (s, a) => ConfigHistory_Click(s, null), Helpers.TPSvgimages.Info, btnConfigHistory.Enabled));
+            if (CanHandleSelectedReading())
+                e.Menu.Items.Add(Lab208Ui.Menu("處理超限", async (s, a) => await HandleReadingAsync(), Helpers.TPSvgimages.Edit, !busy, true));
             if (CanEditSelectedDevice()) e.Menu.Items.Add(Lab208Ui.Menu("編輯設備", (s, a) => EditDevice_Click(s, null), Helpers.TPSvgimages.Edit, btnEdit.Enabled, true));
         }
         private async Task ReloadAsync()
@@ -203,6 +213,21 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             await ReloadAsync();
         }
         private void History_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e) { OpenHistory(); }
+        private async Task HandleReadingAsync()
+        {
+            if (busy || !CanHandleSelectedReading()) return;
+            long readingId = Convert.ToInt64(SelectedDevice()["ReadingId"]);
+            string userId = UserId;
+            busy = true; UpdateButtons();
+            try
+            {
+                using (var form = new f208_ReadingAction(userId, readingId, true))
+                    if (form.ShowDialog(FindForm()) != DialogResult.OK) return;
+            }
+            catch (Exception ex) { ShowError(ex); }
+            finally { busy = false; if (!IsDisposed) UpdateButtons(); }
+            await ReloadAsync();
+        }
         private void OpenHistory()
         {
             var row = SelectedDevice();

@@ -70,6 +70,9 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             view.RowStyle += (s, e) => { var row = view.GetDataRow(e.RowHandle); if (row != null && row.Table.Columns.Contains("Status") && row["Status"].ToString().Contains("超限")) e.Appearance.ForeColor = System.Drawing.Color.Firebrick; };
             chartTemperature = new DevExpress.XtraCharts.ChartControl(); chartHumidity = new DevExpress.XtraCharts.ChartControl();
             chartTemperature.Font = chartHumidity.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            chartTemperature.CrosshairEnabled = chartHumidity.CrosshairEnabled = DevExpress.Utils.DefaultBoolean.True;
+            chartTemperature.ToolTipEnabled = chartHumidity.ToolTipEnabled = DevExpress.Utils.DefaultBoolean.True;
+            chartTemperature.CrosshairOptions.GroupHeaderPattern = chartHumidity.CrosshairOptions.GroupHeaderPattern = "{A:yyyy/MM/dd HH:mm:ss} (UTC+07)";
             contentLayout = new DevExpress.XtraLayout.LayoutControl { Dock = System.Windows.Forms.DockStyle.Fill, AllowCustomization = false };
             layoutRoot = new DevExpress.XtraLayout.LayoutControlGroup { GroupBordersVisible = false, EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True, Padding = new DevExpress.XtraLayout.Utils.Padding(10, 10, 10, 10) };
             chartGroup = new DevExpress.XtraLayout.LayoutControlGroup { GroupBordersVisible = false, Location = new System.Drawing.Point(0, 360), Size = new System.Drawing.Size(1220, 300) };

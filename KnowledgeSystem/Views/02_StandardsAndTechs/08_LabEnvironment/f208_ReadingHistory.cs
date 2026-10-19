@@ -90,6 +90,11 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             var actual = new Series(caption, ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
             var lower = new Series("下限", ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
             var upper = new Series("上限", ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
+            foreach (var series in new[] { actual, lower, upper })
+            {
+                series.CrosshairLabelPattern = "{S}: {V:0.##}";
+                series.ToolTipPointPattern = "{A:yyyy/MM/dd HH:mm:ss} (UTC+07)\n{S}: {V:0.##}";
+            }
             ((LineSeriesView)actual.View).Color = Color.RoyalBlue; ((LineSeriesView)lower.View).Color = Color.DarkOrange; ((LineSeriesView)upper.View).Color = Color.Firebrick;
             // The thresholds are taken from the configuration effective for each reading.
             foreach (DataRow row in readings.AsEnumerable().OrderBy(r => r["MeasuredAt"]))

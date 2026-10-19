@@ -105,6 +105,9 @@ Không dùng tài khoản SQL quản trị hoặc tài khoản của ứng dụn
   chỉ lọc bảng, biểu đồ vẫn hiển thị toàn bộ số đo trong khoảng đã chọn.
 - **處理超限** trong menu chuột phải của số đo vượt giới hạn: ghi nguyên nhân, biện pháp và kết quả; kết quả bắt buộc và có xác nhận khi kết án.
   Nhật ký xử lý được thêm mới, không ghi đè các lần xử lý trước.
+  Có thể mở trực tiếp từ menu chuột phải của thiết bị trên màn hình chính để xử lý số đo mới nhất vượt giới hạn.
+  Mục này chỉ hiện cho người có quyền HANDLE trong bộ phận của số đo; nguyên nhân và biện pháp xử lý bắt buộc khi lưu.
+- Rê chuột trên biểu đồ nhiệt độ/độ ẩm để xem thời gian đo đầy đủ `yyyy/MM/dd HH:mm:ss` (UTC+07), số đo và giới hạn.
 - **資料衝突**: xem các giá trị app gửi khác số đo gốc tại cùng thời điểm.
 - Xuất Excel theo các hàng đang lọc; màn hình lịch sử/nhật ký hỗ trợ xem trước khi in.
 
