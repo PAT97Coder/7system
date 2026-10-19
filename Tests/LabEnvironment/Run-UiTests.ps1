@@ -8,7 +8,7 @@ $refs = @('KnowledgeSystem.exe','BusinessLayer.dll','DataAccessLayer.dll','Entit
 $refs += Get-ChildItem -LiteralPath $binPath -Filter 'DevExpress*.dll' | ForEach-Object { '/r:' + $_.FullName }
 $exePath = Join-Path $binPath 'Lab208UiTests.exe'
 try {
- & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot '208_UiTests.cs')
+ & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot '208_UiTests.cs') (Join-Path $PSScriptRoot '208_MonthlyReportTests.cs')
  if ($LASTEXITCODE -ne 0) { throw 'UI tests compilation failed' }
  & $exePath
  if ($LASTEXITCODE -ne 0) { throw 'UI tests failed' }

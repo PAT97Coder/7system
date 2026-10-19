@@ -93,6 +93,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             btnEdit.Enabled = !busy && selected && CanEditSelectedDevice();
             btnHistory.Enabled = btnConfigHistory.Enabled = !busy && selected;
             btnReload.Enabled = btnExport.Enabled = !busy && devices != null;
+            btnMonthlyReport.Enabled = !busy && devices != null && devices.Rows.Count > 0;
             cbbDept.Enabled = !busy && departments != null && departments.Rows.Count > 0;
             cbbStatus.Enabled = !busy && devices != null;
             btnUnknown.Enabled = !busy;
@@ -265,6 +266,11 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         {
             using (var dialog = new SaveFileDialog { Filter = "Excel (*.xlsx)|*.xlsx", FileName = "溫濕度設備.xlsx" })
                 if (dialog.ShowDialog() == DialogResult.OK) try { treeData.ExportToXlsx(dialog.FileName); } catch (Exception ex) { ShowError(ex); }
+        }
+        private void MonthlyReport_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (busy || devices == null || devices.Rows.Count == 0) return;
+            using (var form = new f208_MonthlyReport(UserId, devices)) form.ShowDialog(FindForm());
         }
         private void ShowError(Exception ex) { if (!IsDisposed) MsgTP.MsgError("溫濕度資料處理失敗：\r\n" + ex.Message); }
         protected override void OnParentChanged(EventArgs e)

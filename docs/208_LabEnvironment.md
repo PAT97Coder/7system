@@ -110,6 +110,22 @@ Không dùng tài khoản SQL quản trị hoặc tài khoản của ứng dụn
 - Rê chuột trên biểu đồ nhiệt độ/độ ẩm để xem thời gian đo đầy đủ `yyyy/MM/dd HH:mm:ss` (UTC+07), số đo và giới hạn.
 - **資料衝突**: xem các giá trị app gửi khác số đo gốc tại cùng thời điểm.
 - Xuất Excel theo các hàng đang lọc; màn hình lịch sử/nhật ký hỗ trợ xem trước khi in.
+- **月檢查表** trên thanh lệnh chính: chọn tháng, phòng (kèm bộ phận) và SN thiết bị để xuất
+  biểu `GA-700-B007-03實驗室溫濕度檢查紀錄表-R1.xls`. Danh sách phòng/thiết bị lấy từ
+  các bộ phận đang chọn mà người dùng có quyền xem. Thiết bị được lọc lại khi đổi phòng.
+  Mỗi ngày một hàng, hai lượt **08:00** và **16:00** theo giờ Việt Nam; lấy số đo gần nhất
+  trong **±30 phút**, bao gồm hai đầu. Nếu khoảng cách bằng nhau lấy số đo sớm hơn;
+  thiếu dữ liệu thì để trống, ngày không tồn tại trong tháng không điền.
+  Chỉ lấy số đo có cấu hình hiệu lực thuộc đúng bộ phận, phòng và SN đã chọn tại thời điểm đo.
+  File giữ bố cục, nội dung song ngữ và font của mẫu gốc, chỉnh vùng in sheet đầu vừa một trang;
+  không xuất sheet ví dụ cũ.
+  Cột giờ ghi giờ đo thực tế. Ô người kiểm tra và ký duyệt để trống cho người thực hiện điền.
+  Số đo vượt giới hạn tô đỏ, đánh dấu lượt 1/2 trong cột ghi chú; sheet **量測明細**
+  ghi đầy đủ giờ dự kiến/thực tế, ngưỡng hiệu lực, nguyên nhân, biện pháp, kết quả và người xử lý.
+  Nếu ngưỡng đổi trong tháng, tiêu đề dẫn chiếu sheet chi tiết thay vì dùng ngưỡng hiện tại cho cả tháng.
+  Mẫu được nhúng vào ứng dụng, không phụ thuộc đường dẫn máy phát triển hay cài thêm Excel.
+  Truy vấn tháng vượt 10.000 bản ghi được chia theo ngày; nếu một ngày vẫn vượt giới hạn
+  thì báo lỗi để tránh xuất dữ liệu bị cắt.
 
 Giao diện 208 dùng BarManager và LayoutControl theo kiểu ISO. Thanh lệnh dùng SVG 32×32,
 font Microsoft JhengHei UI 14.25; dòng dữ liệu và menu dùng cỡ 12. Menu chuột phải giữ

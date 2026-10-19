@@ -8,7 +8,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private DevExpress.XtraBars.BarEditItem cbbDept, cbbStatus;
         private DevExpress.XtraEditors.Repository.RepositoryItemCheckedComboBoxEdit repoDept;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox repoStatus;
-        private DevExpress.XtraBars.BarButtonItem btnAdd, btnEdit, btnHistory, btnConfigHistory, btnReload, btnExport, btnUnknown;
+        private DevExpress.XtraBars.BarButtonItem btnAdd, btnEdit, btnHistory, btnConfigHistory, btnReload, btnExport, btnUnknown, btnMonthlyReport;
         private DevExpress.XtraBars.BarStaticItem lblStatus;
         private DevExpress.XtraTreeList.TreeList treeData;
         private System.Windows.Forms.Timer refreshTimer;
@@ -62,9 +62,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             toolbar.AddItem(btnAdd);
             toolbar.AddItem(btnReload).BeginGroup = true;
             toolbar.AddItem(btnExport).BeginGroup = true;
+            btnMonthlyReport = new DevExpress.XtraBars.BarButtonItem(barManager, "月檢查表") { Enabled = false };
+            btnMonthlyReport.ImageOptions.SvgImage = Helpers.TPSvgimages.Excel;
+            Lab208Ui.StyleBarItem(btnMonthlyReport); btnMonthlyReport.ItemClick += MonthlyReport_Click;
             toolbar.AddItem(cbbDept).BeginGroup = true;
             toolbar.AddItem(cbbStatus).BeginGroup = true;
             toolbar.AddItem(btnUnknown).BeginGroup = true;
+            toolbar.AddItem(btnMonthlyReport).BeginGroup = true;
             Lab208Ui.StyleBarItem(cbbDept); Lab208Ui.StyleBarItem(cbbStatus);
             cbbDept.EditWidth = cbbStatus.EditWidth = 150;
             cbbDept.PaintStyle = cbbStatus.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.Caption;

@@ -2420,6 +2420,10 @@
   -->
   <ItemGroup>
     <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.cs"><SubType>UserControl</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\Lab208MonthlyExporter.cs" />
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_MonthlyReport.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_MonthlyReport.Designer.cs"><DependentUpon>f208_MonthlyReport.cs</DependentUpon></Compile>
+    <EmbeddedResource Include="AppResources\208\MonthlyInspection.xls"><LogicalName>KnowledgeSystem.Lab208.MonthlyInspection.xls</LogicalName></EmbeddedResource>
     <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.Designer.cs"><DependentUpon>uc208_LabEnvironment.cs</DependentUpon></Compile>
     <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\uc208_LabEnvironment.resx"><DependentUpon>uc208_LabEnvironment.cs</DependentUpon></EmbeddedResource>
     <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DeviceInfo.cs"><SubType>Form</SubType></Compile>

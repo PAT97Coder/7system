@@ -75,6 +75,7 @@ public static class Lab208UiTests
     {
         try
         {
+            Lab208MonthlyReportTests.Run();
             using (var home = new KnowledgeSystem.Views._00_Generals.f00_Main())
             {
                 Check(home.GetType().GetField("btnLabEnvironment", F) == null, "Unexpected temperature/humidity tile on home screen");
@@ -226,6 +227,26 @@ public static class Lab208UiTests
             }
             using (var device = new f208_DeviceInfo("test", depts, managers, "D2", null))
                 Check(!((DevExpress.XtraBars.BarButtonItem)Get(device, "btnSave")).Enabled, "Viewer can save device dialog");
+            var reportDevices = data.Copy(); reportDevices.Rows[0]["IdDept"] = "D1"; reportDevices.Rows[1]["IdDept"] = "D2";
+            using (var monthly = new f208_MonthlyReport("test", reportDevices))
+            {
+                monthly.Opacity = 0; monthly.ShowInTaskbar = false; monthly.Show(); Application.DoEvents();
+                var roomEdit = (LookUpEdit)Get(monthly, "roomEdit"); var deviceEdit = (LookUpEdit)Get(monthly, "deviceEdit");
+                Check(((DataTable)roomEdit.Properties.DataSource).Rows.Count == 2, "Rooms with same name in different departments merged");
+                Check(((DataRow)Call(monthly, "SelectedDevice"))["SN"].ToString() == "LAB-001", "Initial room/device selection failed");
+                roomEdit.EditValue = 2;
+                Check(((DataRow)Call(monthly, "SelectedDevice"))["SN"].ToString() == "LAB-002", "Room change retained previous device");
+                deviceEdit.EditValue = 1; Call(monthly, "UpdateExportButton");
+                Check(!((DevExpress.XtraBars.BarButtonItem)Get(monthly, "btnExport")).Enabled, "Wrong-room device can be exported");
+                roomEdit.EditValue = 1;
+                var layout = (DevExpress.XtraLayout.LayoutControl)Get(monthly, "contentPanel");
+                foreach (BaseEdit editor in layout.Controls.OfType<BaseEdit>())
+                    Check(editor.Left >= 10 && editor.Top >= 10 && editor.Right <= layout.Width - 10 && editor.Bottom <= layout.Height - 10, "Monthly selector is clipped");
+                using (var image = new Bitmap(monthly.Width, monthly.Height)) { monthly.DrawToBitmap(image, new Rectangle(Point.Empty, image.Size)); image.Save(Path.Combine(Path.GetTempPath(), "Lab208-MonthlyDialog.png")); }
+                monthly.Hide();
+            }
+            using (var monthly = new f208_MonthlyReport("test", reportDevices.Clone()))
+                Check(!((DevExpress.XtraBars.BarButtonItem)Get(monthly, "btnExport")).Enabled, "Empty device scope enables monthly export");
             using (var audit = new f208_DataList("設定紀錄", data)) { audit.CreateControl(); }
             foreach (DevExpress.XtraGrid.Localization.GridStringId id in Enum.GetValues(typeof(DevExpress.XtraGrid.Localization.GridStringId)))
                 if (id.ToString().StartsWith("MenuColumn") || id.ToString().StartsWith("MenuGroup"))
