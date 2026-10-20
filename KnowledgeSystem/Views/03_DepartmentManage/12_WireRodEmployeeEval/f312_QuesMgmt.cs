@@ -46,6 +46,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         DXMenuItem itemRemoveQues;
 
         int idGroup = -1;
+        private bool canManage;
+        private void AddEssay_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (!canManage) return;
+            using (var form = new f312_EssayQuestion(TPConfigs.LoginUser.Id, idGroup, null, true))
+                if (form.ShowDialog(this) == DialogResult.OK) LoadData();
+        }
+        private void EditEssay_Click(object sender, EventArgs e)
+        {
+            if (!canManage || gvQues.FocusedRowHandle < 0) return;
+            var question = dt312_QuestionsBUS.Instance.GetItemById(Convert.ToInt32(gvQues.GetFocusedRowCellValue(gColId)));
+            if (question == null || !question.IsEssay) return;
+            using (var form = new f312_EssayQuestion(TPConfigs.LoginUser.Id, idGroup, question, true))
+                if (form.ShowDialog(this) == DialogResult.OK) LoadData();
+        }
 
         bool cal(Int32 _Width, GridView _View)
         {
@@ -90,47 +105,19 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             GridView view = gvQues;
             int idQues = (int)view.GetRowCellValue(view.FocusedRowHandle, gColId);
             var question = dt312_QuestionsBUS.Instance.GetItemById(idQues);
+            if (question == null) return;
+            if (question.IsEssay)
+            {
+                using (var form = new f312_EssayQuestion(TPConfigs.LoginUser.Id, idGroup, question)) form.ShowDialog(this);
+                return;
+            }
             var answers = dt312_AnswersBUS.Instance.GetListByQues(idQues);
 
-            var anses = answers.Select((r, index) => new
+            var numbered = answers.OrderBy(a => a.Id).Select((a, index) => new dt312_Answers
             {
-                id = index + 1,
-                disp = r.DisplayName,
-                img = string.IsNullOrEmpty(r.ImageName) ? "" : ImageHelper.ConvertImageToBase64DataUri(r.ImageName),
-                istrue = r.TrueAns
+                Id = index + 1, QuesId = a.QuesId, DisplayName = a.DisplayName, ImageName = a.ImageName, TrueAns = a.TrueAns
             }).ToList();
-
-            var templateData = new
-            {
-                ques = question.DisplayName,
-                quesimg = string.IsNullOrEmpty(question.ImageName) ? "" : ImageHelper.ConvertImageToBase64DataUri(Path.Combine(TPConfigs.Folder312, question.ImageName)),
-                answers = anses,
-                ismultichoice = question.IsmultiAns
-            };
-
-            var templateContentSigner = System.IO.File.ReadAllText(Path.Combine(TPConfigs.ResourcesPath, "dt307_ConfirmQuestion.html"));
-            var templateSigner = Template.Parse(templateContentSigner);
-
-            // 1. Khởi tạo Form mới
-            XtraForm formViewQues = new XtraForm();
-            formViewQues.Text = "預覽題目 (Preview)"; // Tiêu đề form
-            formViewQues.Size = new Size(1000, 700); // Kích thước form
-            formViewQues.StartPosition = FormStartPosition.CenterScreen; // Hiện giữa màn hình
-
-            // 2. Khởi tạo WebBrowser
-            WebBrowser webViewQues = new WebBrowser();
-            webViewQues.Dock = DockStyle.Fill; // Quan trọng: Để web tràn viền form
-            webViewQues.ScriptErrorsSuppressed = true; // Ẩn lỗi script nếu có
-
-            // 3. Gán nội dung HTML (Đoạn code bạn yêu cầu)
-            // Lưu ý: Đảm bảo chuỗi HTML trả về từ templateSigner có thẻ <meta charset="UTF-8"> để không lỗi font
-            webViewQues.DocumentText = templateSigner.Render(templateData);
-
-            // 4. Thêm WebBrowser vào Form
-            formViewQues.Controls.Add(webViewQues);
-
-            // 5. Hiển thị Form
-            formViewQues.ShowDialog();
+            using (var form = new f312_ExamReview(question, numbered)) form.ShowDialog(this);
         }
 
         DXMenuItem CreateMenuItem(string caption, EventHandler clickEvent, SvgImage svgImage)
@@ -162,6 +149,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void f312_QuesMgmt_Load(object sender, EventArgs e)
         {
+            canManage = dt312_QuestionsBUS.Instance.CanManageQuestions(TPConfigs.LoginUser.Id);
+            btnAddEssay.Enabled = canManage;
             gvQues.ReadOnlyGridView();
             gvQues.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             gvQues.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
@@ -231,7 +220,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Filter = "Excel files (*.xlsx)|*.xlsx|All files (*.*)|*.*";
+                openFileDialog.Filter = "試算表 (*.xlsx)|*.xlsx";
                 openFileDialog.RestoreDirectory = true;
 
                 if (openFileDialog.ShowDialog() != DialogResult.OK) return;
@@ -385,8 +374,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
+                gvQues.FocusedRowHandle = e.HitInfo.RowHandle;
                 e.Menu.Items.Add(itemViewQues);
                 e.Menu.Items.Add(itemRemoveQues);
+                if (canManage && gvQues.GetFocusedRow() is dt312_Questions question && question.IsEssay)
+                    e.Menu.Items.Add(new DXMenuItem("編輯申論題", EditEssay_Click, TPSvgimages.Edit, DXMenuItemPriority.Normal) { BeginGroup = true });
             }
         }
     }

@@ -37,6 +37,8 @@
             this.lbTime = new System.Windows.Forms.Label();
             this.lbQuesNo = new System.Windows.Forms.Label();
             this.txbUserAns = new DevExpress.XtraEditors.TokenEdit();
+            this.essayAnswer = new DevExpress.XtraEditors.MemoEdit();
+            this.essayAnswerItem = new DevExpress.XtraLayout.LayoutControlItem();
             this.btnPreviousQues = new DevExpress.XtraEditors.SimpleButton();
             this.btnNextQues = new DevExpress.XtraEditors.SimpleButton();
             this.btnSubmit = new DevExpress.XtraEditors.SimpleButton();
@@ -90,6 +92,23 @@
             this.layoutControl1.Controls.Add(this.lbTime);
             this.layoutControl1.Controls.Add(this.lbQuesNo);
             this.layoutControl1.Controls.Add(this.txbUserAns);
+            this.layoutControl1.Controls.Add(this.essayAnswer);
+            this.essayAnswer.StyleController = this.layoutControl1;
+            this.essayAnswer.Properties.MaxLength = 16000;
+            this.essayAnswer.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.essayAnswer.Properties.Appearance.Options.UseFont = true;
+            this.essayAnswerItem.Control = this.essayAnswer;
+            this.essayAnswerItem.Name = "essayAnswerItem";
+            this.essayAnswerItem.Text = "申論作答（不計分）";
+            this.essayAnswerItem.TextLocation = DevExpress.Utils.Locations.Top;
+            this.essayAnswerItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.essayAnswerItem.AppearanceItemCaption.Options.UseFont = true;
+            this.essayAnswerItem.Location = new System.Drawing.Point(0, 450);
+            this.essayAnswerItem.Size = new System.Drawing.Size(831, 180);
+            this.essayAnswerItem.MinSize = new System.Drawing.Size(200, 140);
+            this.essayAnswerItem.MaxSize = new System.Drawing.Size(0, 240);
+            this.essayAnswerItem.SizeConstraintsType = DevExpress.XtraLayout.SizeConstraintsType.Custom;
+            this.essayAnswerItem.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
             this.layoutControl1.Controls.Add(this.btnPreviousQues);
             this.layoutControl1.Controls.Add(this.btnNextQues);
             this.layoutControl1.Controls.Add(this.btnSubmit);
@@ -208,6 +227,7 @@
             this.gcData.Size = new System.Drawing.Size(309, 613);
             this.gcData.TabIndex = 6;
             this.gcData.UseEmbeddedNavigator = true;
+            this.gcData.EmbeddedNavigator.TextStringFormat = "{0}／{1}";
             this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvData});
             this.gcData.DoubleClick += new System.EventHandler(this.gcData_DoubleClick);
@@ -384,7 +404,7 @@
             this.layoutControlItem1.Control = this.webViewQues;
             this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(831, 630);
+            this.layoutControlItem1.Size = new System.Drawing.Size(831, 450);
             this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem1.TextVisible = false;
             // 
@@ -394,6 +414,7 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1164, 690);
             this.Controls.Add(this.layoutControl1);
+            this.Root.AddItem(this.essayAnswerItem);
             this.Name = "f312_DoExam";
             this.Text = "f312_DoExam";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.f312_DoExam_FormClosing);
@@ -419,6 +440,9 @@
         }
 
         #endregion
+
+        private DevExpress.XtraEditors.MemoEdit essayAnswer;
+        private DevExpress.XtraLayout.LayoutControlItem essayAnswerItem;
 
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private System.Windows.Forms.WebBrowser webViewQues;

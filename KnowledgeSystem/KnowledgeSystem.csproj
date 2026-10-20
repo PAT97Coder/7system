@@ -2442,4 +2442,11 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+  <ItemGroup>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312Ui.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.Designer.cs"><DependentUpon>f312_EssayQuestion.cs</DependentUpon></Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.Designer.cs"><DependentUpon>f312_ExamReview.cs</DependentUpon></Compile>
+  </ItemGroup>
 </Project>

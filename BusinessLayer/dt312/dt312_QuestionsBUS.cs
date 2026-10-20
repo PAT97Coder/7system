@@ -24,6 +24,39 @@ namespace BusinessLayer
 
         private dt312_QuestionsBUS() { logger = new TPLogger(MethodBase.GetCurrentMethod().DeclaringType.FullName); }
 
+        public bool CanManageQuestions(string userId) => HasFunction(userId, "uc312_GroupMgmt");
+        public bool CanPractice(string userId) => HasFunction(userId, "uc312_ExamMain") || CanManageQuestions(userId);
+        private bool HasFunction(string userId, string controlName)
+        {
+            userId = (userId ?? "").Trim().ToUpperInvariant();
+            if (userId.Length == 0) return false;
+            using (var context = new DBDocumentManagementSystemEntities())
+                return (from role in context.dm_UserRole
+                        join grant in context.dm_FunctionRole on role.IdRole equals grant.IdRole
+                        join function in context.dm_Function on grant.IdFunction equals function.Id
+                        where role.IdUser == userId && (function.ControlName == controlName || function.ControlName.EndsWith("." + controlName))
+                        select function.Id).Any();
+        }
+        public int SaveEssay(string userId, int groupId, int questionId, string question, string referenceAnswer)
+        {
+            if (!CanManageQuestions(userId)) throw new UnauthorizedAccessException("您沒有管理題庫的權限。");
+            question = (question ?? "").Trim(); referenceAnswer = (referenceAnswer ?? "").Trim();
+            if (question.Length == 0 || question.Length > 2048 || referenceAnswer.Length > 16000)
+                throw new ArgumentException("題目為必填且不可超過2048字；參考答案不可超過16000字。");
+            using (var context = new DBDocumentManagementSystemEntities())
+            {
+                if (!context.dt312_Groups.Any(g => g.Id == groupId && g.RemoveAt == null))
+                    throw new InvalidOperationException("題目群組不存在或已停用。");
+                var item = questionId == 0 ? new dt312_Questions { GroupId = groupId, IsEssay = true, IsmultiAns = false }
+                    : context.dt312_Questions.FirstOrDefault(q => q.Id == questionId && q.GroupId == groupId && q.IsEssay);
+                if (item == null) throw new InvalidOperationException("找不到此申論題。");
+                item.DisplayName = question; item.ReferenceAnswer = referenceAnswer;
+                if (questionId == 0) context.dt312_Questions.Add(item);
+                context.SaveChanges();
+                return item.Id;
+            }
+        }
+
         public List<dt312_Questions> GetList()
         {
             try

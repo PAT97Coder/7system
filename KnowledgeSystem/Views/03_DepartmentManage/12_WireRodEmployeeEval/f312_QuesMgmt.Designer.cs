@@ -198,7 +198,7 @@
             // 
             this.gColId.AppearanceCell.Options.UseTextOptions = true;
             this.gColId.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gColId.Caption = "ID";
+            this.gColId.Caption = "編號";
             this.gColId.FieldName = "Id";
             this.gColId.Name = "gColId";
             // 
@@ -311,6 +311,13 @@
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnUpload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
+            this.btnAddEssay = new DevExpress.XtraBars.BarButtonItem(this.barManagerTP, "新增申論題") { Enabled = false };
+            this.btnAddEssay.ImageOptions.SvgImage = Helpers.TPSvgimages.Add;
+            Exam312Ui.StyleButton(this.btnAddEssay);
+            this.btnAddEssay.ItemClick += AddEssay_Click;
+            this.bar2.AddItem(this.btnAddEssay).BeginGroup = true;
+            this.colIsEssay = new DevExpress.XtraGrid.Columns.GridColumn { FieldName = "IsEssay", Caption = "申論題", Visible = true, VisibleIndex = 4, Width = 100 };
+            this.gvQues.Columns.Add(this.colIsEssay);
             this.bar2.OptionsBar.MultiLine = true;
             this.bar2.OptionsBar.UseWholeRow = true;
             this.bar2.Text = "Main menu";
@@ -490,6 +497,8 @@
         private DevExpress.XtraBars.BarButtonItem btnExportExcel;
         private DevExpress.XtraBars.BarButtonItem btnReload;
         private DevExpress.XtraBars.BarButtonItem btnUpload;
+        private DevExpress.XtraBars.BarButtonItem btnAddEssay;
+        private DevExpress.XtraGrid.Columns.GridColumn colIsEssay;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
         private DevExpress.XtraBars.BarDockControl barDockControlBottom;
         private DevExpress.XtraBars.BarDockControl barDockControlLeft;

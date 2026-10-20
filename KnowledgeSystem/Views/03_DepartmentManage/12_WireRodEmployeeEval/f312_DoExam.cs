@@ -31,15 +31,27 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 {
     public partial class f312_DoExam : DevExpress.XtraEditors.XtraForm
     {
-        public f312_DoExam()
+        public f312_DoExam(bool practice = false)
         {
             InitializeComponent();
+            IsPractice = practice;
+            Text = practice ? "模擬測驗" : "正式考試";
             this.FormBorderStyle = FormBorderStyle.None; // Bỏ khung viền
             this.WindowState = FormWindowState.Maximized; // Phóng to toàn màn hình
-            this.TopMost = true; // Đảm bảo form luôn ở trên cùng
+            this.TopMost = !practice; // Đảm bảo form luôn ở trên cùng
 
             this.KeyDown += F312_DoExam_KeyDown;
             this.KeyPreview = true;  // Đảm bảo Form nhận được sự kiện KeyDown
+        }
+
+        public bool IsPractice { get; }
+        private bool submitting;
+        private void SaveCurrentAnswer()
+        {
+            if (indexQues < 0 || indexQues >= examResults.Count) return;
+            examResults[indexQues].UserAnswer = examResults[indexQues].Questions.IsEssay ? essayAnswer.Text
+                : string.Join(",", txbUserAns.GetTokenList().Select(r => r.Description as string));
+            gcData.RefreshDataSource();
         }
 
         public class ExamResult
@@ -60,7 +72,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         public int idExamUser = -1;
         int testDuration = 0, passingScore = 0, numQues = 0, indexQues = 0;
-        string templateContentSigner;
 
         List<dt312_Questions> ques = new List<dt312_Questions>();
         List<dt312_Answers> answers = new List<dt312_Answers>();
@@ -77,32 +88,29 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void NextQues()
         {
-            examResults[indexQues].UserAnswer = string.Join(",", txbUserAns.GetTokenList().Select(r => r.Description as string).ToList());
-            gcData.RefreshDataSource();
+            SaveCurrentAnswer();
 
             if (indexQues >= ques.Count - 1) return;
 
             indexQues++;
             InitializeWebView2(indexQues);
-
-            txbUserAns.Focus();
         }
 
         private void PreviousQues()
         {
-            examResults[indexQues].UserAnswer = string.Join(",", txbUserAns.GetTokenList().Select(r => r.Description as string).ToList());
-            gcData.RefreshDataSource();
+            SaveCurrentAnswer();
 
             if (indexQues <= 0) return;
 
             indexQues--;
             InitializeWebView2(indexQues);
-            txbUserAns.Focus();
         }
 
         private void gcData_DoubleClick(object sender, EventArgs e)
         {
             GridView view = gvData;
+            if (view.FocusedRowHandle < 0 || examResults.Count == 0) return;
+            SaveCurrentAnswer();
             indexQues = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId).ToString()) - 1;
 
             InitializeWebView2(indexQues);
@@ -120,6 +128,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void F312_DoExam_KeyDown(object sender, KeyEventArgs e)
         {
+            if (essayAnswer.ContainsFocus) return;
             if (e.KeyCode == Keys.Right)
             {
                 NextQues();
@@ -153,38 +162,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         private void InitializeWebView2(int index)
         {
             lbQuesNo.Text = $"題目：{index + 1}/{ques.Count}";
-            var counter = 1;
-            var anses = answers.Where(r => r.QuesId == ques[index].Id)
-                .Select(r => new
-                {
-                    id = counter++, // Đánh số thứ tự từ 1
-                    disp = r.DisplayName,
-                    img = string.IsNullOrEmpty(r.ImageName) ? "" :
-                    ImageHelper.ConvertImageToBase64DataUri(Path.Combine(TPConfigs.Folder312, r.ImageName)),
-                    istrue = false
-                }).ToList();
-
-            var templateData = new
-            {
-                quesno = index + 1,
-                ques = ques[index].DisplayName,
-                quesimg = string.IsNullOrEmpty(ques[index].ImageName) ? "" :
-                ImageHelper.ConvertImageToBase64DataUri(Path.Combine(TPConfigs.Folder312, ques[index].ImageName)),
-                answers = anses,
-                ismultichoice = ques[index].IsmultiAns == true
-            };
-
-            // Thêm danh sách câu trả lời, và hiện các câu trả lời đã lưu
-            txbUserAns.Properties.DataSource = Enumerable.Range(1, anses.Count).Select(num => num.ToString()).ToList();
-            txbUserAns.EditValue = examResults[indexQues].UserAnswer;
-
-            var templateSigner = Template.Parse(templateContentSigner);
-
-            var pageContent = templateSigner.Render(templateData);
-
-            webViewQues.DocumentText = pageContent;
-
+            bool essay = ques[index].IsEssay;
+            layoutControlItem6.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Never : DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
+            essayAnswerItem.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Always : DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+            var options = answers.Where(a => a.QuesId == ques[index].Id).ToList();
+            txbUserAns.Properties.DataSource = Enumerable.Range(1, options.Count).Select(n => n.ToString()).ToList();
+            txbUserAns.EditValue = essay ? "" : examResults[index].UserAnswer;
+            essayAnswer.Text = essay ? examResults[index].UserAnswer : "";
+            webViewQues.DocumentText = f312_ExamReview.BuildQuestionHtml(ques[index], options, index + 1);
             gvData.FocusedRowHandle = index;
+            if (essay) essayAnswer.Focus(); else txbUserAns.Focus();
         }
 
         private void f312_DoExam_FormClosing(object sender, FormClosingEventArgs e)
@@ -207,46 +194,41 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void Submit_Exam()
         {
+            if (submitting || IsClose || examResults.Count == 0) return;
+            submitting = true; countdownTimer?.Stop(); btnSubmit.Enabled = false;
+            SaveCurrentAnswer();
             foreach (var answer in examResults)
+                answer.IsCorrect = !answer.Questions.IsEssay && dt312_ExamScoring.IsCorrect(answer.CorrectAnswer, answer.UserAnswer);
+            int graded = examResults.Count(r => !r.Questions.IsEssay);
+            int correct = examResults.Count(r => r.IsCorrect);
+            int? score = dt312_ExamScoring.Score(correct, graded);
+            try
             {
-                if (answer.UserAnswer == null) { answer.IsCorrect = false; continue; }
-
-                // Chuyển TrueAns và UserAns thành HashSet để so sánh không thứ tự
-                var trueAnsSet = answer.CorrectAnswer.Split(',').Select(x => x.Trim()).ToHashSet();
-                var userAnsSet = answer.UserAnswer.Split(',').Select(x => x.Trim()).ToHashSet();
-
-                // So sánh hai tập hợp và gán giá trị cho IsTrue
-                answer.IsCorrect = trueAnsSet.SetEquals(userAnsSet);
+                if (!IsPractice)
+                {
+                    var result = dt312_ExamUserBUS.Instance.GetItemById(idExamUser);
+                    if (result == null || result.UserId != TPConfigs.LoginUser.Id || result.SubmitAt.HasValue)
+                        throw new InvalidOperationException("考試不存在、已提交或不屬於目前使用者。");
+                    result.IsPass = score.HasValue ? (bool?)(score.Value >= passingScore) : null;
+                    result.Score = score; result.SubmitAt = DateTime.Now;
+                    result.ExamData = JsonConvert.SerializeObject(examResults);
+                    if (!dt312_ExamUserBUS.Instance.AddOrUpdate(result)) throw new InvalidOperationException("無法儲存考試結果，請重新提交。");
+                }
+                if (IsPractice)
+                {
+                    using (var review = new f312_ExamReview(examResults, score, true)) review.ShowDialog(this);
+                }
+                else
+                    MsgTP.MsgShowInfomation(score.HasValue ? $"{(score.Value >= passingScore ? "考試通過" : "考試未通過")}；成績：{score}/100；選擇題答對 {correct}/{graded} 題。申論題不計分。"
+                        : "已提交作答。本次全為申論題，不計分。");
+                IsClose = true; Close();
             }
-
-            int correctAnswers = examResults.Count(r => r.IsCorrect);
-            int score = (int)Math.Round(correctAnswers * 100.0 / numQues);
-            int totalScore = 100;
-            bool IsPass = score >= passingScore;
-            string message = IsPass ? "恭喜您通過考試!" : "很遺憾你考試沒通過!";
-            string json = JsonConvert.SerializeObject(examResults);
-
-            // Nếu có thông tin của kỳ thi thì lưu kết quả lại
-            if (idExamUser != -1)
+            catch (Exception ex) { MsgTP.MsgError("提交失敗：\r\n" + ex.Message); }
+            finally
             {
-                dt312_ExamUser result = dt312_ExamUserBUS.Instance.GetItemById(idExamUser);
-                result.IsPass = IsPass;
-                result.Score = score;
-                result.SubmitAt = DateTime.Now;
-                result.ExamData = json;
-
-                dt312_ExamUserBUS.Instance.AddOrUpdate(result);
+                submitting = false; btnSubmit.Enabled = true;
+                if (!IsClose && timeRemaining > TimeSpan.Zero) countdownTimer?.Start();
             }
-
-            string htmlString = $"<font='Microsoft JhengHei UI' size=24><color={(IsPass ? "blue" : "red")}>{message}</color></font>\r\n" +
-                $"<font='Microsoft JhengHei UI' size=14>結果：\r\n" +
-                $"-正確：<color=blue>{correctAnswers}/{numQues}</color>\r\n" +
-                $"-成績：<color=blue>{score}/{totalScore}</color></font>";
-
-            MsgTP.MsgShowInfomation(htmlString);
-
-            IsClose = true;
-            Close();
         }
 
         private void btnSubmit_Click(object sender, EventArgs e)
@@ -321,6 +303,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private string LoadData()
         {
+            if (IsPractice && !dt312_QuestionsBUS.Instance.CanPractice(TPConfigs.LoginUser.Id))
+                return "您沒有模擬測驗的權限。";
+            if (!IsPractice)
+            {
+                var assigned = dt312_ExamUserBUS.Instance.GetItemById(idExamUser);
+                if (assigned == null || assigned.UserId != TPConfigs.LoginUser.Id || assigned.SubmitAt.HasValue)
+                    return "此考試不存在、已提交或不屬於目前使用者。";
+            }
             var setting = dt312_SettingBUS.Instance.GetItemById(1);
 
             testDuration = setting?.TestDuration ?? 0;
@@ -331,7 +321,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             var dataQues = dt312_QuestionsBUS.Instance.GetList(); // Lấy tất cả câu hỏi
             var groupIsRemove = dt312_GroupsBUS.Instance.GetListIsRemove();
 
-            if (dataQues.Count <= numQues)
+            dataQues = dataQues.Where(q => !groupIsRemove.Any(g => g.Id == q.GroupId)).ToList();
+            if (testDuration <= 0 || numQues <= 0 || passingScore < 0 || passingScore > 100)
+                return "請先設定有效的考試時間、題目數量及及格分數（0至100）。";
+            if (dataQues.Count < numQues)
                 return "題目數量不夠！";
 
             // Group và đếm số lượng (Code cũ của bạn)
@@ -386,7 +379,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             ques = ques.OrderBy(x => Guid.NewGuid()).ToList();
 
             answers = dt312_AnswersBUS.Instance.GetListByListQues(ques.Select(r => r.Id).ToList())
-                .GroupBy(r => r.QuesId)  // Group by QuesId
+                .OrderBy(r => r.Id).GroupBy(r => r.QuesId)
                 .SelectMany(group => group.Select((answer, index) => new dt312_Answers
                 {
                     Id = index + 1,
@@ -403,19 +396,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 CorrectAnswer = string.Join(",", r.Select(g => g.Id.ToString()))
             }).ToList();
 
-            // Lấy ra danh sách để lưu ra kết quả
-            int indexQues = 1;
-            examResults = (from question in ques
-                           join correct in correctAnsByIdQues on question.Id equals correct.QuesId
-                           select new ExamResult
-                           {
-                               QuestionIndex = indexQues++,
-                               CorrectAnswer = correct.CorrectAnswer,
-                               UserAnswer = "",
-                               Questions = question,
-                               Answers = answers.Where(r => r.QuesId == question.Id).ToList(),
-                               IsMultiChoice = question.IsmultiAns == true
-                           }).ToList();
+            if (ques.Any(q => !q.IsEssay && !correctAnsByIdQues.Any(a => a.QuesId == q.Id)))
+                return "選擇題缺少正確答案，請聯絡題庫管理人員。";
+            examResults = ques.Select((question, index) => new ExamResult
+            {
+                QuestionIndex = index + 1,
+                CorrectAnswer = question.IsEssay ? "" : correctAnsByIdQues.First(a => a.QuesId == question.Id).CorrectAnswer,
+                UserAnswer = "", Questions = question,
+                Answers = answers.Where(a => a.QuesId == question.Id).ToList(),
+                IsMultiChoice = question.IsmultiAns
+            }).ToList();
 
             return "";
         }
@@ -426,7 +416,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             timeRemaining = timeRemaining.Subtract(TimeSpan.FromSeconds(1));
 
             // Cập nhật Label với thời gian còn lại
-            lbTime.Text = $"剩餘時間 {timeRemaining:mm\\:ss}";
+            lbTime.Text = $"剩餘時間 {(int)Math.Max(0, timeRemaining.TotalMinutes):00}:{Math.Max(0, timeRemaining.Seconds):00}";
 
             if (timeRemaining <= TimeSpan.FromMinutes(5))
             {
@@ -445,7 +435,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void f312_DoExam_Load(object sender, EventArgs e)
         {
-            string result = LoadData();
+            string result;
+            try { result = LoadData(); }
+            catch (Exception ex) { result = "無法載入題庫：" + ex.Message; }
 
             if (!string.IsNullOrEmpty(result))
             {
@@ -463,7 +455,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             countdownTimer.Tick += CountdownTimer_Tick;
 
             timeRemaining = TimeSpan.FromMinutes(testDuration);
-            lbTime.Text = $"剩餘時間 {timeRemaining:mm\\:ss}";
+            lbTime.Text = $"剩餘時間 {(int)Math.Max(0, timeRemaining.TotalMinutes):00}:{Math.Max(0, timeRemaining.Seconds):00}";
             countdownTimer.Start();
 
             txbUserAns.Focus();
@@ -471,7 +463,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             sourceResult.DataSource = examResults;
             gcData.DataSource = sourceResult;
 
-            templateContentSigner = File.ReadAllText(Path.Combine(TPConfigs.ResourcesPath, "dt307_ConfirmQuestion.html"));
             InitializeWebView2(indexQues);
         }
     }

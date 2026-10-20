@@ -184,6 +184,7 @@
     <Compile Include="dt312\dt312_ExamUserBUS.cs" />
     <Compile Include="dt312\dt312_GroupsBUS.cs" />
     <Compile Include="dt312\dt312_QuestionsBUS.cs" />
+    <Compile Include="dt312\dt312_ExamScoring.cs" />
     <Compile Include="dt312\dt312_SettingBUS.cs" />
     <Compile Include="dt313\dt313_AbnormalCatalogBUS.cs" />
     <Compile Include="dt313\dt313_DepartmentSettingBUS.cs" />
