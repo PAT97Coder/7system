@@ -77,11 +77,14 @@ internal static class Exam312DbTests
                     else if (form.GetType().Name.Contains("MessageBox"))
                     {
                         Messages++;
+                        var managedButton=Descendants(form).FirstOrDefault(c=>Equals(c.GetType().GetProperty("DialogResult")?.GetValue(c,null),Answer));
+                        if(managedButton!=null)
+                        { managedButton.GetType().GetMethod("PerformClick",Type.EmptyTypes)?.Invoke(managedButton,null); continue; }
                         if(form.GetType().Name.Contains("NativeMessageBox"))
                         {
                             IntPtr buttonWindow=GetDlgItem(form.Handle,(int)Answer);
                             if(buttonWindow!=IntPtr.Zero) SendMessage(buttonWindow,0x00F5,IntPtr.Zero,IntPtr.Zero);
-                            else { form.Activate(); SendKeys.SendWait(Answer==DialogResult.No?"{RIGHT}{ENTER}":"{ENTER}"); }
+                            else { form.DialogResult=Answer; form.Close(); }
                             continue;
                         }
                         var button=Descendants(form).OfType<IButtonControl>().FirstOrDefault(b=>b.DialogResult==Answer);
@@ -228,9 +231,16 @@ internal static class Exam312DbTests
             Fill(form,true);
             int essayIndex=results.FindIndex(r=>r.Questions.IsEssay);
             H.Set(form,"indexQues",essayIndex); H.Call(form,"InitializeWebView2",essayIndex); Application.DoEvents();
+            var essayEditor=(MemoEdit)H.Get(form,"essayAnswer");
+            var nextButton=(SimpleButton)H.Get(form,"btnNextQues");
+            var questionBrowser=(WebBrowser)H.Get(form,"webViewQues");
+            H.Check(essayEditor.Top>=questionBrowser.Bottom&&nextButton.Top>=essayEditor.Bottom,"Essay/question/navigation overlap");
             H.Screenshot(form,"03-practice-essay.png");
             int mc=results.FindIndex(r=>!r.Questions.IsEssay); H.Set(form,"indexQues",mc); H.Call(form,"InitializeWebView2",mc); Application.DoEvents();
+            var choiceEditor=(TokenEdit)H.Get(form,"txbUserAns");
             H.Screenshot(form,"04-practice-choice.png");
+            var choiceLayout=(DevExpress.XtraLayout.LayoutControlItem)H.Get(form,"layoutControlItem6");
+            H.Check(choiceEditor.Width>500&&choiceEditor.Top>=questionBrowser.Bottom&&nextButton.Top>=choiceEditor.Bottom,"Choice answer area is narrow or overlaps navigation: "+choiceEditor.Bounds+" question "+questionBrowser.Bounds+" next "+nextButton.Bounds+" item "+choiceLayout.Size+" min "+choiceLayout.MinSize+" max "+choiceLayout.MaxSize+" col "+choiceLayout.OptionsTableLayoutItem.ColumnIndex+" alignment "+choiceLayout.ControlAlignment);
             using(var dialogs=new Dialogs())
             {
                 dialogs.InspectReview=review=>

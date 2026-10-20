@@ -17,6 +17,19 @@ internal static class Exam312Tests
     private const BindingFlags F = BindingFlags.Instance | BindingFlags.NonPublic;
     internal static int Checks;
     internal static string OutputDir = Path.Combine(Path.GetTempPath(), "7system-Exam312-TestArtifacts");
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern IntPtr OpenInputDesktop(uint flags,bool inherit,uint access);
+    [System.Runtime.InteropServices.DllImport("user32.dll",CharSet=System.Runtime.InteropServices.CharSet.Unicode)]
+    private static extern bool GetUserObjectInformation(IntPtr handle,int index,System.Text.StringBuilder value,int length,out int needed);
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern bool CloseDesktop(IntPtr handle);
+    private static bool DesktopReady()
+    {
+        IntPtr desktop=OpenInputDesktop(0,false,1);
+        if(desktop==IntPtr.Zero) return false;
+        try { var name=new System.Text.StringBuilder(256); int size; return GetUserObjectInformation(desktop,2,name,512,out size)&&name.ToString()=="Default"; }
+        finally { CloseDesktop(desktop); }
+    }
     internal static object Get(object o, string name) => o.GetType().GetField(name, F).GetValue(o);
     internal static void Set(object o, string name, object value) => o.GetType().GetField(name, F).SetValue(o, value);
     internal static object Call(object o, string name, params object[] args) => o.GetType().GetMethod(name, F).Invoke(o, args);
@@ -25,6 +38,13 @@ internal static class Exam312Tests
     {
         Directory.CreateDirectory(OutputDir);
         bool hasBrowser=ContainsBrowser(form);
+        if(hasBrowser&&(!DesktopReady()||Environment.GetEnvironmentVariable("EXAM312_LAYOUT_ONLY")=="1"))
+        {
+            using(var preview=new Bitmap(form.ClientSize.Width,form.ClientSize.Height))
+            { form.DrawToBitmap(preview,new Rectangle(Point.Empty,preview.Size)); preview.Save(Path.Combine(OutputDir,Path.GetFileNameWithoutExtension(name)+"-layout-only.png")); }
+            Console.WriteLine("SKIP screen capture (Windows locked): "+name+"; layout-only preview saved without browser content.");
+            return;
+        }
         bool wasTopMost=form.TopMost;
         if(hasBrowser) form.TopMost=true;
         form.BringToFront(); form.Activate(); form.Update(); Application.DoEvents();

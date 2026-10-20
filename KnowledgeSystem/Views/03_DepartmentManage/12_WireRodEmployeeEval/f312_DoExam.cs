@@ -163,6 +163,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             lbQuesNo.Text = $"題目：{index + 1}/{ques.Count}";
             bool essay = ques[index].IsEssay;
+            answerGroup.Text = essay ? "申論作答（不計分）" : ques[index].IsmultiAns ? "複選作答（可選擇多個答案）" : "單選作答（請選擇一個答案）";
+            answerRow.Height = essay ? 210 : 130;
             layoutControlItem6.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Never : DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
             essayAnswerItem.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Always : DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
             var options = answers.Where(a => a.QuesId == ques[index].Id).ToList();
