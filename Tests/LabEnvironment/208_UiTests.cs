@@ -142,16 +142,16 @@ public static class Lab208UiTests
                 Check(((DevExpress.XtraBars.BarButtonItem)Get(module, "btnEdit")).Enabled, "Edit not enabled for granted department");
                 var menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[1]);
                 Check(menu.Items.Any(item => item.Caption == "編輯設備"), "Editor missing edit menu");
-                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Device without readings has an excursion action");
+                Check(!menu.Items.Any(item => item.Caption == "取樣超限處理"), "Device without readings has an excursion action");
                 menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
-                Check(menu.Items.Any(item => item.Caption == "處理超限" && item.Enabled), "Handler missing direct excursion action");
+                Check(menu.Items.Any(item => item.Caption == "取樣超限處理" && item.Enabled), "Handler missing sample excursion history action");
                 data.Rows[0]["Temperature"] = 25m;
                 menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
-                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Normal reading has an excursion action");
+                Check(menu.Items.Any(item => item.Caption == "取樣超限處理"), "Normal latest reading hides access to earlier report samples");
                 data.Rows[0]["Temperature"] = 26m;
                 depts.Rows[0]["CanHandle"] = false;
                 menu = DeviceMenu(module, tree, tree.Nodes[0].Nodes[0]);
-                Check(!menu.Items.Any(item => item.Caption == "處理超限"), "Editor without handle permission can handle excursions");
+                Check(!menu.Items.Any(item => item.Caption == "取樣超限處理"), "Editor without handle permission can handle excursions");
                 depts.Rows[0]["CanHandle"] = true;
                 ((DevExpress.XtraBars.BarEditItem)Get(module, "cbbStatus")).EditValue = "超限";
                 Check(tree.Nodes[0].Nodes.Count == 1, "Abnormal filter includes unrelated sensor");
@@ -190,10 +190,20 @@ public static class Lab208UiTests
             }
             using (var history = new f208_ReadingHistory("test", "LAB-001"))
             {
-                var readings = data.Clone(); readings.Columns.Add("Status"); readings.Columns.Add("CanHandle", typeof(bool));
+                var readings = data.Clone(); readings.Columns.Add("CanHandle", typeof(bool));
                 var row = readings.NewRow(); row.ItemArray = data.Rows[0].ItemArray;
-                row["Status"] = "溫度超限"; row["CanHandle"] = true; readings.Rows.Add(row);
+                row["MeasuredAt"] = now.Date.AddHours(8); row["CanHandle"] = true; readings.Rows.Add(row);
+                var near = readings.NewRow(); near.ItemArray = row.ItemArray; near["Id"] = 33; near["MeasuredAt"] = now.Date.AddHours(8).AddMinutes(10); readings.Rows.Add(near);
+                var outside = readings.NewRow(); outside.ItemArray = row.ItemArray; outside["Id"] = 34; outside["MeasuredAt"] = now.Date.AddHours(12); readings.Rows.Add(outside);
+                Call(history, "PrepareReadings", readings);
+                Check(row["ReasonStatus"].ToString() == "待填原因", "Report excursion does not request a reason");
+                Check(near["ReasonStatus"].ToString() == "無須填寫" && outside["ReasonStatus"].ToString() == "無須填寫", "Unselected excursion requires a reason");
+                Check(!(bool)Call(history, "CanHandleReading", near) && !(bool)Call(history, "CanHandleReading", outside), "Unselected reading opens required reason dialog");
                 Set(history, "readings", readings); Call(history, "DrawCharts");
+                Call(history, "ApplyFilter");
+                Check(readings.DefaultView.Count == 1, "Default history includes nonsampled readings");
+                ((DevExpress.XtraBars.BarCheckItem)Get(history, "chkReportSamples")).Checked = false;
+                Check(readings.DefaultView.Count == 3, "Cannot inspect full raw history");
                 ((DevExpress.XtraGrid.GridControl)Get(history, "grid")).DataSource = readings;
                 Call(history, "UpdateButtons");
                 Check(((DevExpress.XtraBars.BarButtonItem)Get(history, "btnAction")).Enabled, "Handler cannot handle abnormal reading");

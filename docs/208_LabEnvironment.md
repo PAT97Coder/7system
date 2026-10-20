@@ -101,12 +101,19 @@ Không dùng tài khoản SQL quản trị hoặc tài khoản của ứng dụn
 - **設定紀錄** trong menu chuột phải: lịch sử cấu hình. Cấu hình mới có hiệu lực khi lưu theo giờ DB.
   Màn hình chính đợi số đo thuộc cấu hình hiện tại để không trộn ngưỡng cũ và mới.
 - **歷史與圖表** trong menu chuột phải: chọn ngày, xem bảng và biểu đồ có giới hạn áp dụng tại từng lần đo.
-  Tối đa 10.000 bản ghi/lần truy vấn; vượt mức cần giảm khoảng ngày. Bộ lọc **僅超限**
-  chỉ lọc bảng, biểu đồ vẫn hiển thị toàn bộ số đo trong khoảng đã chọn.
-- **處理超限** trong menu chuột phải của số đo vượt giới hạn: ghi nguyên nhân, biện pháp và kết quả; kết quả bắt buộc và có xác nhận khi kết án.
+  Tối đa 10.000 bản ghi/lần truy vấn; vượt mức cần giảm khoảng ngày. Mặc định bật **僅月表取樣**,
+  chỉ hiện hai số đo/ngày được chọn cho biểu tháng (gần 08:00/16:00 nhất trong ±30 phút).
+  Bỏ chọn để xem mọi số đo. Bộ lọc này và **僅超限** chỉ lọc bảng;
+  biểu đồ vẫn hiển thị toàn bộ số đo trong khoảng đã chọn.
+- **處理超限** chỉ xuất hiện trên số đo vượt giới hạn được chọn cho biểu tháng: ghi nguyên nhân,
+  biện pháp và kết quả; kết quả bắt buộc và có xác nhận khi kết án.
   Nhật ký xử lý được thêm mới, không ghi đè các lần xử lý trước.
-  Có thể mở trực tiếp từ menu chuột phải của thiết bị trên màn hình chính để xử lý số đo mới nhất vượt giới hạn.
-  Mục này chỉ hiện cho người có quyền HANDLE trong bộ phận của số đo; nguyên nhân và biện pháp xử lý bắt buộc khi lưu.
+  **取樣超限處理** trong menu chuột phải thiết bị mở danh sách lấy mẫu để chọn đúng số đo,
+  không mở thẳng phiếu xử lý của số đo mới nhất (có thể nằm ngoài giờ lấy mẫu).
+  Mục này chỉ hiện cho người có quyền HANDLE trong bộ phận của số đo.
+  Cột **超限原因填寫** hiển thị **待填原因** hoặc **已填原因** cho mẫu vượt giới hạn;
+  mọi điểm khác hiển thị **無須填寫**, kể cả điểm bất thường gần mốc lấy mẫu nhưng không được chọn lên biểu.
+  Lịch sử xử lý đã có vẫn giữ nguyên. Không bắt nhập lý do cho các điểm ngoài hai mẫu của biểu tháng.
 - Rê chuột trên biểu đồ nhiệt độ/độ ẩm để xem thời gian đo đầy đủ `yyyy/MM/dd HH:mm:ss` (UTC+07), số đo và giới hạn.
 - **資料衝突**: xem các giá trị app gửi khác số đo gốc tại cùng thời điểm.
 - Xuất Excel theo các hàng đang lọc; màn hình lịch sử/nhật ký hỗ trợ xem trước khi in.

@@ -16,7 +16,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             {"HumidityMin", "濕度下限"}, {"HumidityMax", "濕度上限"}, {"ExpectedMinutes", "逾時 (分鐘)"}, {"DeviceState", "設備狀態"},
             {"EffectiveFrom", "生效時間"}, {"ChangedBy", "變更人"}, {"Reason", "變更原因"}, {"Cause", "原因"}, {"Action", "處理措施"},
             {"Result", "處理結果"}, {"IsClosed", "已結案"}, {"CreatedBy", "處理人"}, {"CreatedAt", "處理時間"}, {"ActionAt", "最後處理時間"},
-            {"ReadingCount", "數據筆數"}, {"LastMeasuredAt", "最後測量時間"}, {"ConflictCount", "衝突筆數"}, {"Status", "判定"}
+            {"ReadingCount", "數據筆數"}, {"LastMeasuredAt", "最後測量時間"}, {"ConflictCount", "衝突筆數"}, {"Status", "判定"},
+            {"ReportSample", "月表取樣時段"}, {"ReasonStatus", "超限原因填寫"}
         };
         public f208_DataList(string title, DataTable data)
         {

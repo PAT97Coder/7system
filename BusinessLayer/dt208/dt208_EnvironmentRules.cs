@@ -1,6 +1,8 @@
 ﻿using DataAccessLayer;
 using System;
 using System.Data;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace BusinessLayer
 {
@@ -22,6 +24,38 @@ namespace BusinessLayer
             return null;
         }
         public static bool IsOutside(decimal value,decimal min,decimal max) => value<min || value>max;
+        public static DateTime? ReportTarget(DateTime measuredAt)
+        {
+            foreach (int hour in new[] { 8, 16 })
+            {
+                DateTime target = measuredAt.Date.AddHours(hour);
+                if (Math.Abs((measuredAt - target).Ticks) <= TimeSpan.FromMinutes(30).Ticks) return target;
+            }
+            return null;
+        }
+        public static DataRow SelectReportSample(IEnumerable<DataRow> rows, DateTime target)
+        {
+            return rows.Where(r => !r.IsNull("MeasuredAt") && !r.IsNull("TempMin") && !r.IsNull("TempMax")
+                    && !r.IsNull("HumidityMin") && !r.IsNull("HumidityMax")
+                    && Math.Abs(((DateTime)r["MeasuredAt"] - target).Ticks) <= TimeSpan.FromMinutes(30).Ticks)
+                .OrderBy(r => Math.Abs(((DateTime)r["MeasuredAt"] - target).Ticks))
+                .ThenBy(r => (DateTime)r["MeasuredAt"]).ThenBy(r => Convert.ToInt64(r["Id"])).FirstOrDefault();
+        }
+        public static HashSet<long> ReportSampleIds(IEnumerable<DataRow> rows)
+        {
+            var ids = new HashSet<long>();
+            foreach (var group in rows.Where(r => !r.IsNull("MeasuredAt")).GroupBy(r => new
+            {
+                SN = r["SN"].ToString(), Department = r["IdDept"].ToString(), Location = r["Location"].ToString(),
+                Date = ((DateTime)r["MeasuredAt"]).Date
+            }))
+                foreach (int hour in new[] { 8, 16 })
+                {
+                    var sample = SelectReportSample(group, group.Key.Date.AddHours(hour));
+                    if (sample != null) ids.Add(Convert.ToInt64(sample["Id"]));
+                }
+            return ids;
+        }
         public static string MeasurementStatus(DataRow row)
         {
             if (row.IsNull("TempMin")) return "未有有效設定";

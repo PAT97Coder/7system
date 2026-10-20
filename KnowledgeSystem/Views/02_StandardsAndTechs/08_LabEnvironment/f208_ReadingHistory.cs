@@ -25,6 +25,27 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             Load += async (s, e) => await LoadReadingsAsync();
         }
         private DataRow SelectedReading() => view.GetFocusedDataRow();
+        private bool CanHandleReading(DataRow row) => row != null && !row.IsNull("CanHandle") && Convert.ToBoolean(row["CanHandle"])
+            && row.Table.Columns.Contains("IsReportSample") && Convert.ToBoolean(row["IsReportSample"])
+            && row["Status"].ToString().Contains("超限");
+        private void PrepareReadings(DataTable data)
+        {
+            var sampleIds = dt208_EnvironmentRules.ReportSampleIds(data.AsEnumerable());
+            data.Columns.Add("Status");
+            data.Columns.Add("IsReportSample", typeof(bool));
+            data.Columns.Add("ReportSample");
+            data.Columns.Add("ReasonStatus");
+            foreach (DataRow row in data.Rows)
+            {
+                row["Status"] = dt208_EnvironmentRules.MeasurementStatus(row);
+                bool sample = sampleIds.Contains(Convert.ToInt64(row["Id"]));
+                row["IsReportSample"] = sample;
+                var target = sample ? dt208_EnvironmentRules.ReportTarget((DateTime)row["MeasuredAt"]) : null;
+                row["ReportSample"] = target.HasValue ? target.Value.ToString("HH:mm") : "非月表取樣";
+                bool needsReason = sample && row["Status"].ToString().Contains("超限");
+                row["ReasonStatus"] = !needsReason ? "無須填寫" : data.Columns.Contains("Cause") && !string.IsNullOrWhiteSpace(row["Cause"].ToString()) ? "已填原因" : "待填原因";
+            }
+        }
         private void Reading_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
             if (e.Menu == null || !e.HitInfo.InRow || !view.IsDataRow(e.HitInfo.RowHandle)) return;
@@ -35,15 +56,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             e.Menu.Items.Add(Lab208Ui.Menu("處理紀錄", ActionHistory_Click, TPSvgimages.View, btnActionHistory.Enabled, true));
             if (Convert.ToInt32(row["ConflictCount"]) > 0)
                 e.Menu.Items.Add(Lab208Ui.Menu("資料衝突", Conflicts_Click, TPSvgimages.Info, btnConflicts.Enabled));
-            if (!row.IsNull("CanHandle") && Convert.ToBoolean(row["CanHandle"]) && row["Status"].ToString().Contains("超限"))
+            if (CanHandleReading(row))
                 e.Menu.Items.Add(Lab208Ui.Menu("處理超限", Action_Click, TPSvgimages.Edit, btnAction.Enabled, true));
         }
         private void UpdateButtons()
         {
             var row = SelectedReading();
             btnLoad.Enabled = dateFrom.Enabled = dateTo.Enabled = !busy;
-            btnAction.Enabled = !busy && row != null && !row.IsNull("CanHandle") && Convert.ToBoolean(row["CanHandle"])
-                && row["Status"].ToString().Contains("超限");
+            btnAction.Enabled = !busy && CanHandleReading(row);
             btnActionHistory.Enabled = !busy && row != null;
             btnConflicts.Enabled = !busy && row != null && Convert.ToInt32(row["ConflictCount"]) > 0;
             btnExport.Enabled = btnPrint.Enabled = !busy && readings != null;
@@ -63,21 +83,24 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                     readings = null; grid.DataSource = null; chartTemperature.Series.Clear(); chartHumidity.Series.Clear();
                     lblSummary.Caption = "資料超過10,000筆，請縮小日期範圍。"; return;
                 }
-                data.Columns.Add("Status");
-                foreach (DataRow row in data.Rows) row["Status"] = dt208_EnvironmentRules.MeasurementStatus(row);
+                PrepareReadings(data);
                 data.DefaultView.Sort = "MeasuredAt ASC";
                 readings = data; grid.DataSource = data.DefaultView;
                 f208_DataList.FormatColumns(view);
                 ApplyFilter(); DrawCharts();
                 int abnormal = data.AsEnumerable().Count(r => r["Status"].ToString().Contains("超限"));
-                lblSummary.Caption = $"設備序號 {sn} | 共 {data.Rows.Count} 筆 | 超限 {abnormal} 筆 | 時間 UTC+07";
+                int pending = data.AsEnumerable().Count(r => r["ReasonStatus"].ToString() == "待填原因");
+                lblSummary.Caption = $"設備序號 {sn} | 共 {data.Rows.Count} 筆 | 超限 {abnormal} 筆 | 取樣待填原因 {pending} 筆 | 時間 UTC+07";
             }
             catch (Exception ex) { MsgTP.MsgError("歷史載入失敗：\r\n" + ex.Message); }
             finally { busy = false; UpdateButtons(); }
         }
         private void ApplyFilter()
         {
-            if (readings != null) readings.DefaultView.RowFilter = chkAbnormal.Checked ? "Status LIKE '%超限%'" : "";
+            if (readings == null) return;
+            string filter = chkReportSamples.Checked ? "IsReportSample = true" : "";
+            if (chkAbnormal.Checked) filter += (filter.Length > 0 ? " AND " : "") + "Status LIKE '%超限%'";
+            readings.DefaultView.RowFilter = filter;
         }
         private void DrawCharts()
         {

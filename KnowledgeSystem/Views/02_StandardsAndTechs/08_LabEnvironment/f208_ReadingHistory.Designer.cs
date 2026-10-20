@@ -8,7 +8,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
         private DevExpress.XtraBars.Bar toolbar, status;
         private DevExpress.XtraBars.BarEditItem dateFrom, dateTo;
         private DevExpress.XtraEditors.Repository.RepositoryItemDateEdit repoDate;
-        private DevExpress.XtraBars.BarCheckItem chkAbnormal;
+        private DevExpress.XtraBars.BarCheckItem chkAbnormal, chkReportSamples;
         private DevExpress.XtraBars.BarStaticItem lblSummary;
         private DevExpress.XtraBars.BarButtonItem btnLoad, btnAction, btnActionHistory, btnConflicts, btnExport, btnPrint;
         private DevExpress.XtraGrid.GridControl grid;
@@ -46,12 +46,14 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
             dateTo = new DevExpress.XtraBars.BarEditItem(barManager) { Caption = "迄日", Edit = repoDate, EditWidth = 150 };
             btnLoad = new DevExpress.XtraBars.BarButtonItem(barManager, "查詢"); btnLoad.ImageOptions.SvgImage = Helpers.TPSvgimages.Search; btnLoad.ItemClick += (s, e) => Load_Click(s, e);
             chkAbnormal = new DevExpress.XtraBars.BarCheckItem(barManager) { Caption = "僅超限" }; chkAbnormal.CheckedChanged += (s, e) => ApplyFilter();
+            chkReportSamples = new DevExpress.XtraBars.BarCheckItem(barManager) { Caption = "僅月表取樣", Checked = true };
+            chkReportSamples.CheckedChanged += (s, e) => ApplyFilter();
             btnAction = new DevExpress.XtraBars.BarButtonItem(barManager, "處理超限") { Enabled = false };
             btnActionHistory = new DevExpress.XtraBars.BarButtonItem(barManager, "處理紀錄") { Enabled = false };
             btnConflicts = new DevExpress.XtraBars.BarButtonItem(barManager, "資料衝突") { Enabled = false };
             btnExport = new DevExpress.XtraBars.BarButtonItem(barManager, "匯出試算表") { Enabled = false }; btnExport.ImageOptions.SvgImage = Helpers.TPSvgimages.Excel; btnExport.ItemClick += (s, e) => Export_Click(s, e);
             btnPrint = new DevExpress.XtraBars.BarButtonItem(barManager, "列印預覽") { Enabled = false }; btnPrint.ImageOptions.SvgImage = Helpers.TPSvgimages.Print; btnPrint.ItemClick += (s, e) => grid.ShowPrintPreview();
-            foreach (var item in new DevExpress.XtraBars.BarItem[] { dateFrom, dateTo, btnLoad, chkAbnormal, btnExport, btnPrint }) { Lab208Ui.StyleDialogBarItem(item); toolbar.AddItem(item); }
+            foreach (var item in new DevExpress.XtraBars.BarItem[] { dateFrom, dateTo, btnLoad, chkReportSamples, chkAbnormal, btnExport, btnPrint }) { Lab208Ui.StyleDialogBarItem(item); toolbar.AddItem(item); }
             lblSummary = new DevExpress.XtraBars.BarStaticItem { Caption = "載入中…" }; barManager.Items.Add(lblSummary); status.AddItem(lblSummary);
             grid = new DevExpress.XtraGrid.GridControl();
             view = new DevExpress.XtraGrid.Views.Grid.GridView(grid); grid.MainView = view;

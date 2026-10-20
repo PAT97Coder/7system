@@ -60,9 +60,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                     foreach (int hour in new[] { 8, 16 })
                     {
                         DateTime target = date.AddHours(hour);
-                        var reading = rows.Where(r => Math.Abs(((DateTime)r["MeasuredAt"] - target).TotalMinutes) <= 30)
-                            .OrderBy(r => Math.Abs(((DateTime)r["MeasuredAt"] - target).Ticks))
-                            .ThenBy(r => (DateTime)r["MeasuredAt"]).ThenBy(r => Convert.ToInt64(r["Id"])).FirstOrDefault();
+                        var reading = dt208_EnvironmentRules.SelectReportSample(rows, target);
                         details.Cells[detailRow, 0].Value = target;
                         details.Cells[detailRow, 2].Value = department + "／" + location;
                         details.Cells[detailRow, 3].Value = sn;
