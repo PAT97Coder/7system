@@ -47,7 +47,6 @@ internal static class Iso209Tests
             Application.SetCompatibleTextRenderingDefault(false);
             TPConfigs.LoginUser = dm_UserBUS.Instance.GetItemById(UserId);
             TPConfigs.Folder209 = Path.Combine(ArtifactFolder, "209");
-            TPConfigs.Folder209CalibCert = Path.Combine(TPConfigs.Folder209, "CalibCert");
             TPConfigs.Folder201 = Path.Combine(ArtifactFolder, "201");
             TPConfigs.DocTypes209 = "一階;二階;三階";
             TPConfigs.DocTypes201 = TPConfigs.DocTypes209;
@@ -128,6 +127,10 @@ internal static class Iso209Tests
                 dialog.formName = "ISO14001附件";
                 Capture(dialog, "209-AddAttachment.png");
             }
+            using (var dialog = new f209_AddRangeAtts())
+            {
+                Capture(dialog, "209-AddRangeAtts.png");
+            }
 
             // Reproduce, but do not silently fix, the inherited double SaveChanges bug.
             bool removed = dt209_FormsBUS.Instance.Remove(formId);
@@ -152,7 +155,7 @@ internal static class Iso209Tests
     {
         var assembly = typeof(TPConfigs).Assembly;
         var types = assembly.GetTypes().Where(t => t.Namespace == "KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs" && typeof(Control).IsAssignableFrom(t) && t.IsPublic).ToList();
-        Check(types.Count == 12, "12 document forms/user controls retained");
+        Check(types.Count == 11, "11 document forms/user controls retained after removing calibration options");
         foreach (var type in types)
         {
             object[] args = new object[0];
@@ -161,7 +164,15 @@ internal static class Iso209Tests
                 var sourceType = assembly.GetType(type.FullName.Replace("_09_ISO14001Docs", "_01_ISOAuditDocs").Replace("f209_", "f201_").Replace("uc209_", "uc201_"), true);
                 using (var source = (Control)Activator.CreateInstance(sourceType, args))
                 {
-                    Check(control.Size == source.Size && Flatten(control).SequenceEqual(Flatten(source)), type.Name + " matches 201 control hierarchy and dimensions");
+                    var expected = Flatten(source).Where(item => !item.Contains(":btnAdvClibAtts:") && !item.Contains(":cbbWatermark:"));
+                    var actual = Flatten(control);
+                    if (type == typeof(f209_AddAttachment) || type == typeof(f209_AddRangeAtts))
+                    {
+                        // Layout redistributes space after removing the HC controls.
+                        actual = actual.Select(item => item.Substring(0, item.LastIndexOf(':')));
+                        expected = expected.Select(item => item.Substring(0, item.LastIndexOf(':')));
+                    }
+                    Check(control.Size == source.Size && actual.SequenceEqual(expected), type.Name + " retains document controls without calibration options");
                 }
             }
         }

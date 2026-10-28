@@ -61,7 +61,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         List<ProgressDetail> progresses = new List<ProgressDetail>();
         List<dt209_Role> roles;
         Attachment attachment = new Attachment();
-        dm_Watermark watermark;
 
         BindingSource sourceProgresses = new BindingSource();
 
@@ -114,7 +113,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void ShowMissingRoleMessage()
         {
-            string msg = "Một số bước trong lưu trình cố định không còn loại ký/xác nhận hợp lệ, vui lòng chọn lại.\r\n部分固定流程角色不存在，請重新選擇。";
+            string msg = "部分固定流程角色不存在，請重新選擇。";
             MsgTP.MsgShowInfomation($"<font='Microsoft JhengHei UI' size=14>{msg}</font>");
         }
 
@@ -201,15 +200,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             txbDisplayName.EditValue = parentData.DisplayName;
             txbDisplayNameVN.EditValue = parentData.DisplayNameVN;
 
-            var grpUsrs = dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id);
-            var groups = (from data in dm_GroupBUS.Instance.GetListByName("ISO14001組")
-                          join grp in grpUsrs on data.Id equals grp.IdGroup
-                          select data).ToList();
-
-            bool is782 = groups.Any(r => r.IdDept == "7820");
-            lcWatermark.Visibility = is782 ? DevExpress.XtraLayout.Utils.LayoutVisibility.Always : DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
-
-            lcControls = new List<LayoutControlItem>() { lcDocCode, lcDisplayName, lcDisplayNameVN, lcAtt, lcWatermark };
+            lcControls = new List<LayoutControlItem>() { lcDocCode, lcDisplayName, lcDisplayNameVN, lcAtt };
             lcImpControls = new List<LayoutControlItem>() { lcDisplayName, lcDisplayNameVN, lcAtt };
             foreach (var item in lcControls)
             {
@@ -249,11 +240,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             sourceProgresses.DataSource = progresses;
             gcProgress.DataSource = sourceProgresses;
-
-            var watermarks = dm_WatermarkBUS.Instance.GetList();
-            cbbWatermark.Properties.DataSource = watermarks;
-            cbbWatermark.Properties.DisplayMember = "DisplayName";
-            cbbWatermark.Properties.ValueMember = "ID";
 
             switch (eventInfo)
             {
@@ -323,7 +309,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             if (StringHelper.CheckUpcase(displayNameVN, 33) && displayNameVN.Length > 20)
             {
-                XtraMessageBox.Show("Tắt CAPSLOCK đi！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show("請關閉大寫鎖定！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -526,22 +512,11 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void HandleCopyFile(string sourcePath, string destPath)
         {
-            bool useWatermark = watermark != null;
+            DirectoryInfo parentDir = Directory.GetParent(destPath);
+            if (parentDir != null && !Directory.Exists(parentDir.FullName))
+                Directory.CreateDirectory(parentDir.FullName);
 
-            if (!useWatermark)
-            {
-                DirectoryInfo parentDir = Directory.GetParent(destPath);
-                if (parentDir != null && !Directory.Exists(parentDir.FullName))
-                    Directory.CreateDirectory(parentDir.FullName);
-
-                File.Copy(sourcePath, destPath, true);
-            }
-            else
-            {
-                System.Drawing.Image img = System.Drawing.Image.FromFile(Path.Combine(TPConfigs.FolderWatermark, watermark.PicImage));
-                System.Drawing.Image mark = PdfHelper.EditImage(img, (float)(watermark.Opacity) / 100, (float)watermark.Rotation);
-                PdfHelper.Instance.AddWatermarkImage(sourcePath, destPath, mark, (int)watermark.Scale, (int)watermark.HoriDistance, (int)watermark.VertDistance);
-            }
+            File.Copy(sourcePath, destPath, true);
         }
 
         private void txbAtt_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
@@ -706,9 +681,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             }
         }
 
-        private void cbbWatermark_EditValueChanged(object sender, EventArgs e)
-        {
-            watermark = dm_WatermarkBUS.Instance.GetItemById(Convert.ToInt32(cbbWatermark.EditValue));
-        }
+
     }
 }

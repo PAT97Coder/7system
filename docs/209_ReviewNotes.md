@@ -43,8 +43,8 @@ Giữ nguyên code và giao diện 201 sau khi đổi định danh module. Các 
 
 ## Các lựa chọn nghiệp vụ nên xem xét
 
-- Phần hiệu chuẩn, watermark riêng bộ phận `7820`, cách tách bộ phận từ mã văn kiện,
-  font/bố cục và cách phân quyền `二級{IdDept}` được giữ theo 201. Cần quyết định các
+- Phần hiệu chuẩn, watermark riêng bộ phận `7820` và gửi Note hiệu chuẩn đã được gỡ
+  khỏi 209. Font/bố cục và cách phân quyền `二級{IdDept}` được giữ theo 201. Cần quyết định các
   quy tắc này có phù hợp ISO14001 không trước khi thay đổi.
 - Danh mục hồ sơ/điều khoản và checklist nhân sự ISO14001 cần bộ cấu hình đã duyệt.
   Không gắn nhãn các điều khoản ISO17025 thành ISO14001 tự động. Có script copy danh

@@ -48,7 +48,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         List<ProgressDetail> progresses = new List<ProgressDetail>();
         List<dt209_Role> roles;
 
-        dm_Watermark watermark;
         string idDept2word = TPConfigs.LoginUser.IdDepartment.Substring(0, 2);
 
         class ProgressDetail : dt209_Progress
@@ -100,20 +99,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void ShowMissingRoleMessage()
         {
-            string msg = "Một số bước trong lưu trình cố định không còn loại ký/xác nhận hợp lệ, vui lòng chọn lại.\r\n部分固定流程角色不存在，請重新選擇。";
+            string msg = "部分固定流程角色不存在，請重新選擇。";
             MsgTP.MsgShowInfomation($"<font='Microsoft JhengHei UI' size=14>{msg}</font>");
         }
 
         private void f209_AddRangeAtts_Load(object sender, EventArgs e)
         {
-            var grpUsrs = dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id);
-            var groups = (from data in dm_GroupBUS.Instance.GetListByName("ISO14001組")
-                          join grp in grpUsrs on data.Id equals grp.IdGroup
-                          select data).ToList();
-
-            bool is782 = groups.Any(r => r.IdDept == "7820");
-            lcAdvCalibAtts.Visibility = is782 ? DevExpress.XtraLayout.Utils.LayoutVisibility.Always : DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
-
             sourceForms.DataSource = forms;
             gcInfo.DataSource = sourceForms;
 
@@ -312,8 +303,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         {
             string folderDest = Path.Combine(TPConfigs.Folder209, idAtt.ToString());
             if (!Directory.Exists(folderDest)) Directory.CreateDirectory(folderDest);
-            bool useWM = watermark != null;
-            HandleCopyFile(detail.FilePath, Path.Combine(folderDest, detail.FileNameEncypt), useWM);
+            HandleCopyFile(detail.FilePath, Path.Combine(folderDest, detail.FileNameEncypt));
 
             var baseProgresses = progresses.Select(data => new dt209_Progress
             {
@@ -336,23 +326,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             dt209_ProgInfoBUS.Instance.Add(info);
         }
 
-        private void HandleCopyFile(string sourcePath, string destPath, bool useWatermark = false)
+        private void HandleCopyFile(string sourcePath, string destPath)
         {
-            if (!useWatermark)
-            {
-                DirectoryInfo parentDir = Directory.GetParent(destPath);
-                if (parentDir != null && !Directory.Exists(parentDir.FullName))
-                    Directory.CreateDirectory(parentDir.FullName);
+            DirectoryInfo parentDir = Directory.GetParent(destPath);
+            if (parentDir != null && !Directory.Exists(parentDir.FullName))
+                Directory.CreateDirectory(parentDir.FullName);
 
-                File.Copy(sourcePath, destPath, true);
-            }
-            else
-            {
-                Image img = Image.FromFile(Path.Combine(TPConfigs.FolderWatermark, watermark.PicImage));
-                Image mark = PdfHelper.EditImage(img, (float)(watermark.Opacity) / 100, (float)watermark.Rotation);
-
-                PdfHelper.Instance.AddWatermarkImage(sourcePath, destPath, mark, (int)watermark.Scale, (int)watermark.HoriDistance, (int)watermark.VertDistance);
-            }
+            File.Copy(sourcePath, destPath, true);
         }
 
         private void btnConfirm_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -364,21 +344,21 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             // Kiểm tra thông tin hợp lệ
             if (forms.Count() <= 0)
             {
-                XtraMessageBox.Show("Kiểm tra lại thông tin văn kiện văn kiện！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show("請檢查文件資訊！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             bool nullData = forms.Any(r => string.IsNullOrEmpty(r.Code) || string.IsNullOrEmpty(r.DisplayName) || string.IsNullOrEmpty(r.DisplayNameVN));
             if (nullData)
             {
-                XtraMessageBox.Show("Kiểm tra lại thông tin văn kiện văn kiện！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show("請檢查文件資訊！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
             bool caplockValue = forms.Any(r => StringHelper.CheckUpcase(r.DisplayNameVN, 33) && r.DisplayNameVN.Length > 20);
             if (caplockValue)
             {
-                XtraMessageBox.Show("Tắt CAPSLOCK đi！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show("請關閉大寫鎖定！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -482,36 +462,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             }
         }
 
-        private void btnAdvClibAtts_Click(object sender, EventArgs e)
-        {
-            uc209_Adv_CalibAtts ucInfo = new uc209_Adv_CalibAtts();
-            if (XtraDialog.Show(ucInfo, "高級功能-校正", MessageBoxButtons.OKCancel) != DialogResult.OK)
-                return;
 
-            string displayName = ucInfo.DisplayName;
-            int idWatermark = ucInfo.IdWatermark;
-
-            if (string.IsNullOrEmpty(displayName))
-            {
-                XtraMessageBox.Show("請填寫所以訊息！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            string displayNameVN = displayName.Split('/')[1];
-            string displayNameTW = displayName.Split('/')[0];
-
-            if (idWatermark != 0)
-            {
-                watermark = dm_WatermarkBUS.Instance.GetItemById(idWatermark);
-            }
-
-            foreach (var item in forms)
-            {
-                item.DisplayName = displayNameTW;
-                item.DisplayNameVN = displayNameVN;
-            }
-
-            gvInfo.RefreshData();
-        }
     }
 }

@@ -25,18 +25,30 @@ def convert(text):
 ui = ROOT / "KnowledgeSystem/Views/02_StandardsAndTechs/01_ISOAuditDocs"
 sources = list(ui.glob("*")) + list((ROOT / "BusinessLayer/dt201").glob("*.cs"))
 sources += list((ROOT / "DataAccessLayer").glob("dt201_*.cs"))
-sources += [ROOT / "KnowledgeSystem/Helpers/Iso201Permission.cs",
-            ROOT / "KnowledgeSystem/AppResources/f201_NotifyCalibCert.html"]
-removed = ("UpdateUsrReq", "ReqUpdateDocs")
+sources += [ROOT / "KnowledgeSystem/Helpers/Iso201Permission.cs"]
+removed = ("UpdateUsrReq", "ReqUpdateDocs", "Adv_CalibAtts", "NotifyCalibCert")
 sources = [p for p in sources if not any(name in p.name for name in removed)]
-assert len(sources) == 50
+assert len(sources) == 46
 for source in sources:
     target = ROOT / convert(source.relative_to(ROOT).as_posix())
-    if source.name not in ("uc201_AuditISOMain.cs", "uc201_AuditISOMain.Designer.cs"):
+    if source.name not in ("uc201_AuditISOMain.cs", "uc201_AuditISOMain.Designer.cs",
+                           "f201_AddRangeAtts.cs", "f201_AddRangeAtts.Designer.cs", "f201_AddRangeAtts.resx",
+                           "f201_AddAttachment.cs", "f201_AddAttachment.Designer.cs"):
         assert target.read_text(encoding="utf-8-sig") == convert(source.read_text(encoding="utf-8-sig")), target
     if target.suffix == ".cs":
         assert not re.search(r"\b(?:SqlCommand|SqlQuery|ExecuteSqlCommand|ExecuteSqlRaw|SqlConnection)\b", target.read_text(encoding="utf-8-sig")), target
-print("PASS: retained files match 201 except the customized 209 document list; no runtime SQL added.")
+print("PASS: retained files match 201 except the customized 209 document and attachment screens; no runtime SQL added.")
+
+target_ui = ROOT / "KnowledgeSystem/Views/02_StandardsAndTechs/09_ISO14001Docs"
+for path in target_ui.glob("*.cs"):
+    assert not re.search(r"Calib|Clib|Watermark|watermark|ItemSendNote|itemSendNote|f00_SendNoteSystem|7820", path.read_text(encoding="utf-8-sig")), path
+assert not list(target_ui.glob("uc209_Adv_CalibAtts.*"))
+assert not (ROOT / "KnowledgeSystem/AppResources/f209_NotifyCalibCert.html").exists()
+project_text = (ROOT / "KnowledgeSystem/KnowledgeSystem.csproj").read_text(encoding="utf-8-sig")
+assert "uc209_Adv_CalibAtts" not in project_text
+assert "f209_NotifyCalibCert" not in project_text
+assert "Folder209CalibCert" not in (ROOT / "KnowledgeSystem/Helpers/TPConfigs.cs").read_text(encoding="utf-8-sig")
+print("PASS: calibration options, watermark and calibration Notes removed from 209.")
 
 designer = (ROOT / "KnowledgeSystem/Views/02_StandardsAndTechs/09_ISO14001Docs/uc209_AuditISOMain.Designer.cs").read_text(encoding="utf-8-sig")
 columns = [

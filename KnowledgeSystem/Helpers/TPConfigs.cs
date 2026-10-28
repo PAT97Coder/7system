@@ -59,7 +59,6 @@ namespace KnowledgeSystem.Helpers
         public static string FolderWatermark { get; set; }
         public static string DocTypes201 { get; set; }
         public static string DocTypes209 { get; set; }
-        public static string Folder209CalibCert { get; set; }
         public static string FolderCalibCert { get; set; }
         public static string FolderReportFormat { get; set; }
         public static string ExclusionDept310 { get; set; }
@@ -89,9 +88,6 @@ namespace KnowledgeSystem.Helpers
             Folder402 = Path.Combine(FolderData, "402");
             Folder201 = Path.Combine(FolderData, "201");
             Folder209 = Path.Combine(FolderData, "209");
-            Folder209CalibCert = lsStaticValue.FirstOrDefault(r => r.KeyT == "209CalibCertFolder")?.ValueT;
-            if (string.IsNullOrWhiteSpace(Folder209CalibCert))
-                Folder209CalibCert = Path.Combine(Folder209, "CalibCert");
             Folder204 = Path.Combine(FolderData, "204");
             Folder205 = Path.Combine(FolderData, "205");
             Folder206 = Path.Combine(FolderData, "206");

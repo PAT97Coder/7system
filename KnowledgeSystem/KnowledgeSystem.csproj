@@ -404,14 +404,8 @@
     <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="Views\02_StandardsAndTechs\09_ISO14001Docs\uc209_Adv_CalibAtts.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
     <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.Designer.cs">
       <DependentUpon>uc201_Adv_CalibAtts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Views\02_StandardsAndTechs\09_ISO14001Docs\uc209_Adv_CalibAtts.Designer.cs">
-      <DependentUpon>uc209_Adv_CalibAtts.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ApprovalProgress.cs">
       <SubType>UserControl</SubType>
@@ -1654,9 +1648,6 @@
     <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_Adv_CalibAtts.resx">
       <DependentUpon>uc201_Adv_CalibAtts.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Views\02_StandardsAndTechs\09_ISO14001Docs\uc209_Adv_CalibAtts.resx">
-      <DependentUpon>uc209_Adv_CalibAtts.cs</DependentUpon>
-    </EmbeddedResource>
     <EmbeddedResource Include="Views\02_StandardsAndTechs\01_ISOAuditDocs\uc201_ApprovalProgress.resx">
       <DependentUpon>uc201_ApprovalProgress.cs</DependentUpon>
     </EmbeddedResource>
@@ -2243,9 +2234,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="AppResources\f201_NotifyCalibCert.html">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="AppResources\f209_NotifyCalibCert.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="AppResources\f301_NotifyPersonnelTransfer.html">

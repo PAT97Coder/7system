@@ -13,7 +13,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using iTextSharp.text;
 using KnowledgeSystem.Helpers;
 using KnowledgeSystem.Views._00_Generals;
-using Scriban;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -56,7 +55,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         DXMenuItem itemDisable;
         DXMenuItem itemEnable;
         DXMenuItem itemClone;
-        DXMenuItem itemSendNote;
 
         TreeListNode currentNode;
         TreeListNode parentNode;
@@ -130,7 +128,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             itemDisable = CreateMenuItem("停用節點", ItemDisable_Click, TPSvgimages.Disable);
             itemEnable = CreateMenuItem("啟用節點", ItemEnable_Click, TPSvgimages.Confirm);
             itemClone = CreateMenuItem("複製節點", ItemClone_Click, TPSvgimages.Copy);
-            itemSendNote = CreateMenuItem("通知Note", ItemSendNote_Click, TPSvgimages.EmailSend);
         }
 
         private void GetFocusData()
@@ -143,102 +140,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             parentData = parentNode != null ? (treeList.GetRow(parentNode.Id) as dynamic).data as dt209_Base : null;
         }
 
-        private void ItemSendNote_Click(object sender, EventArgs e)
-        {
-            if (TPConfigs.DomainComputer != DomainVNFPG.domainVNFPG)
-            {
-                string msg = "請使用公司電腦！";
-                MsgTP.MsgShowInfomation($"<font='Microsoft JhengHei UI' size=14>{msg}</font>");
-                return;
-            }
 
-            f00_SendNoteSystem sendNote = new f00_SendNoteSystem();
-
-            using (var handle = SplashScreenManager.ShowOverlayForm(tlsData))
-            {
-                string dept = "";
-                string[] deptSend = currentData.DocCode.Split('.');
-                if (deptSend.Count() > 1)
-                {
-                    dept = deptSend[1].Length >= 4 ? deptSend[1].Substring(0, 4) : "";
-                }
-
-                var attsId = dt209_FormsBUS.Instance.GetListByBaseId(currentData.Id)
-                    .Where(r => r.IsCancel != true && r.IsDel != true && r.IsProcessing != true)
-                    .Select(r => r.AttId).ToList();
-
-                if (attsId.Count <= 0)
-                {
-                    MsgTP.MsgError("沒有證書！");
-                    return;
-                }
-
-                // Copy các file báo cáo vào ổ chung 153 để người ta lấy
-                string folderCalibCert = Path.Combine(TPConfigs.Folder209CalibCert, dept, currentData.DocCode);
-                if (!Directory.Exists(folderCalibCert))
-                {
-                    Directory.CreateDirectory(folderCalibCert);
-                }
-                else
-                {
-                    string[] files = Directory.GetFiles(folderCalibCert);
-                    foreach (string file in files)
-                    {
-                        try
-                        {
-                            File.Delete(file);
-                        }
-                        catch { }
-                    }
-                }
-
-                foreach (var id in attsId)
-                {
-                    var attDt = dm_AttachmentBUS.Instance.GetItemById(Convert.ToInt32(id));
-
-                    var sourceFile = Path.Combine(TPConfigs.Folder209, attDt.EncryptionName);
-                    var destFile = Path.Combine(folderCalibCert, attDt.ActualName);
-
-                    if (File.Exists(sourceFile))
-                    {
-                        PdfHelper.Instance.ProtechPdf(sourceFile, destFile);
-                        //File.Copy(sourceFile, destFile, true);
-                    }
-                }
-
-                // Thông tin để gửi note
-                string cc = TPConfigs.LoginUser.Id;
-                string title = $"設備校正完成通知|{currentData.Id}";
-                string threadId = "209";
-
-                var templateData = new
-                {
-                    dept = dept,
-                    devicevn = parentData.DisplayNameVN,
-                    devicetw = parentData.DisplayName,
-                    folder = folderCalibCert,
-                    namevn = TPConfigs.LoginUser.DisplayNameVN,
-                    nametw = TPConfigs.LoginUser.DisplayName,
-                    empid = TPConfigs.LoginUser.Id
-                };
-
-                var templateContentSigner = System.IO.File.ReadAllText(Path.Combine(TPConfigs.ResourcesPath, $"f209_NotifyCalibCert.html"));
-                var templateSigner = Template.Parse(templateContentSigner);
-
-                var pageContent = templateSigner.Render(templateData);
-
-                sendNote = new f00_SendNoteSystem()
-                {
-                    Cc = cc,
-                    Title = title,
-                    Subject = pageContent,
-                    ThreadId = threadId,
-                    Atts = string.Join(",", attsId),
-                };
-            }
-
-            sendNote.ShowDialog();
-        }
 
         private void ItemClone_Click(object sender, EventArgs e)
         {
@@ -681,11 +583,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
                         if (isCanDelete) e.Menu.Items.Add(itemDelNode);
                     }
 
-                    if (groups.Select(r => r.IdDept).Contains("7820") && currentData.DisplayName == "校正證書")
-                    {
-                        itemSendNote.BeginGroup = true;
-                        e.Menu.Items.Add(itemSendNote);
-                    }
                     //var nodes = dt209_BaseBUS.Instance.GetListByParentId(parentData.Id);
                     //if (nodes.Max(r => r.Id) == currentData.Id)
                     //{
