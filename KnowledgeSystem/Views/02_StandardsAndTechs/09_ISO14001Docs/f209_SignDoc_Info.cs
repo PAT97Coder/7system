@@ -36,7 +36,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         public EventFormInfo eventInfo = EventFormInfo.Create;
         public string formName = "";
         public int idBase = -1;
-        string idDept2word = TPConfigs.LoginUser.IdDepartment.Substring(0, 2);
+        string idDept2word = (TPConfigs.LoginUser.IdDepartment ?? "").Length >= 2
+            ? TPConfigs.LoginUser.IdDepartment.Substring(0, 2) : TPConfigs.LoginUser.IdDepartment ?? "";
 
         int idRoleConfirm = -1;
         string nextStepProg = "";
@@ -60,6 +61,53 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         }
 
         bool IsLastStep = false;
+        bool canProcessWorkflow;
+
+        private void BlockWorkflow(string message)
+        {
+            canProcessWorkflow = false;
+            idRoleConfirm = -1;
+            nextStepProg = "";
+            btnApproval.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            btnConfirm.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            btnCancel.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            btnApproval.Enabled = btnConfirm.Enabled = btnCancel.Enabled = false;
+            gcDocs.Enabled = false;
+            Text = $"待簽文件 | {message}";
+        }
+
+        private static int ResolveNextStepIndex(List<dt209_Progress> steps, List<dt209_ProgInfo> history)
+        {
+            if (steps == null || steps.Count == 0 || history == null) return -1;
+            var responses = history.Where(r => r.IdUsr != "VNW0000000")
+                .OrderBy(r => r.RespTime).ThenBy(r => r.Id).ToList();
+            if (responses.Count > steps.Count) return -1;
+            for (int index = 0; index < responses.Count; index++)
+            {
+                if (responses[index].IdUsr != steps[index].IdUsr) return -1;
+            }
+            return responses.Count;
+        }
+
+        private bool CanProcessCurrentStep()
+        {
+            if (!canProcessWorkflow) return false;
+            var form = dt209_FormsBUS.Instance.GetItemById(idBase);
+            var steps = dt209_ProgressBUS.Instance.GetListByIdBase(idBase).OrderBy(r => r.Id).ToList();
+            var history = dt209_ProgInfoBUS.Instance.GetListByIdForm(idBase);
+            int nextIndex = ResolveNextStepIndex(steps, history);
+            if (form == null || form.IsDel == true || form.IsCancel == true || form.IsProcessing != true ||
+                nextIndex < 0 || nextIndex >= steps.Count ||
+                steps[nextIndex].IdUsr != TPConfigs.LoginUser.Id ||
+                steps[nextIndex].IdRole != idRoleConfirm || form.NextStepProg != TPConfigs.LoginUser.Id)
+            {
+                BlockWorkflow("簽核狀態已變更，請關閉後重新開啟。");
+                return false;
+            }
+            IsLastStep = nextIndex == steps.Count - 1;
+            nextStepProg = IsLastStep ? "" : steps[nextIndex + 1].IdUsr;
+            return true;
+        }
 
         private void InitializeIcon()
         {
@@ -70,7 +118,13 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void f209_SignDoc_Info_Load(object sender, EventArgs e)
         {
+            BlockWorkflow("正在載入簽核流程…");
             var baseData = dt209_FormsBUS.Instance.GetItemById(idBase);
+            if (baseData == null || baseData.IsDel == true)
+            {
+                BlockWorkflow("文件不存在或已刪除。");
+                return;
+            }
             minTimeRespValue = baseData.UploadTime; // Lấy thời gian đưa lên làm mốc để ký
 
             Text = $"待簽文件 | {baseData.Code} | {baseData.DisplayName}";
@@ -80,7 +134,30 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             roleConfirms = dt209_RoleBUS.Instance.GetList();
 
             var users = dm_UserBUS.Instance.GetList();
-            progress = dt209_ProgressBUS.Instance.GetListByIdBase(idBase);
+            progress = dt209_ProgressBUS.Instance.GetListByIdBase(idBase).OrderBy(r => r.Id).ToList();
+            progInfos = dt209_ProgInfoBUS.Instance.GetListByIdForm(idBase).Where(r => r.IdUsr != "VNW0000000").ToList();
+            if (baseData.IsCancel == true || baseData.IsProcessing != true)
+            {
+                BlockWorkflow(baseData.IsCancel == true ? "文件已退回，無法繼續簽核。" : "文件已結束簽核，無待簽步驟。");
+                return;
+            }
+            int nextStepIndex = ResolveNextStepIndex(progress, progInfos);
+            if (nextStepIndex < 0)
+            {
+                BlockWorkflow("簽核流程或歷史資料不完整，請聯絡管理員。");
+                return;
+            }
+            if (nextStepIndex >= progress.Count)
+            {
+                BlockWorkflow("所有步驟均已簽核，無待簽步驟。");
+                return;
+            }
+            if (progress.Any(step => !users.Any(user => user.Id == step.IdUsr) ||
+                !roleConfirms.Any(role => role.Id == step.IdRole && (role.Id == 1 || role.Id == 2))))
+            {
+                BlockWorkflow("簽核人員或角色不存在，請聯絡管理員。");
+                return;
+            }
 
             var progressInfo = (from data in progress
                                 join usr in users on data.IdUsr equals usr.Id
@@ -91,23 +168,22 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             {
                 var barItem = new StepProgressBarItem();
                 barItem.ContentBlock1.Caption = $"{item.usr.IdDepartment} {item.usr.DisplayName}";
-                barItem.ContentBlock1.Description = $"{item.usr.Id}\r\n{jobTitles.FirstOrDefault(r => r.Id == item.usr.JobCode).DisplayName}";
+                barItem.ContentBlock1.Description = $"{item.usr.Id}\r\n{jobTitles.FirstOrDefault(r => r.Id == item.usr.JobCode)?.DisplayName}";
                 barItem.ContentBlock2.Caption = roleConfirms.FirstOrDefault(r => r.Id == item.data.IdRole)?.DisplayName;
                 stepProgressDoc.Items.Add(barItem);
             }
             stepProgressDoc.ItemOptions.Indicator.Width = 40;
 
-            progInfos = dt209_ProgInfoBUS.Instance.GetListByIdForm(idBase).Where(r => r.IdUsr != "VNW0000000").ToList();
             var progNow = progInfos.OrderByDescending(r => r.RespTime).FirstOrDefault();
             minTimeRespValue = progNow?.RespTime ?? minTimeRespValue;
 
-            int stepNow = progNow != null ? progress.IndexOf(progress.First(r => r.IdUsr == progNow.IdUsr)) : -1;
+            int stepNow = nextStepIndex - 1;
             stepProgressDoc.SelectedItemIndex = stepNow; // Focus đến bước hiện tại
 
-            var nextStepUsr = progress[stepNow + 1].IdUsr;
-            nextStepProg = stepNow + 2 >= progress.Count ? "" : progress[stepNow + 2].IdUsr;
+            var nextStepUsr = progress[nextStepIndex].IdUsr;
+            nextStepProg = nextStepIndex + 1 >= progress.Count ? "" : progress[nextStepIndex + 1].IdUsr;
 
-            IsLastStep = stepNow == progress.Count() - 2;
+            IsLastStep = nextStepIndex == progress.Count - 1;
 
             // Thêm lịch sử trình ký vào gridProcess
             var lsHistoryProcess = (from data in progInfos
@@ -125,7 +201,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             gvHistoryProcess.ReadOnlyGridView();
 
-            idRoleConfirm = progress.Where(r => r.IdRole != 0).FirstOrDefault(r => r.IdUsr == TPConfigs.LoginUser.Id)?.IdRole ?? -1;
+            idRoleConfirm = progress[nextStepIndex].IdRole;
 
             btnApproval.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             btnConfirm.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
@@ -133,12 +209,20 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             // Thêm các file vào gvDocs
             attachment = new Attachment() { BaseAtt = dm_AttachmentBUS.Instance.GetItemById(baseData.AttId ?? -1) };
+            if (attachment.BaseAtt == null || string.IsNullOrWhiteSpace(attachment.BaseAtt.EncryptionName))
+            {
+                BlockWorkflow("附件資料不完整，無法簽核。");
+                return;
+            }
             sourceAtts.DataSource = attachment;
             gcDocs.DataSource = sourceAtts;
             gvDocs.ReadOnlyGridView();
 
-            if (nextStepUsr == TPConfigs.LoginUser.Id)
+            if (nextStepUsr == TPConfigs.LoginUser.Id && baseData.NextStepProg == nextStepUsr)
             {
+                canProcessWorkflow = true;
+                gcDocs.Enabled = true;
+                btnApproval.Enabled = btnConfirm.Enabled = btnCancel.Enabled = true;
                 switch (idRoleConfirm)
                 {
                     case 1:
@@ -149,10 +233,16 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
                         break;
                 }
             }
+            else
+            {
+                BlockWorkflow(baseData.NextStepProg == nextStepUsr
+                    ? "尚未輪到您簽核，無法操作。" : "待簽人員與流程不一致，請聯絡管理員。");
+            }
         }
 
         private void gvDocs_DoubleClick(object sender, EventArgs e)
         {
+            if (!CanProcessCurrentStep()) return;
             GridView view = sender as GridView;
 
             var pt = view.GridControl.PointToClient(Control.MousePosition);
@@ -164,6 +254,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             string sourceFolder = Path.Combine(TPConfigs.Folder209, attachment.BaseAtt.Id.ToString());
             string sourcePath = Path.Combine(sourceFolder, fileName);
             string destPath = Path.Combine(TPConfigs.TempFolderData, $"sign_{DateTime.Now:yyyyMMddHHmmss}.pdf");
+
+            if (!File.Exists(sourcePath))
+            {
+                BlockWorkflow("附件檔案不存在，請聯絡管理員。");
+                return;
+            }
 
             if (!Directory.Exists(TPConfigs.TempFolderData))
                 Directory.CreateDirectory(TPConfigs.TempFolderData);
@@ -230,6 +326,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void btnApproval_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (!CanProcessCurrentStep()) return;
             // 1. Kiểm tra mô tả đính kèm
             if (string.IsNullOrEmpty(attachment.Desc))
             {
@@ -340,6 +437,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void btnCancel_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (!CanProcessCurrentStep()) return;
             XtraInputBoxArgs args = new XtraInputBoxArgs
             {
                 Caption = TPConfigs.SoftNameTW,
@@ -386,6 +484,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
         private void btnConfirm_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (!CanProcessCurrentStep()) return;
             // kiểm tra xem đã xử lý hết các file chưa
             bool validate = string.IsNullOrEmpty(attachment.Desc);
             if (validate)

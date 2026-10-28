@@ -128,6 +128,8 @@
             // btnCancel
             // 
             this.btnCancel.Caption = "退回";
+            this.btnCancel.Enabled = false;
+            this.btnCancel.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             this.btnCancel.Id = 0;
             this.btnCancel.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnCancel.ImageOptions.SvgImage")));
             this.btnCancel.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
@@ -137,6 +139,8 @@
             // btnApproval
             // 
             this.btnApproval.Caption = "核准";
+            this.btnApproval.Enabled = false;
+            this.btnApproval.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             this.btnApproval.Id = 1;
             this.btnApproval.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnApproval.Name = "btnApproval";
@@ -145,6 +149,8 @@
             // btnConfirm
             // 
             this.btnConfirm.Caption = "確認";
+            this.btnConfirm.Enabled = false;
+            this.btnConfirm.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
             this.btnConfirm.Id = 2;
             this.btnConfirm.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnConfirm.Name = "btnConfirm";
@@ -465,7 +471,7 @@
             this.IconOptions.Image = global::KnowledgeSystem.Properties.Resources.AppIcon;
             this.Name = "f209_SignDoc_Info";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
-            this.Text = "f209_SignDoc_Info";
+            this.Text = "待簽文件";
             this.Load += new System.EventHandler(this.f209_SignDoc_Info_Load);
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();

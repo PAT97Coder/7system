@@ -154,7 +154,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         private void gvDetail_DoubleClick(object sender, EventArgs e)
         {
             GridView view = sender as GridView;
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
             f209_SignDoc_Info fInfo = new f209_SignDoc_Info();
             fInfo.idBase = idForm;

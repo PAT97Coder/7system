@@ -126,13 +126,17 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             var districsRecords = records.Select(r =>
             {
-                var displayNameParts = r.DisplayName.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
+                var displayNameParts = (r.DisplayName ?? "").Replace("\r", "").Split('\n');
+                string nameVN = displayNameParts.Length > 1 ? displayNameParts[0].Trim() : "";
+                string nameTW = displayNameParts.Length > 1 ? displayNameParts[1].Trim() : displayNameParts[0].Trim();
+                if (string.IsNullOrEmpty(nameTW)) nameTW = nameVN;
+                if (string.IsNullOrEmpty(nameTW)) nameTW = r.Code;
                 return new
                 {
                     Code = r.Code,
-                    DisplayName = $"{r.Code} {displayNameParts[1]}",
-                    DisplayNameVN = displayNameParts[0],
-                    DisplayNameTW = displayNameParts[1]
+                    DisplayName = $"{r.Code} {nameTW}",
+                    DisplayNameVN = nameVN,
+                    DisplayNameTW = nameTW
                 };
             }).Distinct().ToList();
 
@@ -140,7 +144,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             txbIdRecord.Properties.DisplayMember = "DisplayName";
             txbIdRecord.Properties.ValueMember = "Code";
 
-            cbbDocType.Properties.Items.AddRange(TPConfigs.DocTypes209.Split(';').ToList());
+            cbbDocType.Properties.Items.AddRange((TPConfigs.DocTypes209 ?? "").Split(';').Where(t => !string.IsNullOrWhiteSpace(t)).ToList());
 
             IniControl();
 
@@ -190,7 +194,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
 
             if (StringHelper.CheckUpcase(displayNameVN, 33) && displayNameVN.Length > 20)
             {
-                XtraMessageBox.Show("Tắt CAPSLOCK đi！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show("請關閉大寫鎖定！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 

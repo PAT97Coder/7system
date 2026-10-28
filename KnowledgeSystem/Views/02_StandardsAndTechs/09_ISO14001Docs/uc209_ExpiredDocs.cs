@@ -157,10 +157,10 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         private void gvDetail_DoubleClick(object sender, EventArgs e)
         {
             GridView view = sender as GridView;
-            int idBase = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColBaseId));
+            int idBase = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColBaseId));
             var currentData = dt209_BaseBUS.Instance.GetItemById(idBase);
 
-            int year = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColYear));
+            int year = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColYear));
             if (year < DateTime.Today.Year)
             {
                 if (MsgTP.MsgYesNoQuestion("您目前正在使用舊版檔案更新文件，系統將會自動創建與提供今年最新版本。\r\n點擊「是」則系統將繼續提供最新版本。\r\n如果您仍然需要使用舊版檔案，請進入「稽核文件」以手動方式更新文件。") != DialogResult.Yes)

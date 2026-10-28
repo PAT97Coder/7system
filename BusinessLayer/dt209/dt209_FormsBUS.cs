@@ -177,11 +177,9 @@ namespace BusinessLayer
                 using (var _context = new DBDocumentManagementSystemEntities())
                 {
                     var entity = _context.dt209_Forms.FirstOrDefault(r => r.Id == Id);
+                    if (entity == null || entity.IsDel == true) return false;
                     entity.DelTime = DateTime.Now;
                     entity.IsDel = true;
-                    _context.dt209_Forms.AddOrUpdate(entity);
-                    _context.SaveChanges();
-
                     int affectedRecords = _context.SaveChanges();
                     return affectedRecords > 0;
                 }

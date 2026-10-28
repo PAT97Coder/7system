@@ -50,7 +50,7 @@ try {
     $env:ISO209_TEST_ARTIFACTS = Join-Path $env:TEMP '7system-Iso209-TestArtifacts'
     New-Item -ItemType Directory -Path $env:ISO209_TEST_ARTIFACTS -Force | Out-Null
     $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-    $references = @('DataAccessLayer.dll','BusinessLayer.dll','EntityFramework.dll','KnowledgeSystem.exe','DevExpress.Utils.v22.1.dll','DevExpress.XtraEditors.v22.1.dll') | ForEach-Object { '/r:'+(Join-Path $bin $_) }
+    $references = @('DataAccessLayer.dll','BusinessLayer.dll','EntityFramework.dll','KnowledgeSystem.exe','DevExpress.Utils.v22.1.dll','DevExpress.XtraEditors.v22.1.dll','DevExpress.XtraGrid.v22.1.dll','DevExpress.Data.v22.1.dll','DevExpress.Drawing.v22.1.dll','DevExpress.Data.Desktop.v22.1.dll','DevExpress.Printing.v22.1.Core.dll') | ForEach-Object { '/r:'+(Join-Path $bin $_) }
     & $csc /nologo /codepage:65001 /debug /target:exe /platform:anycpu "/out:$bin/Iso209Tests.exe" /r:System.Data.dll /r:System.Data.Entity.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll @references (Join-Path $PSScriptRoot 'Iso209Tests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
     Copy-Item -LiteralPath (Join-Path $bin 'KnowledgeSystem.exe.config') -Destination (Join-Path $bin 'Iso209Tests.exe.config')

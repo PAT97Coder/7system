@@ -97,22 +97,22 @@ internal static class Iso209Tests
             Check(dt209_ProgressBUS.Instance.GetListByIdForm(formId).Count == 1 && dt209_ProgInfoBUS.Instance.GetListByIdForm(formId).Count == 1, "EF6 reads signing steps and history");
 
             TestConstructors();
-            Check(dt209_RecordCodeBUS.Instance.Add(new dt209_RecordCode { Id = 91, Code = "BAD-TEST", DisplayName = "Single line", Articles = "TEST" }), "create one-line catalogue regression fixture");
-            bool badNameReproduced = false;
+            Check(dt209_RecordCodeBUS.Instance.Add(new dt209_RecordCode { Id = 91, Code = "SINGLE", DisplayName = "單行名稱", Articles = "TEST" }), "create one-line catalogue regression fixture");
+            Check(dt209_RecordCodeBUS.Instance.Add(new dt209_RecordCode { Id = 92, Code = "EMPTY", DisplayName = "", Articles = "TEST" }), "create empty-name catalogue fixture");
+            Check(dt209_RecordCodeBUS.Instance.Add(new dt209_RecordCode { Id = 93, Code = "VN-ONLY", DisplayName = "Ten Viet\r\n", Articles = "TEST" }), "create catalogue fixture without Chinese name");
             using (var dialog = new f209_AddNode())
             {
-                try
-                {
-                    typeof(f209_AddNode).GetMethod("f209_AddNode_Load", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, new object[] { dialog, EventArgs.Empty });
-                }
-                catch (TargetInvocationException error)
-                {
-                    if (!(error.InnerException is IndexOutOfRangeException)) throw;
-                    badNameReproduced = true;
-                }
+                InvokeLoad(dialog, "f209_AddNode_Load");
+                var editor = (DevExpress.XtraEditors.GridLookUpEdit)GetField(dialog, "txbIdRecord");
+                var rows = ((System.Collections.IEnumerable)editor.Properties.DataSource).Cast<object>().ToList();
+                Check(NameValue(rows, "SINGLE", "DisplayNameTW") == "單行名稱" && NameValue(rows, "SINGLE", "DisplayNameVN") == "", "single-line catalogue name loads without an index error");
+                Check(NameValue(rows, "EMPTY", "DisplayNameTW") == "EMPTY", "empty catalogue name falls back to document code");
+                Check(NameValue(rows, "VN-ONLY", "DisplayNameTW") == "Ten Viet", "missing Chinese catalogue name falls back to Vietnamese");
+                Check(NameValue(rows, "ENV-TEST", "DisplayNameTW") == "測試環境文件" && NameValue(rows, "ENV-TEST", "DisplayNameVN") == "Ho so moi truong", "bilingual catalogue retains both names");
             }
-            Check(badNameReproduced, "KNOWN BUG reproduced: one-line reference name fails in AddNode load");
-            Check(dt209_RecordCodeBUS.Instance.RemoveById(91), "remove one-line catalogue regression fixture");
+            foreach (int codeId in new[] { 91, 92, 93 }) Check(dt209_RecordCodeBUS.Instance.RemoveById(codeId), "remove catalogue regression fixture " + codeId);
+            TestSigningWorkflow(childId);
+            TestLargeRecordId();
             CaptureMain();
             using (var dialog = new f209_AddNode())
             {
@@ -132,9 +132,12 @@ internal static class Iso209Tests
                 Capture(dialog, "209-AddRangeAtts.png");
             }
 
-            // Reproduce, but do not silently fix, the inherited double SaveChanges bug.
             bool removed = dt209_FormsBUS.Instance.Remove(formId);
-            Check(!removed && dt209_FormsBUS.Instance.GetItemById(formId).IsDel == true, "KNOWN BUG reproduced: Remove returns false after successfully soft-deleting");
+            var deleted = dt209_FormsBUS.Instance.GetItemById(formId);
+            Check(removed && deleted.IsDel == true && deleted.DelTime.HasValue, "soft delete returns success and persists deletion time");
+            Check(!dt209_FormsBUS.Instance.GetListProcessing().Any(f => f.Id == formId), "deleted attachment is excluded from pending list");
+            Check(!dt209_FormsBUS.Instance.Remove(formId) && dt209_FormsBUS.Instance.GetItemById(formId).DelTime == deleted.DelTime, "repeated deletion makes no further changes");
+            Check(!dt209_FormsBUS.Instance.Remove(int.MaxValue), "deleting a missing attachment returns false");
             using (var db = new DBDocumentManagementSystemEntities())
             {
                 Check(db.dt201_Base.Single().DocCode == "SOURCE-201" && db.dt201_Forms.Count() == 0 && db.dt201_UpdateUsrReq.Count() == 0, "209 changes leave source 201 data untouched");
@@ -149,6 +152,114 @@ internal static class Iso209Tests
     {
         var type = typeof(TPConfigs).Assembly.GetType("KnowledgeSystem.Helpers.Iso209Permission", true);
         return (bool)type.GetMethod(method, BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
+    }
+
+    private static object GetField(object target, string name)
+    {
+        return target.GetType().GetField(name, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
+    }
+
+    private static void InvokeLoad(object target, string name)
+    {
+        target.GetType().GetMethod(name, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(target, new object[] { target, EventArgs.Empty });
+    }
+
+    private static string NameValue(List<object> rows, string code, string property)
+    {
+        var row = rows.Single(r => (string)r.GetType().GetProperty("Code").GetValue(r, null) == code);
+        return (string)row.GetType().GetProperty(property).GetValue(row, null);
+    }
+
+    private static void CheckSigningState(int formId, bool allowed, string expectedStatus)
+    {
+        using (var dialog = new f209_SignDoc_Info { idBase = formId })
+        {
+            InvokeLoad(dialog, "f209_SignDoc_Info_Load");
+            Check((bool)GetField(dialog, "canProcessWorkflow") == allowed &&
+                (allowed || dialog.Text.Contains(expectedStatus)), "signing state: " + expectedStatus);
+            foreach (string name in new[] { "btnApproval", "btnConfirm", "btnCancel" })
+            {
+                var button = GetField(dialog, name);
+                if (!allowed)
+                    Check(!(bool)button.GetType().GetProperty("Enabled").GetValue(button, null) &&
+                        button.GetType().GetProperty("Visibility").GetValue(button, null).ToString() == "Never", name + " disabled and hidden");
+            }
+        }
+    }
+
+    private static void TestSigningWorkflow(int childId)
+    {
+        CheckSigningState(int.MaxValue, false, "不存在");
+        var form = new dt209_Forms { IdBase = childId, Code = "WORKFLOW", DisplayName = "流程測試", UploadUser = UserId, UploadTime = DateTime.Now, IsProcessing = true, NextStepProg = UserId };
+        int formId = dt209_FormsBUS.Instance.Add(form);
+        Check(formId > 0, "create signing regression fixture");
+        CheckSigningState(formId, false, "不完整");
+        Check(dt209_ProgressBUS.Instance.Add(new dt209_Progress { IdForm = formId, IdUsr = UserId, IdRole = 1 }) > 0, "create signing step");
+        CheckSigningState(formId, false, "附件");
+        form.AttId = dm_AttachmentBUS.Instance.Add(new dm_Attachment { Thread = "209", EncryptionName = "regression.pdf", ActualName = "regression.pdf" });
+        Check(form.AttId > 0 && dt209_FormsBUS.Instance.AddOrUpdate(form), "attach signing regression file metadata");
+        CheckSigningState(formId, true, "first pending step");
+        using (var dialog = new f209_SignDoc_Info { idBase = formId })
+        {
+            InvokeLoad(dialog, "f209_SignDoc_Info_Load");
+            form.IsProcessing = false;
+            Check(dt209_FormsBUS.Instance.AddOrUpdate(form), "complete workflow while dialog is open");
+            bool allowed = (bool)typeof(f209_SignDoc_Info).GetMethod("CanProcessCurrentStep", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, null);
+            Check(!allowed && !(bool)GetField(dialog, "canProcessWorkflow"), "stale dialog blocks signing after state changes");
+        }
+        CheckSigningState(formId, false, "結束");
+        form.IsProcessing = true;
+        form.IsCancel = true;
+        Check(dt209_FormsBUS.Instance.AddOrUpdate(form), "return workflow fixture");
+        CheckSigningState(formId, false, "退回");
+        form.IsCancel = false;
+        form.NextStepProg = "VNW9999999";
+        Check(dt209_FormsBUS.Instance.AddOrUpdate(form), "create inconsistent pending signer fixture");
+        CheckSigningState(formId, false, "不一致");
+        form.NextStepProg = UserId;
+        Check(dt209_FormsBUS.Instance.AddOrUpdate(form), "restore pending signer");
+        var response = new dt209_ProgInfo { IdForm = formId, IdUsr = "VNW9999999", RespTime = DateTime.Now, Desc = "簽名" };
+        Check(dt209_ProgInfoBUS.Instance.Add(response) > 0, "create unmatched history fixture");
+        CheckSigningState(formId, false, "不完整");
+        response.IdUsr = UserId;
+        Check(dt209_ProgInfoBUS.Instance.AddOrUpdate(response), "match history to final step");
+        CheckSigningState(formId, false, "所有步驟");
+        Check(dt209_ProgressBUS.Instance.Add(new dt209_Progress { IdForm = formId, IdUsr = UserId, IdRole = 2 }) > 0, "add confirmation step for the same signer");
+        CheckSigningState(formId, true, "repeated signer proceeds to their next role");
+        var steps = dt209_ProgressBUS.Instance.GetListByIdForm(formId).OrderBy(r => r.Id).ToList();
+        steps[1].IdUsr = "VNW9999999";
+        Check(dt209_ProgressBUS.Instance.AddOrUpdate(steps[1]), "create missing signer fixture");
+        CheckSigningState(formId, false, "人員或角色");
+        steps[1].IdUsr = UserId;
+        steps[1].IdRole = 999;
+        Check(dt209_ProgressBUS.Instance.AddOrUpdate(steps[1]), "create missing role fixture");
+        CheckSigningState(formId, false, "人員或角色");
+    }
+
+    private static void TestLargeRecordId()
+    {
+        using (var dialog = new f209_AuditDoc_Info())
+        using (var timer = new System.Windows.Forms.Timer { Interval = 100 })
+        {
+            var grid = (DevExpress.XtraGrid.GridControl)GetField(dialog, "gcData");
+            var view = (DevExpress.XtraGrid.Views.Grid.GridView)GetField(dialog, "gvData");
+            grid.CreateControl();
+            grid.DataSource = new[] { new { data = new dt209_Forms { Id = 40000 } } };
+            grid.ForceInitialize();
+            view.FocusedRowHandle = 0;
+            bool received = false;
+            timer.Tick += delegate
+            {
+                var history = Application.OpenForms.OfType<f209_SignProg_Detail>().FirstOrDefault();
+                if (history == null) return;
+                received = history.idBase == 40000;
+                history.Close();
+            };
+            timer.Start();
+            typeof(f209_AuditDoc_Info).GetMethod("ItemApprovalHis_Click", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, new object[] { dialog, EventArgs.Empty });
+            timer.Stop();
+            Check(received, "document history action passes ID 40000 without Int16 overflow");
+        }
     }
 
     private static void TestConstructors()

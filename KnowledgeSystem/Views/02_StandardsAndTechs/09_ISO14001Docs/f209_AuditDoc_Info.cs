@@ -74,7 +74,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         private void ItemApprovalHis_Click(object sender, EventArgs e)
         {
             GridView view = gvData;
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
             f209_SignProg_Detail fDetail = new f209_SignProg_Detail();
             fDetail.idBase = idForm;
@@ -98,7 +98,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             if (string.IsNullOrEmpty(result) || result != TPConfigs.LoginUser.Id.ToUpper()) return;
 
             GridView view = gvData;
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
             dt209_FormsBUS.Instance.Remove(idForm);
             LoadData();
@@ -109,7 +109,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             if (!Iso209Permission.EnsureCanEditCurrentUser()) return;
 
             GridView view = gvData;
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
             f209_AddAttachment fAtt = new f209_AddAttachment();
             fAtt.eventInfo = EventFormInfo.Update;
@@ -200,7 +200,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             bool IsCancel = Convert.ToBoolean(view.GetRowCellValue(view.FocusedRowHandle, gColIsCancel));
             if (IsCancel) return;
 
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
             dt209_Forms baseForm = dt209_FormsBUS.Instance.GetItemById(idForm);
             if (baseForm.IsProcessing == true) return;
 
@@ -229,7 +229,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         private void btnAddMultiFile_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             GridView view = gvData;
-            int idForm = Convert.ToInt16(view.GetRowCellValue(view.FocusedRowHandle, gColId));
+            int idForm = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColId));
 
             f209_AddRangeAtts fAdd = new f209_AddRangeAtts();
             fAdd.Text = "上傳多文件";

@@ -33,11 +33,17 @@ for source in sources:
     target = ROOT / convert(source.relative_to(ROOT).as_posix())
     if source.name not in ("uc201_AuditISOMain.cs", "uc201_AuditISOMain.Designer.cs",
                            "f201_AddRangeAtts.cs", "f201_AddRangeAtts.Designer.cs", "f201_AddRangeAtts.resx",
-                           "f201_AddAttachment.cs", "f201_AddAttachment.Designer.cs"):
+                           "f201_AddAttachment.cs", "f201_AddAttachment.Designer.cs",
+                           "dt201_FormsBUS.cs", "f201_AddNode.cs", "f201_SignDoc_Info.cs", "f201_SignDoc_Info.Designer.cs",
+                           "f201_AuditDoc_Info.cs", "uc201_ApprovalProgress.cs", "uc201_DigitalSignature.cs", "uc201_ExpiredDocs.cs"):
         assert target.read_text(encoding="utf-8-sig") == convert(source.read_text(encoding="utf-8-sig")), target
     if target.suffix == ".cs":
         assert not re.search(r"\b(?:SqlCommand|SqlQuery|ExecuteSqlCommand|ExecuteSqlRaw|SqlConnection)\b", target.read_text(encoding="utf-8-sig")), target
-print("PASS: retained files match 201 except the customized 209 document and attachment screens; no runtime SQL added.")
+print("PASS: retained files match 201 except the 209 customizations and regression fixes; no runtime SQL added.")
+
+for path in (ROOT / "KnowledgeSystem/Views/02_StandardsAndTechs/09_ISO14001Docs").glob("*.cs"):
+    assert not re.search(r"Convert\.ToInt16\([^;\n]*(?:GetRowCellValue|[iI]d)", path.read_text(encoding="utf-8-sig")), path
+print("PASS: record identifiers in 209 are no longer narrowed to Int16.")
 
 target_ui = ROOT / "KnowledgeSystem/Views/02_StandardsAndTechs/09_ISO14001Docs"
 for path in target_ui.glob("*.cs"):
