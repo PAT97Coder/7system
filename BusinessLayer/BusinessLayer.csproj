@@ -146,8 +146,13 @@
     <Compile Include="dt315\dt315_InterviewAssessmentBUS.cs" />
     <Compile Include="dt317\dt317_ExamStatisticsBUS.cs" />
     <Compile Include="dt318\dt318_TaskAttachBUS.cs" />
+    <Compile Include="dt318\Task318WorkflowModels.cs" />
+    <Compile Include="dt318\dt318_TaskWorkflowBUS.cs" />
+    <Compile Include="dt318\dt318_TaskHistoryBUS.cs" />
     <Compile Include="dt318\dt318_TasksBUS.cs" />
+    <Compile Include="dt318\dt318_TaskTeamsBUS.cs" />
     <Compile Include="dt318\dt318_TaskUsersBUS.cs" />
+    <Compile Include="dt318\dt318_TaskWorkflowStepsBUS.cs" />
     <Compile Include="dt308\dt308_CheckDetailBUS.cs" />
     <Compile Include="dt308\dt308_CheckSessionBUS.cs" />
     <Compile Include="dt308\dt308_DiseaseBUS.cs" />

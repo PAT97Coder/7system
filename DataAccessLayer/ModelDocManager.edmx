@@ -1663,6 +1663,21 @@
           <Property Name="IdDinhKem" Type="int" Nullable="false" />
           <Property Name="LoaiDinhKem" Type="varchar" MaxLength="20" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt318_TaskHistory">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="bigint" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdCongViec" Type="int" Nullable="false" />
+          <Property Name="IdTaskTeam" Type="int" />
+          <Property Name="IdWorkflowStep" Type="int" />
+          <Property Name="LoaiSuKien" Type="varchar" MaxLength="40" Nullable="false" />
+          <Property Name="GiaTriCu" Type="nvarchar(max)" />
+          <Property Name="GiaTriMoi" Type="nvarchar(max)" />
+          <Property Name="NoiDung" Type="nvarchar" MaxLength="2000" />
+          <Property Name="NguoiThucHien" Type="varchar" MaxLength="10" />
+          <Property Name="NgayThucHien" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt318_Tasks">
           <Key>
             <PropertyRef Name="Id" />
@@ -1685,6 +1700,30 @@
           <Property Name="NguoiXoa" Type="varchar" MaxLength="10" />
           <Property Name="DuongDanThuMucNguon" Type="nvarchar" MaxLength="1024" />
           <Property Name="MaNguon" Type="varchar" MaxLength="64" />
+          <Property Name="CanXuLy7810" Type="bit" />
+          <Property Name="CanXuLy7820" Type="bit" />
+          <Property Name="IdNguoiNhanAn" Type="varchar" MaxLength="10" />
+          <Property Name="MaToNhanAn" Type="varchar" MaxLength="4" />
+        </EntityType>
+        <EntityType Name="dt318_TaskTeams">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdCongViec" Type="int" Nullable="false" />
+          <Property Name="MaTo" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="IdNguoiPhuTrach" Type="varchar" MaxLength="10" />
+          <Property Name="NguonXacNhan" Type="varchar" MaxLength="20" />
+          <Property Name="NguoiXacNhan" Type="varchar" MaxLength="10" />
+          <Property Name="NgayXacNhan" Type="datetime" />
+          <Property Name="TrangThaiXuLy" Type="varchar" MaxLength="24" Nullable="false" />
+          <Property Name="NguoiXuLyXong" Type="varchar" MaxLength="10" />
+          <Property Name="NgayXuLyXong" Type="datetime" />
+          <Property Name="NgayTao" Type="datetime" Nullable="false" />
+          <Property Name="NguoiTao" Type="varchar" MaxLength="10" />
+          <Property Name="NgayCapNhat" Type="datetime" />
+          <Property Name="NguoiCapNhat" Type="varchar" MaxLength="10" />
+          <Property Name="RowVersion" Type="timestamp" StoreGeneratedPattern="Computed" Nullable="false" />
         </EntityType>
         <EntityType Name="dt318_TaskUsers">
           <Key>
@@ -1697,6 +1736,25 @@
           <Property Name="NguoiTao" Type="varchar" MaxLength="10" Nullable="false" />
           <Property Name="NgayXoa" Type="datetime" />
           <Property Name="NguoiXoa" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt318_TaskWorkflowSteps">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdTaskTeam" Type="int" Nullable="false" />
+          <Property Name="ThuTu" Type="int" Nullable="false" />
+          <Property Name="TenBuoc" Type="nvarchar" MaxLength="100" Nullable="false" />
+          <Property Name="VaiTro" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="IdNguoiXuLy" Type="varchar" MaxLength="10" />
+          <Property Name="IdNhomXuLy" Type="int" />
+          <Property Name="TrangThai" Type="varchar" MaxLength="20" Nullable="false" />
+          <Property Name="NguoiXacNhan" Type="varchar" MaxLength="10" />
+          <Property Name="NgayXacNhan" Type="datetime" />
+          <Property Name="YKien" Type="nvarchar" MaxLength="2000" />
+          <Property Name="NgayTao" Type="datetime" Nullable="false" />
+          <Property Name="NguoiTao" Type="varchar" MaxLength="10" />
+          <Property Name="RowVersion" Type="timestamp" StoreGeneratedPattern="Computed" Nullable="false" />
         </EntityType>
         <EntityType Name="dt403_04_HardnessStandardLog">
           <Key>
@@ -1793,6 +1851,7 @@
           <Property Name="CCUsers" Type="varchar(max)" />
           <Property Name="Attachments" Type="varchar(max)" />
           <Property Name="TimeNotify" Type="datetime" />
+          <Property Name="EventKey" Type="varchar" MaxLength="180" />
         </EntityType>
         <EntityType Name="sys_StaticValue">
           <Key>
@@ -2090,8 +2149,11 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt315_InterviewScore" EntityType="Self.dt315_InterviewScore" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScoreAudit" EntityType="Self.dt315_InterviewScoreAudit" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt318_TaskAttach" EntityType="Self.dt318_TaskAttach" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_TaskHistory" EntityType="Self.dt318_TaskHistory" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt318_Tasks" EntityType="Self.dt318_Tasks" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_TaskTeams" EntityType="Self.dt318_TaskTeams" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt318_TaskUsers" EntityType="Self.dt318_TaskUsers" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt318_TaskWorkflowSteps" EntityType="Self.dt318_TaskWorkflowSteps" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_HardnessStandardLog" EntityType="Self.dt403_04_HardnessStandardLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_StandardInfo" EntityType="Self.dt403_04_StandardInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_05_Standard" EntityType="Self.dt403_05_Standard" Schema="dbo" store:Type="Tables" />
@@ -2355,6 +2417,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt318_TaskAttach" EntityType="DBDocumentManagementSystemModel.dt318_TaskAttach" />
           <EntitySet Name="dt318_TaskUsers" EntityType="DBDocumentManagementSystemModel.dt318_TaskUsers" />
           <EntitySet Name="dt318_Tasks" EntityType="DBDocumentManagementSystemModel.dt318_Tasks" />
+          <EntitySet Name="dt318_TaskHistory" EntityType="DBDocumentManagementSystemModel.dt318_TaskHistory" />
+          <EntitySet Name="dt318_TaskTeams" EntityType="DBDocumentManagementSystemModel.dt318_TaskTeams" />
+          <EntitySet Name="dt318_TaskWorkflowSteps" EntityType="DBDocumentManagementSystemModel.dt318_TaskWorkflowSteps" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -2628,6 +2693,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="CCUsers" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Attachments" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TimeNotify" Type="DateTime" Precision="3" />
+          <Property Name="EventKey" Type="String" MaxLength="180" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
@@ -4326,6 +4392,64 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="NguoiXoa" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="DuongDanThuMucNguon" Type="String" MaxLength="1024" FixedLength="false" Unicode="true" />
           <Property Name="MaNguon" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+          <Property Name="CanXuLy7810" Type="Boolean" />
+          <Property Name="CanXuLy7820" Type="Boolean" />
+          <Property Name="IdNguoiNhanAn" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="MaToNhanAn" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt318_TaskHistory">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int64" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdCongViec" Type="Int32" Nullable="false" />
+          <Property Name="IdTaskTeam" Type="Int32" />
+          <Property Name="IdWorkflowStep" Type="Int32" />
+          <Property Name="LoaiSuKien" Type="String" Nullable="false" MaxLength="40" FixedLength="false" Unicode="false" />
+          <Property Name="GiaTriCu" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="GiaTriMoi" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+          <Property Name="NoiDung" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+          <Property Name="NguoiThucHien" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayThucHien" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="dt318_TaskTeams">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdCongViec" Type="Int32" Nullable="false" />
+          <Property Name="MaTo" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="IdNguoiPhuTrach" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NguonXacNhan" Type="String" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NguoiXacNhan" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayXacNhan" Type="DateTime" Precision="3" />
+          <Property Name="TrangThaiXuLy" Type="String" Nullable="false" MaxLength="24" FixedLength="false" Unicode="false" />
+          <Property Name="NguoiXuLyXong" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayXuLyXong" Type="DateTime" Precision="3" />
+          <Property Name="NgayTao" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="NguoiTao" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayCapNhat" Type="DateTime" Precision="3" />
+          <Property Name="NguoiCapNhat" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RowVersion" Type="Binary" Nullable="false" MaxLength="8" FixedLength="true" annotation:StoreGeneratedPattern="Computed" />
+        </EntityType>
+        <EntityType Name="dt318_TaskWorkflowSteps">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdTaskTeam" Type="Int32" Nullable="false" />
+          <Property Name="ThuTu" Type="Int32" Nullable="false" />
+          <Property Name="TenBuoc" Type="String" Nullable="false" MaxLength="100" FixedLength="false" Unicode="true" />
+          <Property Name="VaiTro" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="IdNguoiXuLy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IdNhomXuLy" Type="Int32" />
+          <Property Name="TrangThai" Type="String" Nullable="false" MaxLength="20" FixedLength="false" Unicode="false" />
+          <Property Name="NguoiXacNhan" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="NgayXacNhan" Type="DateTime" Precision="3" />
+          <Property Name="YKien" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+          <Property Name="NgayTao" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="NguoiTao" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RowVersion" Type="Binary" Nullable="false" MaxLength="8" FixedLength="true" annotation:StoreGeneratedPattern="Computed" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -4621,6 +4745,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="sys_NotesMail">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.sys_NotesMail">
               <MappingFragment StoreEntitySet="sys_NotesMail">
+                <ScalarProperty Name="EventKey" ColumnName="EventKey" />
                 <ScalarProperty Name="TimeNotify" ColumnName="TimeNotify" />
                 <ScalarProperty Name="Attachments" ColumnName="Attachments" />
                 <ScalarProperty Name="CCUsers" ColumnName="CCUsers" />
@@ -6269,6 +6394,10 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="dt318_Tasks">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_Tasks">
               <MappingFragment StoreEntitySet="dt318_Tasks">
+                <ScalarProperty Name="MaToNhanAn" ColumnName="MaToNhanAn" />
+                <ScalarProperty Name="IdNguoiNhanAn" ColumnName="IdNguoiNhanAn" />
+                <ScalarProperty Name="CanXuLy7820" ColumnName="CanXuLy7820" />
+                <ScalarProperty Name="CanXuLy7810" ColumnName="CanXuLy7810" />
                 <ScalarProperty Name="MaNguon" ColumnName="MaNguon" />
                 <ScalarProperty Name="DuongDanThuMucNguon" ColumnName="DuongDanThuMucNguon" />
                 <ScalarProperty Name="NguoiXoa" ColumnName="NguoiXoa" />
@@ -6286,6 +6415,63 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="NgayDenHan" ColumnName="NgayDenHan" />
                 <ScalarProperty Name="GiaiThich" ColumnName="GiaiThich" />
                 <ScalarProperty Name="ChuDe" ColumnName="ChuDe" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_TaskHistory">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_TaskHistory">
+              <MappingFragment StoreEntitySet="dt318_TaskHistory">
+                <ScalarProperty Name="NgayThucHien" ColumnName="NgayThucHien" />
+                <ScalarProperty Name="NguoiThucHien" ColumnName="NguoiThucHien" />
+                <ScalarProperty Name="NoiDung" ColumnName="NoiDung" />
+                <ScalarProperty Name="GiaTriMoi" ColumnName="GiaTriMoi" />
+                <ScalarProperty Name="GiaTriCu" ColumnName="GiaTriCu" />
+                <ScalarProperty Name="LoaiSuKien" ColumnName="LoaiSuKien" />
+                <ScalarProperty Name="IdWorkflowStep" ColumnName="IdWorkflowStep" />
+                <ScalarProperty Name="IdTaskTeam" ColumnName="IdTaskTeam" />
+                <ScalarProperty Name="IdCongViec" ColumnName="IdCongViec" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_TaskTeams">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_TaskTeams">
+              <MappingFragment StoreEntitySet="dt318_TaskTeams">
+                <ScalarProperty Name="RowVersion" ColumnName="RowVersion" />
+                <ScalarProperty Name="NguoiCapNhat" ColumnName="NguoiCapNhat" />
+                <ScalarProperty Name="NgayCapNhat" ColumnName="NgayCapNhat" />
+                <ScalarProperty Name="NguoiTao" ColumnName="NguoiTao" />
+                <ScalarProperty Name="NgayTao" ColumnName="NgayTao" />
+                <ScalarProperty Name="NgayXuLyXong" ColumnName="NgayXuLyXong" />
+                <ScalarProperty Name="NguoiXuLyXong" ColumnName="NguoiXuLyXong" />
+                <ScalarProperty Name="TrangThaiXuLy" ColumnName="TrangThaiXuLy" />
+                <ScalarProperty Name="NgayXacNhan" ColumnName="NgayXacNhan" />
+                <ScalarProperty Name="NguoiXacNhan" ColumnName="NguoiXacNhan" />
+                <ScalarProperty Name="NguonXacNhan" ColumnName="NguonXacNhan" />
+                <ScalarProperty Name="IdNguoiPhuTrach" ColumnName="IdNguoiPhuTrach" />
+                <ScalarProperty Name="MaTo" ColumnName="MaTo" />
+                <ScalarProperty Name="IdCongViec" ColumnName="IdCongViec" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt318_TaskWorkflowSteps">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt318_TaskWorkflowSteps">
+              <MappingFragment StoreEntitySet="dt318_TaskWorkflowSteps">
+                <ScalarProperty Name="RowVersion" ColumnName="RowVersion" />
+                <ScalarProperty Name="NguoiTao" ColumnName="NguoiTao" />
+                <ScalarProperty Name="NgayTao" ColumnName="NgayTao" />
+                <ScalarProperty Name="YKien" ColumnName="YKien" />
+                <ScalarProperty Name="NgayXacNhan" ColumnName="NgayXacNhan" />
+                <ScalarProperty Name="NguoiXacNhan" ColumnName="NguoiXacNhan" />
+                <ScalarProperty Name="TrangThai" ColumnName="TrangThai" />
+                <ScalarProperty Name="IdNhomXuLy" ColumnName="IdNhomXuLy" />
+                <ScalarProperty Name="IdNguoiXuLy" ColumnName="IdNguoiXuLy" />
+                <ScalarProperty Name="VaiTro" ColumnName="VaiTro" />
+                <ScalarProperty Name="TenBuoc" ColumnName="TenBuoc" />
+                <ScalarProperty Name="ThuTu" ColumnName="ThuTu" />
+                <ScalarProperty Name="IdTaskTeam" ColumnName="IdTaskTeam" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

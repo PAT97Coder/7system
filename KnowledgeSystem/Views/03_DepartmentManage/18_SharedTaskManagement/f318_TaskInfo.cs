@@ -1,3 +1,4 @@
+using BusinessLayer;
 using DevExpress.XtraEditors;
 using KnowledgeSystem.Helpers;
 using System;
@@ -14,6 +15,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private readonly BindingList<Task318Attachment> attachments =
             new BindingList<Task318Attachment>();
         private string sourceOxpsPath;
+        private Task318Participants participants;
+        private readonly System.Collections.Generic.List<string> recipientIds = new System.Collections.Generic.List<string>();
 
         public Task318Draft Draft { get; private set; }
 
@@ -43,13 +46,18 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
 
         private void InitializeData()
         {
-            cbAssignee.Properties.Items.AddRange(new object[]
+            participants = Task318WorkflowSettings.Participants();
+            var users = dm_UserBUS.Instance.GetList().Where(r => r.Id == participants.User7810 || r.Id == participants.User7820).ToList();
+            foreach (string team in new[] { "7810", "7820" })
             {
-                "共同處理",
-                "本人",
-                "另一位同仁"
-            });
-            cbAssignee.SelectedIndex = 0;
+                string id = participants.GetUser(team);
+                var user = users.SingleOrDefault(r => r.Id == id);
+                if (user == null) throw new InvalidOperationException("找不到設定的收件人：" + id);
+                recipientIds.Add(id);
+                cbAssignee.Properties.Items.Add($"{team} — {user.DisplayName}");
+            }
+            cbAssignee.SelectedIndex = recipientIds.IndexOf(TPConfigs.LoginUser.Id);
+            cbAssignee.SelectedIndexChanged += FolderPreview_EditValueChanged;
 
             dtDueDate.DateTime = DateTime.Today.AddDays(7);
             gcAttachments.DataSource = attachments;
@@ -70,6 +78,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             if (task == null)
             {
                 Text = "新增交辦事項";
+                txbSharedRoot.Text = Task318WorkflowSettings.Required("Module318:CommonRoot");
                 UpdateTargetFolderPreview();
                 return;
             }
@@ -78,7 +87,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             txbSubject.Text = task.Subject;
             memDescription.Text = task.Description;
             dtDueDate.DateTime = task.DueDate;
-            cbAssignee.Text = task.Assignee;
+            cbAssignee.SelectedIndex = recipientIds.IndexOf(task.RecipientId);
             txbSharedRoot.Text = task.SharedRootPath;
             if (!string.IsNullOrWhiteSpace(task.SourceOxpsPath))
                 LoadOxpsFile(task.SourceOxpsPath, false);
@@ -143,6 +152,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             task.Description = memDescription.Text.Trim();
             task.DueDate = dtDueDate.DateTime.Date;
             task.Assignee = cbAssignee.Text.Trim();
+            task.RecipientId = recipientIds[cbAssignee.SelectedIndex];
+            task.RecipientTeam = participants.GetTeam(task.RecipientId);
             task.SharedRootPath = txbSharedRoot.Text.Trim();
             task.TargetFolderPath = txbTargetFolder.Text.Trim();
 
@@ -162,9 +173,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
 
         private bool ValidateData()
         {
+            if (cbAssignee.SelectedIndex < 0)
+            {
+                XtraMessageBox.Show("請選擇原收件人。", TPConfigs.SoftNameTW);
+                return false;
+            }
             if (string.IsNullOrWhiteSpace(sourceOxpsPath) || !File.Exists(sourceOxpsPath))
             {
-                XtraMessageBox.Show("請選擇包含主旨與說明的 OXPS 檔案。", TPConfigs.SoftNameTW,
+                XtraMessageBox.Show("請選擇包含主旨與說明的 XPS/OXPS 檔案。", TPConfigs.SoftNameTW,
                     MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return false;
             }
@@ -199,7 +215,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             using (var dialog = new OpenFileDialog
             {
                 Title = "選擇 OXPS 檔案",
-                Filter = "OXPS File (*.oxps)|*.oxps",
+                Filter = "XPS/OXPS Files (*.xps;*.oxps)|*.xps;*.oxps",
                 CheckFileExists = true,
                 Multiselect = false
             })
@@ -357,10 +373,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
                 return;
             }
 
-            txbTargetFolder.Text = Path.Combine(
-                root,
-                $"Tháng {dueDate.Month}{dueDate.Year}",
-                dueDate.ToString("MMdd"));
+            string team = cbAssignee.SelectedIndex < 0 ? null : participants.GetTeam(recipientIds[cbAssignee.SelectedIndex]);
+            txbTargetFolder.Text = Path.Combine(root, $"{dueDate:yyyyMMdd}_{(team == "7810" ? "Tuan" : team == "7820" ? "Hung" : "收件人")}");
         }
 
         private void f318_TaskInfo_KeyDown(object sender, KeyEventArgs e)
@@ -414,7 +428,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private static bool IsOxpsFile(string path)
         {
             return File.Exists(path)
-                && string.Equals(Path.GetExtension(path), ".oxps", StringComparison.OrdinalIgnoreCase);
+                && (string.Equals(Path.GetExtension(path), ".oxps", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(Path.GetExtension(path), ".xps", StringComparison.OrdinalIgnoreCase));
         }
     }
 }

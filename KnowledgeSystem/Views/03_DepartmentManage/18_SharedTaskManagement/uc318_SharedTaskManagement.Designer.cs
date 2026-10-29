@@ -17,15 +17,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.bar2 = new DevExpress.XtraBars.Bar();
             this.btnAdd = new DevExpress.XtraBars.BarButtonItem();
             this.btnReload = new DevExpress.XtraBars.BarButtonItem();
+            this.btnSetting = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
             this.gcData = new DevExpress.XtraGrid.GridControl();
-            this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gColDueDate = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColSubject = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gColAssignee = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gvData = new DevExpress.XtraGrid.Views.BandedGrid.BandedGridView();
+            this.gColDueDate = new DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn();
+            this.gColSubject = new DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn();
+            this.gColAssignee = new DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn();
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
             this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
@@ -47,9 +48,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.barManagerTP.DockControls.Add(this.barDockControlRight);
             this.barManagerTP.Form = this;
             this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-                this.btnAdd, this.btnReload });
+                this.btnAdd, this.btnReload, this.btnSetting });
             this.barManagerTP.MainMenu = this.bar2;
-            this.barManagerTP.MaxItemId = 2;
+            this.barManagerTP.MaxItemId = 3;
             //
             // bar2
             //
@@ -74,7 +75,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
             this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
                 new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnAdd, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-                new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph) });
+                new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
+                new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnSetting, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph) });
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.bar2.OptionsBar.MultiLine = true;
@@ -96,6 +98,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.btnReload.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnReload.Name = "btnReload";
             this.btnReload.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnReload_ItemClick);
+            //
+            // btnSetting
+            //
+            this.btnSetting.Caption = "設定";
+            this.btnSetting.Id = 2;
+            this.btnSetting.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
+            this.btnSetting.Name = "btnSetting";
+            this.btnSetting.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSetting_ItemClick);
             //
             // dock controls
             //
@@ -236,15 +246,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         private DevExpress.XtraBars.Bar bar2;
         private DevExpress.XtraBars.BarButtonItem btnAdd;
         private DevExpress.XtraBars.BarButtonItem btnReload;
+        private DevExpress.XtraBars.BarButtonItem btnSetting;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
         private DevExpress.XtraBars.BarDockControl barDockControlBottom;
         private DevExpress.XtraBars.BarDockControl barDockControlLeft;
         private DevExpress.XtraBars.BarDockControl barDockControlRight;
         private DevExpress.XtraGrid.GridControl gcData;
-        private DevExpress.XtraGrid.Views.Grid.GridView gvData;
-        private DevExpress.XtraGrid.Columns.GridColumn gColDueDate;
-        private DevExpress.XtraGrid.Columns.GridColumn gColSubject;
-        private DevExpress.XtraGrid.Columns.GridColumn gColAssignee;
+        private DevExpress.XtraGrid.Views.BandedGrid.BandedGridView gvData;
+        private DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn gColDueDate;
+        private DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn gColSubject;
+        private DevExpress.XtraGrid.Views.BandedGrid.BandedGridColumn gColAssignee;
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private DevExpress.XtraLayout.LayoutControlGroup Root;
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;

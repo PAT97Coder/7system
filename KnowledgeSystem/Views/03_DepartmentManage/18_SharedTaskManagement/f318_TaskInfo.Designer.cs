@@ -341,7 +341,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
             this.lblAssignee.Name = "lblAssignee";
             this.lblAssignee.Size = new System.Drawing.Size(99, 29);
             this.lblAssignee.TabIndex = 8;
-            this.lblAssignee.Text = "負責人";
+            this.lblAssignee.Text = "原收件人";
             // 
             // cbAssignee
             // 

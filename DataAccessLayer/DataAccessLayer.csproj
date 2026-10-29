@@ -473,10 +473,19 @@
     <Compile Include="dt318_TaskAttach.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt318_TaskHistory.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt318_Tasks.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt318_TaskTeams.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt318_TaskUsers.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt318_TaskWorkflowSteps.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="dt403_04_HardnessStandardLog.cs">

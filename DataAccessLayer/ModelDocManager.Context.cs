@@ -169,5 +169,8 @@ namespace DataAccessLayer
         public virtual DbSet<dt318_TaskAttach> dt318_TaskAttach { get; set; }
         public virtual DbSet<dt318_TaskUsers> dt318_TaskUsers { get; set; }
         public virtual DbSet<dt318_Tasks> dt318_Tasks { get; set; }
+        public virtual DbSet<dt318_TaskHistory> dt318_TaskHistory { get; set; }
+        public virtual DbSet<dt318_TaskTeams> dt318_TaskTeams { get; set; }
+        public virtual DbSet<dt318_TaskWorkflowSteps> dt318_TaskWorkflowSteps { get; set; }
     }
 }

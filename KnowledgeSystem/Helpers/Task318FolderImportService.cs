@@ -20,6 +20,7 @@ namespace KnowledgeSystem.Helpers
     {
         public string CommonRootPath { get; set; }
         public string ImportedBy { get; set; }
+        public Task318Participants Participants { get; set; }
         public IList<Task318ImportSource> Sources { get; } = new List<Task318ImportSource>();
     }
 
@@ -54,6 +55,67 @@ namespace KnowledgeSystem.Helpers
     /// </summary>
     public sealed class Task318FolderImportService
     {
+        public int ImportSelectedFiles(dt318_Tasks task, string sourceDocument,
+            IEnumerable<string> selectedAttachments, string recipient, Task318Participants participants)
+        {
+            participants.Validate();
+            string team = participants.GetTeam(recipient);
+            if (team == null || !File.Exists(sourceDocument) || !IsOxpsFile(sourceDocument))
+                throw new InvalidOperationException("請選擇收件人及有效的 XPS/OXPS 檔案。");
+            string sourceKey = CreateSourceKey(sourceDocument);
+            if (dt318_TasksBUS.Instance.ExistsBySourceKey(sourceKey)) return 0;
+            var files = new[] { sourceDocument }.Concat(selectedAttachments ?? Enumerable.Empty<string>())
+                .Select(Path.GetFullPath).Distinct(StringComparer.OrdinalIgnoreCase).ToList();
+            if (files.Any(path => !File.Exists(path))) throw new InvalidOperationException("有附件已不存在，請重新選擇。");
+            if (files.GroupBy(Path.GetFileName, StringComparer.OrdinalIgnoreCase).Any(g => g.Count() > 1))
+                throw new InvalidOperationException("附件有相同檔名，請先重新命名。");
+            Directory.CreateDirectory(task.DuongDanThuMucChung);
+            using (var destination = ReserveDestinationFolder(task.DuongDanThuMucChung,
+                task.NgayDenHan, team == "7810" ? "Tuan" : "Hung"))
+            {
+                bool moved = false;
+                try
+                {
+                    Directory.CreateDirectory(destination.TemporaryPath);
+                    foreach (string path in files)
+                        File.Copy(path, Path.Combine(destination.TemporaryPath, Path.GetFileName(path)), false);
+                    Directory.Move(OwnedFolder(destination.TemporaryPath, task.DuongDanThuMucChung),
+                        OwnedFolder(destination.FinalPath, task.DuongDanThuMucChung));
+                    moved = true;
+                    task.DuongDanThuMucCongViec = destination.FinalPath;
+                    task.DuongDanThuMucNguon = Path.GetDirectoryName(Path.GetFullPath(sourceDocument));
+                    task.MaNguon = sourceKey;
+                    int id = dt318_TasksBUS.Instance.Import(task, recipient,
+                        BuildAttachments(destination.FinalPath, sourceDocument), participants);
+                    if (id <= 0) DeleteOwnedFolder(destination.FinalPath, task.DuongDanThuMucChung);
+                    return id;
+                }
+                catch
+                {
+                    DeleteOwnedFolder(destination.TemporaryPath, task.DuongDanThuMucChung);
+                    if (moved) DeleteOwnedFolder(destination.FinalPath, task.DuongDanThuMucChung);
+                    throw;
+                }
+            }
+        }
+
+        private static string OwnedFolder(string path, string commonRoot)
+        {
+            string resolved = Path.GetFullPath(path);
+            string root = Path.GetFullPath(commonRoot).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            string parent = Path.GetDirectoryName(resolved.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar))
+                ?.TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+            if (!string.Equals(parent, root, StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("匯入清理路徑不在指定共用根目錄內。");
+            return resolved;
+        }
+
+        private static void DeleteOwnedFolder(string path, string commonRoot)
+        {
+            string resolved = OwnedFolder(path, commonRoot);
+            if (Directory.Exists(resolved)) Directory.Delete(resolved, true);
+        }
+
         public Task318ImportSummary Preview(Task318ImportOptions options)
         {
             ValidateOptions(options);
@@ -195,7 +257,8 @@ namespace KnowledgeSystem.Helpers
                     try
                     {
                         CopyDirectory(sourceFolder, temporaryFolder);
-                        Directory.Move(temporaryFolder, finalFolder);
+                        Directory.Move(OwnedFolder(temporaryFolder, options.CommonRootPath),
+                            OwnedFolder(finalFolder, options.CommonRootPath));
                         finalFolderCreated = true;
 
                         DateTime now = DateTime.Now;
@@ -219,11 +282,12 @@ namespace KnowledgeSystem.Helpers
                         int taskId = dt318_TasksBUS.Instance.Import(
                             task,
                             source.AssigneeId,
-                            attachments);
+                            attachments,
+                            options.Participants);
 
                         if (taskId == 0)
                         {
-                            Directory.Delete(finalFolder, true);
+                            DeleteOwnedFolder(finalFolder, options.CommonRootPath);
                             finalFolderCreated = false;
                             return Skipped(sourceFolder, "此資料夾已由其他使用者匯入。", null);
                         }
@@ -241,10 +305,8 @@ namespace KnowledgeSystem.Helpers
                     }
                     catch
                     {
-                        if (Directory.Exists(temporaryFolder))
-                            Directory.Delete(temporaryFolder, true);
-                        if (finalFolderCreated && Directory.Exists(finalFolder))
-                            Directory.Delete(finalFolder, true);
+                        DeleteOwnedFolder(temporaryFolder, options.CommonRootPath);
+                        if (finalFolderCreated) DeleteOwnedFolder(finalFolder, options.CommonRootPath);
                         throw;
                     }
                 }
@@ -386,6 +448,8 @@ namespace KnowledgeSystem.Helpers
         private static void ValidateOptions(Task318ImportOptions options)
         {
             if (options == null) throw new ArgumentNullException(nameof(options));
+            if (options.Participants == null) throw new ArgumentException("尚未設定兩課負責人。", nameof(options));
+            options.Participants.Validate();
             if (string.IsNullOrWhiteSpace(options.CommonRootPath))
                 throw new ArgumentException("尚未設定共用資料夾。", nameof(options));
             if (string.IsNullOrWhiteSpace(options.ImportedBy))

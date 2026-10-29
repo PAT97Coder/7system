@@ -20,6 +20,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._18_SharedTaskManagement
         public string Description { get; set; }
         public DateTime DueDate { get; set; }
         public string Assignee { get; set; }
+        public string RecipientId { get; set; }
+        public string RecipientTeam { get; set; }
         public string SharedRootPath { get; set; }
         public string TargetFolderPath { get; set; }
         public DateTime CreatedAt { get; set; }

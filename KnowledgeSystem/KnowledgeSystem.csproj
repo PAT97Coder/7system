@@ -241,6 +241,7 @@
     <Compile Include="Helpers\Material309Helper.cs" />
     <Compile Include="Helpers\OxpsParser.cs" />
     <Compile Include="Helpers\Task318FolderImportService.cs" />
+    <Compile Include="Helpers\Task318WorkflowSettings.cs" />
     <Compile Include="Helpers\PCInfoHelper.cs" />
     <Compile Include="Helpers\PdfHelper.cs" />
     <Compile Include="Helpers\RefreshHelper.cs" />
@@ -661,6 +662,18 @@
       <DependentUpon>uc317_ExamStatistics.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\Task318Draft.cs" />
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Workflow.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Settings.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Settings.Designer.cs">
+      <DependentUpon>f318_Settings.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Workflow.Designer.cs">
+      <DependentUpon>f318_Workflow.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\18_SharedTaskManagement\f318_Description.cs">
       <SubType>Form</SubType>
     </Compile>

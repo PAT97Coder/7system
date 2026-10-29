@@ -32,5 +32,9 @@ namespace DataAccessLayer
         public string NguoiXoa { get; set; }
         public string DuongDanThuMucNguon { get; set; }
         public string MaNguon { get; set; }
+        public Nullable<bool> CanXuLy7810 { get; set; }
+        public Nullable<bool> CanXuLy7820 { get; set; }
+        public string IdNguoiNhanAn { get; set; }
+        public string MaToNhanAn { get; set; }
     }
 }
