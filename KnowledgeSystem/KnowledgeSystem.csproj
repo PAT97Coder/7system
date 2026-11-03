@@ -2444,9 +2444,34 @@
   -->
   <ItemGroup>
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312Ui.cs" />
-    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.cs" />
-    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.Designer.cs"><DependentUpon>f312_EssayQuestion.cs</DependentUpon></Compile>
-    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.cs" />
-    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.Designer.cs"><DependentUpon>f312_ExamReview.cs</DependentUpon></Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312QuestionExcel.cs" />
+    <Compile Include="Helpers\TraditionalGridLocalizer.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExternalCandidate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExternalCandidate.Designer.cs">
+      <DependentUpon>f312_ExternalCandidate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312ExamTest.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312ExamTest.Designer.cs">
+      <DependentUpon>uc312ExamTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_PracticeExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.Designer.cs">
+      <DependentUpon>f312_EssayQuestion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.Designer.cs">
+      <DependentUpon>f312_ExamReview.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>

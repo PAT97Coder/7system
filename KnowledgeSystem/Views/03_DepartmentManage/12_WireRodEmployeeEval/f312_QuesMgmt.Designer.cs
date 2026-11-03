@@ -354,6 +354,7 @@
             this.btnUpload.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnUpload_ItemClick);
+            this.btnUpload.Enabled = false;
             // 
             // barDockControlTop
             // 

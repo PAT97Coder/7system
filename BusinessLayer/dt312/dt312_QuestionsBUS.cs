@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 
 namespace BusinessLayer
 {
@@ -25,7 +26,8 @@ namespace BusinessLayer
         private dt312_QuestionsBUS() { logger = new TPLogger(MethodBase.GetCurrentMethod().DeclaringType.FullName); }
 
         public bool CanManageQuestions(string userId) => HasFunction(userId, "uc312_GroupMgmt");
-        public bool CanPractice(string userId) => HasFunction(userId, "uc312_ExamMain") || CanManageQuestions(userId);
+        public bool CanPractice(string userId) => HasFunction(userId, "uc312_ExamMain") || CanManageQuestions(userId)
+            || HasFunction(userId, "f312_PracticeExam") || HasFunction(userId, "uc312ExamTest");
         private bool HasFunction(string userId, string controlName)
         {
             userId = (userId ?? "").Trim().ToUpperInvariant();
@@ -55,6 +57,79 @@ namespace BusinessLayer
                 context.SaveChanges();
                 return item.Id;
             }
+        }
+
+        public List<int> ImportQuestions(string userId, int groupId, IList<dt312_QuestionImportItem> items, string imageFolder)
+        {
+            if (!CanManageQuestions(userId)) throw new UnauthorizedAccessException("您沒有管理題庫的權限。");
+            if (items == null || items.Count == 0) throw new ArgumentException("沒有可匯入的題目。");
+            foreach (var item in items)
+            {
+                var q = item?.Question;
+                if (q == null || string.IsNullOrWhiteSpace(q.DisplayName) || q.DisplayName.Length > 2048 || (q.ReferenceAnswer ?? "").Length > 16000)
+                    throw new ArgumentException("題目為必填且最多 2048 字；參考答案最多 16000 字。");
+                if (item.Answers == null || (q.IsEssay && item.Answers.Count > 0)
+                    || (!q.IsEssay && (item.Answers.Count == 0 || !item.Answers.Any(a => a != null && a.TrueAns))))
+                    throw new ArgumentException("申論題不可有選項；選擇題必須有選項及正確答案。");
+                if (item.Answers.Any(a => a == null || (a.DisplayName ?? "").Length > 2048
+                    || (string.IsNullOrWhiteSpace(a.DisplayName) && string.IsNullOrWhiteSpace(a.ImageName))))
+                    throw new ArgumentException("選項必須有文字或圖片，文字最多 2048 字。");
+            }
+            var copied = new List<string>();
+            var imageNames = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction())
+                {
+                    if (!context.dt312_Groups.Any(g => g.Id == groupId && g.RemoveAt == null))
+                        throw new InvalidOperationException("題目群組不存在或已停用。");
+                    var ids = new List<int>();
+                    foreach (var item in items)
+                    {
+                        var source = item.Question;
+                        var question = new dt312_Questions
+                        {
+                            GroupId = groupId, DisplayName = source.DisplayName, IsEssay = source.IsEssay,
+                            ReferenceAnswer = source.IsEssay ? source.ReferenceAnswer : null,
+                            IsmultiAns = !source.IsEssay && item.Answers.Count(a => a.TrueAns) > 1,
+                            ImageName = CopyImportImage(source.ImageName, imageFolder, imageNames, copied)
+                        };
+                        context.dt312_Questions.Add(question); context.SaveChanges();
+                        ids.Add(question.Id);
+                        // Use this question's generated Id, never mutate Excel question numbers.
+                        foreach (var answer in item.Answers)
+                            context.dt312_Answers.Add(new dt312_Answers
+                            {
+                                QuesId = question.Id, DisplayName = answer.DisplayName ?? "", TrueAns = answer.TrueAns,
+                                ImageName = CopyImportImage(answer.ImageName, imageFolder, imageNames, copied)
+                            });
+                    }
+                    context.SaveChanges(); transaction.Commit();
+                    return ids;
+                }
+            }
+            catch
+            {
+                // Only remove newly generated files from this import, never existing/shared images.
+                foreach (string file in copied)
+                    try { File.Delete(file); } catch (Exception ex) { System.Diagnostics.Trace.TraceError("Import image cleanup: {0}", ex); }
+                throw;
+            }
+        }
+
+        private static string CopyImportImage(string source, string folder, Dictionary<string, string> imageNames, List<string> copied)
+        {
+            if (string.IsNullOrWhiteSpace(source)) return "";
+            source = Path.GetFullPath(source);
+            if (imageNames.TryGetValue(source, out var existing)) return existing;
+            Directory.CreateDirectory(folder);
+            string name = Guid.NewGuid().ToString("N") + Path.GetExtension(source);
+            string destination = Path.GetFullPath(Path.Combine(folder, name));
+            copied.Add(destination);
+            File.Copy(source, destination, false);
+            imageNames.Add(source, name);
+            return name;
         }
 
         public List<dt312_Questions> GetList()

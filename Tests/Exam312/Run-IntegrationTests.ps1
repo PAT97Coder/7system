@@ -1,6 +1,7 @@
+param([string]$BinPath)
 $ErrorActionPreference = 'Stop'
 $workspacePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$binPath = Join-Path $workspacePath 'KnowledgeSystem/bin/Debug'
+if (-not $BinPath) { $BinPath = Join-Path $workspacePath 'KnowledgeSystem/bin/Debug' }
 [void][Reflection.Assembly]::LoadFrom((Join-Path $binPath 'DataAccessLayer.dll'))
 [void][Reflection.Assembly]::LoadFrom((Join-Path $binPath 'EntityFramework.dll'))
 $entity = [System.Data.Entity.Core.EntityClient.EntityConnectionStringBuilder]::new([DataAccessLayer.SingleConnection]::ConString)
@@ -23,6 +24,9 @@ try {
     [void]$command.ExecuteNonQuery()
     $migration = [IO.File]::ReadAllText((Join-Path $workspacePath 'Database/20261020_add_312_essay_questions.sql'))
     $command.CommandText = $migration; [void]$command.ExecuteNonQuery()
+    $practiceMigration = [IO.File]::ReadAllText((Join-Path $workspacePath 'Database/20261102_add_312_practice_history.sql'))
+    $command.CommandText = $practiceMigration; [void]$command.ExecuteNonQuery()
+    $command.CommandText = $practiceMigration; [void]$command.ExecuteNonQuery()
     $command.CommandText = [IO.File]::ReadAllText((Join-Path $workspacePath 'Database/Tests/312_seed_after_migration.sql'))
     [void]$command.ExecuteNonQuery()
     $command.CommandText = $migration; [void]$command.ExecuteNonQuery()
@@ -31,7 +35,7 @@ try {
     $entity['provider connection string'] = $testConnection.ConnectionString
     $env:EXAM312_TEST_CONNECTION = $entity.ConnectionString
     Write-Output ('Disposable test database: ' + $testDatabase)
-    & (Join-Path $PSScriptRoot 'Run-Tests.ps1')
+    & (Join-Path $PSScriptRoot 'Run-Tests.ps1') -BinPath $BinPath
     if ($LASTEXITCODE -ne 0) { throw 'Integration/UI tests failed' }
 } finally {
     Remove-Item Env:/EXAM312_TEST_CONNECTION -ErrorAction SilentlyContinue

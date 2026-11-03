@@ -45,6 +45,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         }
 
         public bool IsPractice { get; }
+        // Only the standalone practice UC supplies persistence. Legacy practice stays unchanged.
+        public Action<int?, string> SavePracticeResult { get; set; }
+        public bool PracticeResultSaved { get; private set; }
         private bool submitting;
         private void SaveCurrentAnswer()
         {
@@ -218,6 +221,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 }
                 if (IsPractice)
                 {
+                    if (SavePracticeResult != null && !PracticeResultSaved)
+                    {
+                        SavePracticeResult(score, JsonConvert.SerializeObject(examResults));
+                        PracticeResultSaved = true;
+                    }
                     using (var review = new f312_ExamReview(examResults, score, true)) review.ShowDialog(this);
                 }
                 else
@@ -225,7 +233,15 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                         : "已提交作答。本次全為申論題，不計分。");
                 IsClose = true; Close();
             }
-            catch (Exception ex) { MsgTP.MsgError("提交失敗：\r\n" + ex.Message); }
+            catch (Exception ex)
+            {
+                if (PracticeResultSaved)
+                {
+                    MsgTP.MsgError("作答已儲存，但無法顯示結果：\r\n" + ex.Message);
+                    IsClose = true; Close();
+                }
+                else MsgTP.MsgError("提交失敗：\r\n" + (SavePracticeResult == null ? ex.Message : Exam312Ui.ErrorText(ex)));
+            }
             finally
             {
                 submitting = false; btnSubmit.Enabled = true;

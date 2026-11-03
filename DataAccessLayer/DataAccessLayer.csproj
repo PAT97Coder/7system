@@ -402,6 +402,12 @@
     <Compile Include="dt312_ExamUser.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt312_ExternalParticipant.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt312_PracticeAttempt.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt312_Groups.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
@@ -527,6 +533,8 @@
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="TPConfigsDAL.cs" />
+    <Compile Include="dt312_PracticeModels.cs" />
+    <Compile Include="dt312_QuestionImportItem.cs" />
     <Compile Include="vw310_EquipmentInfo.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>

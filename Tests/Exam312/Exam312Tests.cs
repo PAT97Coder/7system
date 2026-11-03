@@ -69,7 +69,12 @@ internal static class Exam312Tests
         {
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.ThrowException);
             Directory.CreateDirectory(OutputDir);
-            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("EXAM312_TEST_CONNECTION"))) Exam312DbTests.Run();
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("EXAM312_TEST_CONNECTION")))
+            {
+                Exam312DbTests.Run();
+                PracticeHistoryTests.Run();
+                ExcelImportTests.Run();
+            }
             Check(dt312_ExamScoring.IsCorrect("1,3", "3,1"), "Multichoice order affects grading");
             Check(!dt312_ExamScoring.IsCorrect("1,3", "1"), "Partial selection accepted");
             Check(!dt312_ExamScoring.IsCorrect("1", "1,2"), "Extra answer accepted");

@@ -1,6 +1,7 @@
+param([string]$BinPath)
 $ErrorActionPreference = 'Stop'
 $workspacePath = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '../..'))
-$binPath = Join-Path $workspacePath 'KnowledgeSystem/bin/Debug'
+if (-not $BinPath) { $BinPath = Join-Path $workspacePath 'KnowledgeSystem/bin/Debug' }
 $vswhere = Join-Path ${env:ProgramFiles(x86)} 'Microsoft Visual Studio/Installer/vswhere.exe'
 $installation = & $vswhere -latest -products * -requires Microsoft.Component.MSBuild -property installationPath
 $compiler = Join-Path $installation 'MSBuild/Current/Bin/Roslyn/csc.exe'
@@ -8,7 +9,7 @@ $refs = @('KnowledgeSystem.exe', 'BusinessLayer.dll', 'DataAccessLayer.dll', 'En
 $refs += Get-ChildItem -LiteralPath $binPath -Filter 'DevExpress*.dll' | ForEach-Object { '/r:' + $_.FullName }
 $exePath = Join-Path $binPath 'Exam312Tests.exe'
 try {
-    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs')
+    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs') (Join-Path $PSScriptRoot 'PracticeHistoryTests.cs') (Join-Path $PSScriptRoot 'ExcelImportTests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed' }
     & $exePath
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }

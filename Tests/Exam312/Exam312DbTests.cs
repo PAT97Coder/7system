@@ -41,7 +41,7 @@ internal static class Exam312DbTests
         }
         Application.DoEvents();
     }
-    private sealed class Dialogs : IDisposable
+    internal sealed class Dialogs : IDisposable
     {
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern IntPtr SendMessage(IntPtr window,int message,IntPtr value,IntPtr data);

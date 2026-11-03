@@ -1281,6 +1281,16 @@
           <Property Name="IsPass" Type="bit" />
           <Property Name="ExamData" Type="nvarchar(max)" />
         </EntityType>
+        <EntityType Name="dt312_ExternalParticipant">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeCode" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="EmployeeName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Department" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt312_Groups">
           <Key>
             <PropertyRef Name="Id" />
@@ -1292,6 +1302,23 @@
           <Property Name="RemoveAt" Type="date" />
           <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
         </EntityType>
+        <EntityType Name="dt312_PracticeAttempt">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PracticeKind" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="InternalUserId" Type="varchar" MaxLength="10" />
+          <Property Name="ExternalParticipantId" Type="int" />
+          <Property Name="EmployeeCode" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="EmployeeName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Department" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="StartedBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="StartedAt" Type="datetime" Nullable="false" />
+          <Property Name="SubmitAt" Type="datetime" />
+          <Property Name="Score" Type="int" />
+          <Property Name="ExamData" Type="nvarchar(max)" />
+        </EntityType>
         <EntityType Name="dt312_Questions">
           <Key>
             <PropertyRef Name="Id" />
@@ -1302,7 +1329,7 @@
           <Property Name="ImageName" Type="varchar" MaxLength="128" />
           <Property Name="IsmultiAns" Type="bit" Nullable="false" />
           <Property Name="IsEssay" Type="bit" Nullable="false" />
-          <Property Name="ReferenceAnswer" Type="nvarchar" MaxLength="Max" />
+          <Property Name="ReferenceAnswer" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="dt312_Setting">
           <Key>
@@ -2057,7 +2084,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt312_Answers" EntityType="Self.dt312_Answers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_ExamMgmt" EntityType="Self.dt312_ExamMgmt" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_ExamUser" EntityType="Self.dt312_ExamUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt312_ExternalParticipant" EntityType="Self.dt312_ExternalParticipant" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Groups" EntityType="Self.dt312_Groups" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt312_PracticeAttempt" EntityType="Self.dt312_PracticeAttempt" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Questions" EntityType="Self.dt312_Questions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Setting" EntityType="Self.dt312_Setting" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt313_AbnormalCatalog" EntityType="Self.dt313_AbnormalCatalog" Schema="dbo" store:Type="Tables" />
@@ -2346,6 +2375,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt316_Plan" EntityType="DBDocumentManagementSystemModel.dt316_Plan" />
           <EntitySet Name="dt316_PlanUser" EntityType="DBDocumentManagementSystemModel.dt316_PlanUser" />
           <EntitySet Name="dt316_Report" EntityType="DBDocumentManagementSystemModel.dt316_Report" />
+          <EntitySet Name="dt312_ExternalParticipant" EntityType="DBDocumentManagementSystemModel.dt312_ExternalParticipant" />
+          <EntitySet Name="dt312_PracticeAttempt" EntityType="DBDocumentManagementSystemModel.dt312_PracticeAttempt" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -4309,6 +4340,33 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
           <Property Name="RemoveAt" Type="DateTime" Precision="3" />
         </EntityType>
+        <EntityType Name="dt312_ExternalParticipant">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeCode" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="EmployeeName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="Department" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="UpdatedAt" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="dt312_PracticeAttempt">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PracticeKind" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="InternalUserId" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ExternalParticipantId" Type="Int32" />
+          <Property Name="EmployeeCode" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="EmployeeName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="Department" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="StartedBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="StartedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="SubmitAt" Type="DateTime" Precision="3" />
+          <Property Name="Score" Type="Int32" />
+          <Property Name="ExamData" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -6259,6 +6317,35 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="IdAdt" ColumnName="IdAdt" />
                 <ScalarProperty Name="IdDept" ColumnName="IdDept" />
                 <ScalarProperty Name="IdPlan" ColumnName="IdPlan" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt312_ExternalParticipant">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_ExternalParticipant">
+              <MappingFragment StoreEntitySet="dt312_ExternalParticipant">
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="Department" ColumnName="Department" />
+                <ScalarProperty Name="EmployeeName" ColumnName="EmployeeName" />
+                <ScalarProperty Name="EmployeeCode" ColumnName="EmployeeCode" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt312_PracticeAttempt">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_PracticeAttempt">
+              <MappingFragment StoreEntitySet="dt312_PracticeAttempt">
+                <ScalarProperty Name="ExamData" ColumnName="ExamData" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="SubmitAt" ColumnName="SubmitAt" />
+                <ScalarProperty Name="StartedAt" ColumnName="StartedAt" />
+                <ScalarProperty Name="StartedBy" ColumnName="StartedBy" />
+                <ScalarProperty Name="Department" ColumnName="Department" />
+                <ScalarProperty Name="EmployeeName" ColumnName="EmployeeName" />
+                <ScalarProperty Name="EmployeeCode" ColumnName="EmployeeCode" />
+                <ScalarProperty Name="ExternalParticipantId" ColumnName="ExternalParticipantId" />
+                <ScalarProperty Name="InternalUserId" ColumnName="InternalUserId" />
+                <ScalarProperty Name="PracticeKind" ColumnName="PracticeKind" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
