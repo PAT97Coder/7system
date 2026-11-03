@@ -133,6 +133,10 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
                 diagram.AxisX.DateTimeScaleOptions.ScaleMode = ScaleMode.Continuous;
                 diagram.AxisX.Label.TextPattern = "{A:MM/dd HH:mm}";
                 diagram.AxisY.Title.Text = caption; diagram.AxisY.Title.Visibility = DevExpress.Utils.DefaultBoolean.True;
+                diagram.AxisY.WholeRange.AlwaysShowZeroLevel = false;
+                diagram.AxisY.WholeRange.Auto = true;
+                diagram.AxisY.WholeRange.AutoSideMargins = true;
+                diagram.AxisY.VisualRange.Auto = true;
                 diagram.EnableAxisXZooming = true; diagram.EnableAxisXScrolling = true;
             }
         }
