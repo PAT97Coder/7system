@@ -1,5 +1,6 @@
 using BusinessLayer;
 using DataAccessLayer;
+using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
 using KnowledgeSystem.Helpers;
@@ -245,9 +246,15 @@ internal static class PracticeHistoryTests
                 dialogs.InspectReview = review => {
                     var browser = (WebBrowser)H.Get(review, "browser");
                     string body = browser.Document.Body.InnerText;
+                    var print = (BarButtonItem)H.Get(review, "btnPrint");
+                    H.Check(print.Visibility == BarItemVisibility.Always && print.Enabled,
+                        "Loaded result does not offer printing");
+                    H.Check(((Bar)H.Get(review, "previewBar")).Visible
+                        && ((BarButtonItem)H.Get(review, "btnConfirmImport")).Visibility == BarItemVisibility.Never,
+                        "Result toolbar exposes import actions");
                     H.Check(body.Contains(selected.EmployeeCode) && body.Contains(selected.EmployeeName)
-                        && body.Contains(selected.Department) && body.Contains(selected.SubmitAt.ToString("yyyy/MM/dd HH:mm:ss"))
-                        && body.Contains("測驗編號：" + selected.Id), "Review identity/date/attempt does not match clicked row");
+                        && body.Contains(selected.Department) && body.Contains(selected.SubmitAt.ToString("yyyy/MM/dd HH:mm:ss")),
+                        "Review identity/date does not match clicked row");
                     H.Check(body.Contains(kind == "INTERNAL" ? "模擬測驗內部" : "模擬測驗外部") && body.Contains("您的答案"),
                         "Review type or saved answers missing");
                     if (kind == "INTERNAL") H.Check(body.Contains("Tiếng Việt 中文") && body.Contains("參考解答"), "Essay history not shown");
@@ -261,6 +268,8 @@ internal static class PracticeHistoryTests
         detail.EmployeeName = "<script>alert(1)</script>";
         string html = f312_ExamReview.BuildHtml(JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(detail.ExamData), detail.Score, true, detail);
         H.Check(html.Contains("&lt;script&gt;") && !html.Contains("<script>"), "Participant header allows HTML injection");
+        H.Check(html.Contains("<title>") && html.Contains("@media print") && html.Contains("@page"),
+            "Result print document lacks title or print layout");
     }
 
     private static void CheckConcurrencyAndNames()

@@ -162,6 +162,15 @@ internal static class Exam312Tests
             }
             string reviewHtml = f312_ExamReview.BuildHtml(results, 50, true);
             Check(reviewHtml.Contains("答錯") && reviewHtml.Contains("正確答案") && reviewHtml.Contains("您的答案"), "Practice review does not identify mistakes");
+            Check(reviewHtml.Contains("class='answer correct selected'") && reviewHtml.Contains("class='badge neutral'>不計分"),
+                "Selected correct option or ungraded essay is misrepresented");
+            var optionReview = new f312_DoExam.ExamResult { Questions = choice, QuestionIndex = 1, Answers = answerList,
+                CorrectAnswer = " 1 ", UserAnswer = "2", IsCorrect = false };
+            string wrongHtml = f312_ExamReview.BuildHtml(new[] { optionReview }, 0, false);
+            Check(wrongHtml.Contains("class='answer missed'") && wrongHtml.Contains("class='answer selected'")
+                && wrongHtml.Contains("class='summary-item'>正確答案：") && wrongHtml.Contains("class='summary-item'>您的答案：2"),
+                "Wrong selection or missed correct option is not distinguished");
+            File.WriteAllText(Path.Combine(OutputDir, "Exam312-Result.html"), reviewHtml);
             var restored = JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(JsonConvert.SerializeObject(results));
             Check(restored[0].Questions.IsEssay && restored[0].UserAnswer == "最後一次修改", "Essay answer lost from stored official snapshot");
             Console.WriteLine("PASS: EF model/mapping; multichoice grading; essays excluded; no answers before submit; input persistence/navigation/submit; practice score/review without official DB access; HTML encoding; JSON snapshots; editor layout.");

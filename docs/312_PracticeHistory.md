@@ -177,6 +177,21 @@ Kiểm tra thêm menu chuột phải thật qua hit-test cho cả hai loại thi
 quyền xem, không lộ bài chưa nộp, không trộn loại, không có menu ở vùng trống,
 xử lý JSON thiếu/hỏng và mã hóa HTML thông tin người thi.
 
+Giao diện kết quả F312 theo ảnh module 314: nền xám, khung trắng ở đầu với thông tin
+và điểm thành từng dòng; mỗi câu hiển thị trực tiếp trên nền xám, trạng thái thành
+dải màu ngang, đáp án có màu phân biệt đúng/đã chọn/bỏ sót và phần tổng kết ngắn
+bên dưới. Phần tổng hợp giữ dòng thành tích, bỏ mã lần thi và số câu đúng/sai/tự luận;
+thông tin người thi và ngày thi vẫn hiển thị. Tự luận hiển thị riêng câu trả lời/đáp án tham khảo và không tính
+đúng/sai. Giữ nguyên nội dung xem trước câu hỏi/Excel. Build thành công và 395
+điều kiện kiểm tra đạt trên database tạm/DOM/UI; không ghi dữ liệu production.
+
+In kết quả: mở `查看詳情` từ dòng lịch sử, chọn `列印／PDF` trên form
+`f312_ExamReview`, chọn máy in `Microsoft Print to PDF`, rồi chọn nơi lưu PDF.
+Nút chỉ bật sau khi nội dung đã tải xong; không xuất hiện trong xem trước câu hỏi/Excel.
+Nội dung in dùng chính bài đang xem, gồm thông tin người thi, điểm, câu hỏi, ảnh,
+câu trả lời và đáp án tham khảo. Không thay đổi database. Việc lưu PDF dùng hộp thoại
+in của Windows và cần máy in PDF khả dụng; chưa kiểm chứng tạo file PDF thực tế.
+
 Ảnh và kết quả: `%TEMP%/7system-Exam312-TestArtifacts/index.html`.
 Ảnh UC và dialog mới đã được xem trực tiếp. Ảnh WebBrowser của bài thi/review chỉ
 chụp bố cục vì chạy ở chế độ layout-only; DOM vẫn được kiểm tra bởi test cũ.

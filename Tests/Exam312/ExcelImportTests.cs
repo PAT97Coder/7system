@@ -98,6 +98,8 @@ internal static class ExcelImportTests
             using (var preview = new f312_ExamReview(mixed))
             {
                 preview.ShowInTaskbar = false; preview.Show(); Application.DoEvents();
+                H.Check(((BarButtonItem)H.Get(preview, "btnPrint")).Visibility == BarItemVisibility.Never,
+                    "Import preview exposes result printing");
                 H.Check(!((BarButtonItem)H.Get(preview, "btnConfirmImport")).Enabled, "Import confirmation enabled before last question");
                 H.Call(preview, "ConfirmImport_Click", null, null);
                 H.Check(preview.Visible, "Premature confirmation closes preview");
