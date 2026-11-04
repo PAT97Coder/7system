@@ -52,6 +52,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -182,6 +185,7 @@
     <Compile Include="dt312\dt312_AnswersBUS.cs" />
     <Compile Include="dt312\dt312_ExamMgmtBUS.cs" />
     <Compile Include="dt312\dt312_ExamUserBUS.cs" />
+    <Compile Include="dt312\dt312_ExamAnalysisBUS.cs" />
     <Compile Include="dt312\dt312_GroupsBUS.cs" />
     <Compile Include="dt312\dt312_QuestionsBUS.cs" />
     <Compile Include="dt312\dt312_ExamScoring.cs" />

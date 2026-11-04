@@ -9,8 +9,9 @@ $refs = @('KnowledgeSystem.exe', 'BusinessLayer.dll', 'DataAccessLayer.dll', 'En
 $refs += Get-ChildItem -LiteralPath $binPath -Filter 'DevExpress*.dll' | ForEach-Object { '/r:' + $_.FullName }
 $exePath = Join-Path $binPath 'Exam312Tests.exe'
 try {
-    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs') (Join-Path $PSScriptRoot 'PracticeHistoryTests.cs') (Join-Path $PSScriptRoot 'ExcelImportTests.cs')
+    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs') (Join-Path $PSScriptRoot 'PracticeHistoryTests.cs') (Join-Path $PSScriptRoot 'ExcelImportTests.cs') (Join-Path $PSScriptRoot 'ExamAnalysisTests.cs') (Join-Path $PSScriptRoot 'ManualAnalysisSeedTests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed' }
+    $env:EXAM312_TEST_WORKSPACE = $workspacePath
     & $exePath
     if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
     $artifactPath = Join-Path ([IO.Path]::GetTempPath()) '7system-Exam312-TestArtifacts'
@@ -22,4 +23,7 @@ try {
     }
     foreach ($image in $images) { $html += '<section><h2>' + $image.BaseName + '</h2><img src="' + $image.Name + '"></section>' }
     [IO.File]::WriteAllText((Join-Path $artifactPath 'index.html'), $html + '</html>', [Text.Encoding]::UTF8)
-} finally { Remove-Item -LiteralPath $exePath -ErrorAction SilentlyContinue }
+} finally {
+    Remove-Item Env:/EXAM312_TEST_WORKSPACE -ErrorAction SilentlyContinue
+    Remove-Item -LiteralPath $exePath -ErrorAction SilentlyContinue
+}

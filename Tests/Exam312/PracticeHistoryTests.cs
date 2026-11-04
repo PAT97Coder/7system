@@ -191,7 +191,7 @@ internal static class PracticeHistoryTests
             var grid = (DevExpress.XtraGrid.GridControl)H.Get(uc, "resultsGrid");
             H.Check(grid.Width > 850 && grid.Height > 450, "Unified result grid does not fill the screen");
             var smallBar = (DevExpress.XtraBars.Bar)H.Get(uc, "toolbar");
-            var smallDock = (DevExpress.XtraBars.StandaloneBarDockControl)H.Get(uc, "toolbarDock");
+            var smallDock = (DevExpress.XtraBars.BarDockControl)H.Get(uc, "barDockTop");
             H.Check(smallBar.ItemLinks.Cast<DevExpress.XtraBars.BarItemLink>().Sum(link => link.Width) <= smallDock.Width,
                 "Toolbar buttons overflow after resizing");
             H.Screenshot(host, "PracticeHistory-900.png"); host.Close();

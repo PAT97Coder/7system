@@ -2445,6 +2445,12 @@
   <ItemGroup>
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312Ui.cs" />
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312QuestionExcel.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.Designer.cs">
+      <DependentUpon>uc312_ExamAnalysis.cs</DependentUpon>
+    </Compile>
     <Compile Include="Helpers\TraditionalGridLocalizer.cs" />
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExternalCandidate.cs">
       <SubType>Form</SubType>

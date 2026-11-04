@@ -74,6 +74,8 @@ internal static class Exam312Tests
                 Exam312DbTests.Run();
                 PracticeHistoryTests.Run();
                 ExcelImportTests.Run();
+                ExamAnalysisTests.Run();
+                ManualAnalysisSeedTests.Run();
             }
             Check(dt312_ExamScoring.IsCorrect("1,3", "3,1"), "Multichoice order affects grading");
             Check(!dt312_ExamScoring.IsCorrect("1,3", "1"), "Partial selection accepted");

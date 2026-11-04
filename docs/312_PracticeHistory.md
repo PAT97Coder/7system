@@ -135,9 +135,11 @@ Các thay đổi `Program.cs` có sẵn trong workspace không thuộc công vi�
 Áp dụng quy tắc giao diện trong phạm vi UC thi thử và dialog ngoài bộ phận:
 
 - Layout gốc là DevExpress LayoutControl; thanh lệnh chung phía trên và bảng kết quả chung co giãn phía dưới.
-- Thanh lệnh BarManager/BarButtonItem đặt trong StandaloneBarDockControl, khai báo
-  cố định ở Designer; icon SVG 32x32, caption đen. Giữ yêu cầu riêng của người dùng:
-  chữ nút UC 16pt ở Normal/Hovered/Pressed; Disabled 12pt. Dialog dùng chuẩn 14.25pt.
+- Giao diện UC theo `uc312_GroupMgmt`: BarManager/BarButtonItem dock trên cùng,
+  icon SVG 32x32, caption 14.25pt và màu hover xanh như mẫu; Disabled 12pt.
+  Layout padding gốc 10px + item 2px; bảng có header căn giữa, dòng xen kẽ màu,
+  độ rộng cột cố định, footer đếm bản ghi và navigator chỉ đọc. Nút tải lại là **刷新**.
+  Các control cố định được khai báo ở Designer. Dialog giữ chuẩn 14.25pt.
 - Tiêu đề cột 14.25pt, dữ liệu và menu 12pt; focus theo dòng, lọc nhanh, không sửa tại ô.
 - Localizer `Helpers/TraditionalGridLocalizer.cs` dùng chung cho caption GridView;
   menu gốc được giữ lại, hành động xem chi tiết được phân nhóm bằng BeginGroup.
