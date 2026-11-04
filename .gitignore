@@ -377,3 +377,4 @@ FodyWeavers.xsd
 
 # Kết quả kiểm tra bố cục hồ sơ nghỉ việc
 tmp/offboarding-smoke/
+tmp/logout-dialog-build/
