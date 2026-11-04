@@ -24,7 +24,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         private Bar toolbar;
         private BarDockControl barDockTop, barDockBottom, barDockLeft, barDockRight;
         private BarEditItem barScope, barExam, barPerson;
-        private BarButtonItem btnRefresh;
+        private BarButtonItem btnRefresh, btnExport;
+        private System.Windows.Forms.SaveFileDialog reportSaveDialog;
         private RepositoryItemComboBox scopeEditor;
         private RepositoryItemSearchLookUpEdit examEditor;
         private RepositoryItemSearchLookUpEdit personEditor;
@@ -55,7 +56,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             statusItem = new LayoutControlItem(); contentItem = new LayoutControlItem();
             barManager = new BarManager(components); toolbar = new Bar();
             barDockTop = new BarDockControl(); barDockBottom = new BarDockControl(); barDockLeft = new BarDockControl(); barDockRight = new BarDockControl();
-            barScope = new BarEditItem(); barExam = new BarEditItem(); barPerson = new BarEditItem(); btnRefresh = new BarButtonItem();
+            barScope = new BarEditItem(); barExam = new BarEditItem(); barPerson = new BarEditItem(); btnRefresh = new BarButtonItem(); btnExport = new BarButtonItem();
+            reportSaveDialog = new System.Windows.Forms.SaveFileDialog(); components.Add(reportSaveDialog);
             scopeEditor = new RepositoryItemComboBox(); examEditor = new RepositoryItemSearchLookUpEdit(); personEditor = new RepositoryItemSearchLookUpEdit();
             peopleView = new GridView(); personCodeColumn = new GridColumn(); personNameColumn = new GridColumn();
             examsView = new GridView(); examNameColumn = new GridColumn();
@@ -92,7 +94,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
             barManager.Form = this; barManager.Bars.Add(toolbar);
             barManager.MainMenu = toolbar;
-            barManager.Items.AddRange(new BarItem[] { barScope, barExam, barPerson, btnRefresh });
+            barManager.Items.AddRange(new BarItem[] { barScope, barExam, barPerson, btnRefresh, btnExport });
             barManager.RepositoryItems.AddRange(new RepositoryItem[] { scopeEditor, examEditor, personEditor });
             barDockTop.Name = "barDockTop"; barDockBottom.Name = "barDockBottom"; barDockLeft.Name = "barDockLeft"; barDockRight.Name = "barDockRight";
             barDockTop.Dock = DockStyle.Top; barDockBottom.Dock = DockStyle.Bottom; barDockLeft.Dock = DockStyle.Left; barDockRight.Dock = DockStyle.Right;
@@ -100,7 +102,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             { dock.Manager = barManager; dock.CausesValidation = false; barManager.DockControls.Add(dock); }
             toolbar.BarName = "錯題分析工具列"; toolbar.DockStyle = BarDockStyle.Top; toolbar.CanDockStyle = BarCanDockStyle.Top;
             toolbar.DockCol = 0; toolbar.DockRow = 0;
-            toolbar.LinksPersistInfo.AddRange(new[] { new LinkPersistInfo(btnRefresh), new LinkPersistInfo(barScope, true), new LinkPersistInfo(barExam), new LinkPersistInfo(barPerson) });
+            toolbar.LinksPersistInfo.AddRange(new[] { new LinkPersistInfo(btnRefresh), new LinkPersistInfo(btnExport, true), new LinkPersistInfo(barScope, true), new LinkPersistInfo(barExam), new LinkPersistInfo(barPerson) });
             Exam312Ui.StyleBar(toolbar); toolbar.OptionsBar.MultiLine = true;
             foreach (var appearance in new[] { toolbar.BarAppearance.Normal, toolbar.BarAppearance.Hovered, toolbar.BarAppearance.Pressed })
             { appearance.Font = new Font("Microsoft JhengHei UI", 14.25F); appearance.ForeColor = Color.Black; appearance.Options.UseFont = appearance.Options.UseForeColor = true; }
@@ -108,6 +110,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             barExam.Name = "barExam"; barExam.Caption = "考試"; barExam.Id = 1; barExam.Edit = examEditor; barExam.EditWidth = 300;
             barPerson.Name = "barPerson"; barPerson.Caption = "人員"; barPerson.Id = 2; barPerson.Edit = personEditor; barPerson.EditWidth = 235; barPerson.EditValue = "";
             btnRefresh.Name = "btnRefresh"; btnRefresh.Caption = "刷新"; btnRefresh.Id = 3; btnRefresh.ImageOptions.SvgImage = Helpers.TPSvgimages.Reload;
+            btnExport.Name = "btnExport"; btnExport.Caption = "匯出分析報告"; btnExport.Id = 4; btnExport.Enabled = false;
+            btnExport.ImageOptions.SvgImage = Helpers.TPSvgimages.Print; Exam312Ui.StyleButton(btnExport);
+            btnExport.ItemAppearance.Hovered.ForeColor = Color.Blue;
+            btnExport.ItemClick += Export_ItemClick;
+            reportSaveDialog.Title = "匯出錯題分析報告";
+            reportSaveDialog.Filter = "PDF 文件 (*.pdf)|*.pdf|Excel 活頁簿 (*.xlsx)|*.xlsx";
+            reportSaveDialog.DefaultExt = "pdf"; reportSaveDialog.AddExtension = true; reportSaveDialog.OverwritePrompt = true;
+            reportSaveDialog.RestoreDirectory = true;
             foreach (var item in new BarItem[] { barScope, barExam, barPerson, btnRefresh }) { Exam312Ui.StyleButton(item); item.Enabled = false; }
             btnRefresh.ItemAppearance.Hovered.ForeColor = Color.Blue;
             scopeEditor.Name = "scopeEditor"; scopeEditor.TextEditStyle = TextEditStyles.DisableTextEditor;

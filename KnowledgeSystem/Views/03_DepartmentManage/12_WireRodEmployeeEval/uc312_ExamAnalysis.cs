@@ -5,6 +5,7 @@ using DevExpress.XtraGrid.Views.Grid;
 using KnowledgeSystem.Helpers;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -17,6 +18,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         private bool changingFilters, authorized, binding;
         private volatile int loadVersion;
         private bool loading;
+        private SelectionData loadedSelection;
+        private DateTime loadedAt;
 
         public uc312_ExamAnalysis()
         {
@@ -57,6 +60,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             barScope.Enabled = barPerson.Enabled = btnRefresh.Enabled = enabled;
             barExam.Enabled = enabled && Convert.ToString(barScope.EditValue) == "單次考試";
+            UpdateExportState();
         }
 
         private sealed class SelectionData
@@ -134,6 +138,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 }
                 finally { changingFilters = false; }
                 var result = data.Result;
+                loadedSelection = data; loadedAt = DateTime.Now;
                 binding = true;
                 try { resultsGrid.DataSource = result.Rows; }
                 finally { binding = false; }
@@ -157,6 +162,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void ClearResults()
         {
+            loadedSelection = null; btnExport.Enabled = false;
             binding = true;
             try { resultsGrid.DataSource = new List<Exam312AnalysisRow>(); chartNames.Clear(); chart.Series[0].Points.Clear(); }
             finally { binding = false; }
@@ -173,7 +179,75 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void Results_Changed(object sender, EventArgs e)
         {
-            if (!binding) UpdateChart();
+            if (!binding) { UpdateChart(); UpdateExportState(); }
+        }
+
+        private void UpdateExportState() => btnExport.Enabled = authorized && !loading && loadedSelection != null && resultsView.DataRowCount > 0;
+
+        private List<Exam312AnalysisRow> VisibleRows()
+        {
+            var rows = new List<Exam312AnalysisRow>();
+            for (int i = 0; i < resultsView.DataRowCount; i++)
+            {
+                var row = resultsView.GetRow(resultsView.GetVisibleRowHandle(i)) as Exam312AnalysisRow;
+                if (row != null) rows.Add(row);
+            }
+            return rows;
+        }
+
+        private rp312_ExamAnalysis CreateAnalysisReport()
+        {
+            bus.EnsureCanAnalyze(TPConfigs.LoginUser?.Id);
+            if (loading || loadedSelection == null || resultsView.DataRowCount == 0)
+                throw new InvalidOperationException("沒有可匯出的分析資料，請先完成查詢。");
+            var data = loadedSelection;
+            string scope = data.ExamId.HasValue ? "單次考試" : "全部歷史";
+            string exam = data.ExamId.HasValue ? data.Options.Exams.FirstOrDefault(x => x.Id == data.ExamId.Value)?.Name ?? "未知考試" : "全部考試";
+            string person = data.Options.People.FirstOrDefault(x => x.UserId == data.PersonId)?.Display ?? data.PersonId;
+            return new rp312_ExamAnalysis(VisibleRows(), scope, exam, person,
+                resultsView.GetFilterDisplayText(resultsView.ActiveFilterCriteria), statusLabel.Text, loadedAt);
+        }
+
+        private void Export_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (!btnExport.Enabled || loading) return;
+            reportSaveDialog.FileName = "錯題分析_" + DateTime.Now.ToString("yyyyMMdd_HHmmss");
+            if (reportSaveDialog.ShowDialog(FindForm()) != System.Windows.Forms.DialogResult.OK) return;
+            string path = reportSaveDialog.FileName;
+            string extension = Path.GetExtension(path).ToLowerInvariant();
+            if (extension != ".pdf" && extension != ".xlsx")
+            {
+                MsgTP.MsgShowInfomation("請選擇 PDF（.pdf）或 Excel（.xlsx）格式。");
+                return;
+            }
+            try
+            {
+                using (var wait = DevExpress.XtraSplashScreen.SplashScreenManager.ShowOverlayForm(this)) SaveAnalysisReport(path);
+                MsgTP.MsgShowInfomation("分析報告已匯出：\r\n" + path);
+            }
+            catch (Exception ex)
+            {
+                if (ex is UnauthorizedAccessException) { authorized = false; ClearResults(); EnableFilters(false); }
+                MsgTP.MsgError("無法匯出分析報告：\r\n" + Exam312Ui.ErrorText(ex));
+            }
+        }
+
+        private void SaveAnalysisReport(string path)
+        {
+            using (var report = CreateAnalysisReport())
+            {
+                string temp = Path.Combine(Path.GetDirectoryName(path), "." + Path.GetFileName(path) + "." + Guid.NewGuid().ToString("N") + ".tmp");
+                try
+                {
+                    if (string.Equals(Path.GetExtension(path), ".pdf", StringComparison.OrdinalIgnoreCase)) report.ExportToPdf(temp);
+                    else if (string.Equals(Path.GetExtension(path), ".xlsx", StringComparison.OrdinalIgnoreCase)) report.ExportToXlsx(temp);
+                    else throw new ArgumentException("不支援的報告格式。");
+                    // Chỉ thay file đích sau khi tạo xong toàn bộ báo cáo.
+                    if (File.Exists(path)) File.Replace(temp, path, null);
+                    else File.Move(temp, path);
+                }
+                finally { if (File.Exists(temp)) File.Delete(temp); }
+            }
         }
 
         private void UpdateChart()
@@ -181,10 +255,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             var series = chart.Series[0];
             chartNames.Clear();
             series.Points.Clear();
-            for (int i = 0; i < resultsView.DataRowCount; i++)
+            foreach (var row in VisibleRows())
             {
-                var row = resultsView.GetRow(resultsView.GetVisibleRowHandle(i)) as Exam312AnalysisRow;
-                if (row == null) continue;
                 chartNames[row.ChartLabel] = row.GroupName == "未知群組（ID：" + row.GroupId + "）" ? "未知群組" : row.GroupName;
                 series.Points.Add(new SeriesPoint(row.ChartLabel, (double)row.ErrorRate) { ToolTipHint = row.ChartToolTip });
             }

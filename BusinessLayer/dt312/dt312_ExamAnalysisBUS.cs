@@ -74,6 +74,8 @@ namespace BusinessLayer
             if (!CanAnalyze(actorUserId)) throw new UnauthorizedAccessException("您沒有錯題分析的權限，請先登錄功能並由管理員授權。");
         }
 
+        public void EnsureCanAnalyze(string actorUserId) => Authorize(actorUserId);
+
         private static void ValidateExam(int? examId)
         {
             if (examId.HasValue && examId.Value <= 0) throw new ArgumentException("請選擇有效的考試。");

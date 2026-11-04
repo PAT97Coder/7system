@@ -2448,6 +2448,12 @@
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.cs">
       <SubType>UserControl</SubType>
     </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\rp312_ExamAnalysis.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\rp312_ExamAnalysis.Designer.cs">
+      <DependentUpon>rp312_ExamAnalysis.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.Designer.cs">
       <DependentUpon>uc312_ExamAnalysis.cs</DependentUpon>
     </Compile>

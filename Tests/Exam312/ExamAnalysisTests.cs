@@ -12,6 +12,11 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
+using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using H = Exam312Tests;
 
@@ -172,19 +177,69 @@ internal static class ExamAnalysisTests
                 && Convert.ToDouble(((XYDiagram)chart.Diagram).AxisY.VisualRange.MaxValue) == 100, "Chart orientation/rate range wrong");
             H.Check(!((XYDiagram)chart.Diagram).AxisX.VisualRange.Auto, "Many groups lack scrolling window");
             AssertChartMatches(grid,chart);
+            var export = (BarButtonItem)H.Get(uc,"btnExport");
+            H.Check(export.Enabled,"Loaded analysis does not enable report export");
+            using (var report=(rp312_ExamAnalysis)H.Call(uc,"CreateAnalysisReport"))
+            {
+                var data=((Exam312AnalysisReportSource[])report.DataSource).Single();
+                H.Check(data.Rows.Count==grid.DataRowCount && data.ChartPages.SelectMany(p=>p.Rows).Count()==grid.DataRowCount
+                    && data.ChartPages.All(p=>p.Rows.Count<=8),"Report drops groups outside chart viewport");
+                report.CreateDocument();
+                H.Check(report.Pages.Count>=data.ChartPages.Count+1,"Report chart pages not generated");
+                string allPdf=Path.Combine(H.OutputDir,"Exam312-AnalysisReport-All.pdf"); report.ExportToPdf(allPdf);
+                using(var document=new DevExpress.Pdf.PdfDocumentProcessor())
+                {
+                    document.LoadDocument(allPdf); string contents=Regex.Replace(document.GetText(),@"\s+","");
+                    H.Check(data.Rows.All(r=>contents.Contains(Regex.Replace(r.GroupName,@"\s+","")))
+                        && data.ChartPages.All(p=>contents.Contains(Regex.Replace(p.Title,@"\s+",""))),
+                        "Actual PDF omits table groups or chart pages");
+                }
+            }
             H.Screenshot(host,"Exam312-Analysis-History.png");
             grid.ActiveFilterString = "[GroupId] = " + groupA; Application.DoEvents();
             H.Check(grid.DataRowCount == 1 && chart.Series[0].Points.Count == 1
                 && chart.Series[0].Points[0].Values[0] == 40, "Quick filter leaves stale chart or percentage inflated");
+            using(var report=(rp312_ExamAnalysis)H.Call(uc,"CreateAnalysisReport"))
+            {
+                var data=((Exam312AnalysisReportSource[])report.DataSource).Single();
+                H.Check(data.Rows.Count==1 && data.Rows[0].GroupId==groupA && data.Rows[0].ErrorRate==40,
+                    "Report ignores current grid filter or inflates percentage");
+            }
+            string pdf=Path.Combine(H.OutputDir,"Exam312-AnalysisReport.pdf"), excel=Path.Combine(H.OutputDir,"Exam312-AnalysisReport.xlsx");
+            H.Call(uc,"SaveAnalysisReport",pdf); H.Call(uc,"SaveAnalysisReport",excel);
+            H.Check(Encoding.ASCII.GetString(File.ReadAllBytes(pdf),0,4)=="%PDF" && new FileInfo(pdf).Length>10000,"PDF export failed");
+            using(var document=new DevExpress.Pdf.PdfDocumentProcessor())
+            {
+                document.LoadDocument(pdf); string contents=document.GetText();
+                H.Check(contents.Contains("設備安全") && contents.Contains("40.00%") && !contents.Contains("未知群組"),
+                    "Actual PDF ignores selected group filter");
+            }
+            using(var zip=ZipFile.OpenRead(excel))
+            using(var text=new StreamReader(zip.GetEntry("xl/sharedStrings.xml").Open()))
+            {
+                string xml=text.ReadToEnd();
+                string worksheet;
+                using(var sheet=new StreamReader(zip.GetEntry("xl/worksheets/sheet1.xml").Open())) worksheet=sheet.ReadToEnd();
+                H.Check(xml.Contains("錯題分析報告") && xml.Contains("設備安全") && (xml.Contains("40.00%") || worksheet.Contains("<v>40</v>"))
+                    && !xml.Contains("未知群組"),"Excel report content differs from filtered snapshot");
+            }
+            H.Check(!Directory.GetFiles(H.OutputDir,".Exam312-AnalysisReport*.tmp").Any(),"Report export leaves temporary files");
             grid.ActiveFilterString = ""; grid.Columns["GroupName"].SortOrder = DevExpress.Data.ColumnSortOrder.Ascending; Application.DoEvents();
             AssertChartMatches(grid,chart);
             grid.ActiveFilterString = "[GroupId] = -100"; Application.DoEvents();
             H.Check(chart.Series[0].Points.Count == 0, "Empty grid filter leaves bars visible");
+            H.Check(!export.Enabled,"Empty grid filter allows report export");
             grid.ActiveFilterString = "";
             scope.EditValue = "單次考試"; exam.EditValue = examA; Finished(uc);
             person.EditValue = Second; Finished(uc);
             H.Check(((Exam312AnalysisRow)grid.GetRow(grid.LocateByValue("GroupId",groupA))).ErrorRate == 80,
                 "UI single person/single exam incorrect");
+            using(var report=(rp312_ExamAnalysis)H.Call(uc,"CreateAnalysisReport"))
+            {
+                H.Check(((DevExpress.XtraReports.UI.XRLabel)H.Get(report,"scopeLabel")).Text.Contains("分析測試甲")
+                    && ((DevExpress.XtraReports.UI.XRLabel)H.Get(report,"personLabel")).Text.Contains(Second),
+                    "Report metadata does not match selected exam/person");
+            }
             // Rapidly replace scopes while requests are outstanding; latest selection must win.
             exam.EditValue = edgeExam; scope.EditValue = "全部歷史"; person.EditValue = First; Finished(uc);
             H.Check(Convert.ToString(person.EditValue) == First && ((Exam312AnalysisRow)grid.GetRow(grid.LocateByValue("GroupId",groupA))).ErrorRate == 30,
@@ -204,6 +259,11 @@ internal static class ExamAnalysisTests
             { db.dm_FunctionRole.RemoveRange(db.dm_FunctionRole.Where(x => x.IdRole == Role)); db.SaveChanges(); }
             H.Call(uc,"Refresh_ItemClick",null,null); Finished(uc);
             H.Check(!scope.Enabled && chart.Series[0].Points.Count == 0,"Revoked analysis permission retains results");
+            H.Check(!export.Enabled,"Revoked analysis permission retains export button");
+            byte[] previous=File.ReadAllBytes(pdf);
+            try { H.Call(uc,"SaveAnalysisReport",pdf); throw new Exception("Revoked permission can export analysis"); }
+            catch(TargetInvocationException ex) when(ex.InnerException is UnauthorizedAccessException)
+            { H.Check(previous.SequenceEqual(File.ReadAllBytes(pdf)),"Denied export overwrites existing report"); }
             host.Close();
         }
         TPConfigs.LoginUser = new dm_User { Id = First };

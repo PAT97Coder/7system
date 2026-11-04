@@ -87,10 +87,33 @@ tổng lượt câu; số lượt sai; tỷ lệ sai. Trục biểu đồ 0–10
   BUS không phụ thuộc class UI. Tải nền có số phiên yêu cầu để bỏ kết quả cũ khi
   thay đổi bộ lọc/đóng UC. Mỗi tác vụ dùng DbContext riêng.
 
+## Xuất báo cáo
+
+Nút **匯出分析報告** nằm trên BarManager, cạnh **刷新**:
+
+1. Chọn phạm vi/kỳ thi/người, đợi tải xong; lọc hoặc sắp xếp bảng nếu cần.
+2. Nhấn **匯出分析報告**, chọn **PDF 文件 (.pdf)** hoặc **Excel 活頁簿 (.xlsx)**.
+3. Chọn nơi lưu. Xuất PDF trực tiếp bằng DevExpress, không cần máy in PDF.
+
+Báo cáo dùng snapshot các dòng bảng đang hiển thị, theo đúng thứ tự hiện tại;
+không truy vấn lại kết quả để tính một bộ số liệu khác. Có phạm vi, kỳ thi, người,
+điều kiện lọc bảng, thời gian tải/xuất và số dữ liệu bị bỏ qua của phạm vi đã tải.
+Khi lọc bảng, số bài/lỗi ở phần trạng thái vẫn là số của phạm vi truy vấn gốc,
+giống trạng thái trên màn hình; bảng và biểu đồ chỉ gồm các nhóm còn hiển thị.
+
+Mẫu `rp312_ExamAnalysis` dùng XtraReport, A4 ngang, bảng có tiêu đề lặp và số trang.
+Biểu đồ được xuất đủ các nhóm, chia tối đa 8 nhóm mỗi trang; không chỉ chụp 8 nhóm
+đang nằm trong vùng cuộn của UC. Excel giữ bố cục báo cáo, số liệu là các ô và
+biểu đồ được nhúng dưới dạng hình. Không thay đổi CSDL.
+
+Nút bị vô hiệu hóa khi đang tải/không có dòng dữ liệu/chưa có quyền. BUS kiểm tra
+lại quyền trước khi xuất; dữ liệu gốc không bị sửa. File đích chỉ được thay sau
+khi đã tạo xong file tạm trong cùng thư mục; file tạm được dọn sau thao tác.
+
 ## Kiểm chứng
 
 Build Debug/AnyCPU vào `%TEMP%/7system-practice-history-build`.
-Bản triển khai này đã build thành công và đạt **560 điều kiện kiểm tra** của bộ
+Bản triển khai này đã build thành công và đạt **573 điều kiện kiểm tra** của bộ
 module 312 (bao gồm chức năng mới). Kiểm tra truy cập control khác luồng được bật;
 kết quả tải nền chỉ cập nhật UI qua `BeginInvoke`, bỏ yêu cầu cũ theo số phiên.
 Bộ kiểm thử chung module 312 có thêm `Tests/Exam312/ExamAnalysisTests.cs`;
@@ -101,6 +124,9 @@ Kiểm tra bốn phạm vi, tổng lượt/không chọn bài mới nhất, nhi�
 tự luận/bỏ trống, snapshot không còn câu trong ngân hàng, nhóm ngừng sử dụng/không
 có danh mục, người không có hồ sơ, JSON lỗi/cũ, quyền riêng, lọc/sắp xếp bảng và
 biểu đồ, nhiều nhóm, đổi bộ lọc nhanh và không sửa dữ liệu thi gốc.
+Kiểm tra thêm file PDF/Excel xuất thực tế, nội dung sau lọc, số liệu phần trăm,
+đủ nhóm/trang biểu đồ trong PDF nhiều trang, metadata kỳ thi/nhân viên, nút xuất
+khi rỗng/thu hồi quyền và giữ nguyên file đích khi xuất bị từ chối.
 Ảnh giao diện: `%TEMP%/7system-Exam312-TestArtifacts/Exam312-Analysis*.png`.
 
 Chưa kiểm chứng hiệu năng trên toàn bộ lịch sử database thật hoặc mọi mức DPI.

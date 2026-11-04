@@ -9,7 +9,7 @@ $refs = @('KnowledgeSystem.exe', 'BusinessLayer.dll', 'DataAccessLayer.dll', 'En
 $refs += Get-ChildItem -LiteralPath $binPath -Filter 'DevExpress*.dll' | ForEach-Object { '/r:' + $_.FullName }
 $exePath = Join-Path $binPath 'Exam312Tests.exe'
 try {
-    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs') (Join-Path $PSScriptRoot 'PracticeHistoryTests.cs') (Join-Path $PSScriptRoot 'ExcelImportTests.cs') (Join-Path $PSScriptRoot 'ExamAnalysisTests.cs') (Join-Path $PSScriptRoot 'ManualAnalysisSeedTests.cs')
+    & $compiler /nologo /target:exe "/out:$exePath" /r:System.Data.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll /r:System.IO.Compression.dll /r:System.IO.Compression.FileSystem.dll $refs (Join-Path $PSScriptRoot 'Exam312Tests.cs') (Join-Path $PSScriptRoot 'Exam312DbTests.cs') (Join-Path $PSScriptRoot 'PracticeHistoryTests.cs') (Join-Path $PSScriptRoot 'ExcelImportTests.cs') (Join-Path $PSScriptRoot 'ExamAnalysisTests.cs') (Join-Path $PSScriptRoot 'ManualAnalysisSeedTests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed' }
     $env:EXAM312_TEST_WORKSPACE = $workspacePath
     & $exePath
