@@ -53,8 +53,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             InitializeComponent();
             InitializeIcon();
             InitializeMenuItems();
+            OffboardingGridLocalizer.Activate();
 
-            helper = new RefreshHelper(gvData, "Id");
+            helper = new RefreshHelper(gvData, gColIdUser.FieldName);
             Font fontUI12 = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             DevExpress.Utils.AppearanceObject.DefaultMenuFont = fontUI12;
         }
@@ -75,6 +76,10 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             "重大學工"
         };
 
+        DXMenuItem itemOffboardingHistory;
+        DXMenuItem itemOffboardingUpload;
+        readonly EmployeeOffboardingService offboardingService = new EmployeeOffboardingService();
+
         DXMenuItem itemEditRole;
         DXMenuItem itemEditSign;
         DXMenuItem itemEditGroup;
@@ -94,7 +99,12 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
         private void InitializeMenuItems()
         {
-            itemEditRole = CreateMenuItem("設定用色", ItemEditRole_Click, TPSvgimages.Num1);
+            itemOffboardingHistory = CreateMenuItem("離職紀錄", (sender, args) => OpenOffboardingDocuments(false), TPSvgimages.View);
+            itemOffboardingHistory.BeginGroup = true;
+            itemOffboardingHistory.Enabled = false;
+            itemOffboardingUpload = CreateMenuItem("上傳離職文件", (sender, args) => OpenOffboardingDocuments(true), TPSvgimages.Attach);
+            itemOffboardingUpload.Enabled = false;
+            itemEditRole = CreateMenuItem("設定角色", ItemEditRole_Click, TPSvgimages.Num1);
             itemEditSign = CreateMenuItem("設定簽名", ItemEditSign_Click, TPSvgimages.Num2);
             itemEditGroup = CreateMenuItem("設定群組", ItemEditGroup_Click, TPSvgimages.Num3);
         }
@@ -238,8 +248,17 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             LoadUser();
             CreateRuleGV();
 
-            string filterString = "[StatusName] In ('在職','留職停薪','預報離職')";
-            gvData.Columns["StatusName"].FilterInfo = new ColumnFilterInfo(filterString);
+            StatusFilter_EditValueChanged(this, EventArgs.Empty);
+        }
+
+        private void StatusFilter_EditValueChanged(object sender, EventArgs e)
+        {
+            var column = gvData.Columns["StatusName"];
+            if (column == null) return;
+            string selected = statusFilter.EditValue as string;
+            string filter = selected == "已離職人員" ? "[StatusName] = '離職'"
+                : selected == "全部人員" ? "" : "[StatusName] In ('在職','留職停薪','預報離職')";
+            column.FilterInfo = new ColumnFilterInfo(filter);
         }
 
         private void btnCreate_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -802,13 +821,41 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             }
         }
 
+        private void OpenOffboardingDocuments(bool upload)
+        {
+            string id = gvData.GetFocusedRowCellValue(gColIdUser)?.ToString();
+            if (string.IsNullOrEmpty(id)) return;
+            using (XtraForm dialog = upload ? (XtraForm)new f401_OffboardingUpload(id) : new f401_OffboardingDocuments(id)) dialog.ShowDialog(this);
+            LoadUser();
+        }
+
         private void gvData_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell && e.HitInfo.InDataRow && IsSysAdmin)
+            if (!e.HitInfo.InDataRow || e.Menu == null) return;
+            gvData.FocusedRowHandle = e.HitInfo.RowHandle;
+            if (IsSysAdmin)
             {
+                itemEditRole.BeginGroup = true;
                 e.Menu.Items.Add(itemEditRole);
                 e.Menu.Items.Add(itemEditSign);
                 e.Menu.Items.Add(itemEditGroup);
+            }
+            string id = gvData.GetFocusedRowCellValue(gColIdUser)?.ToString();
+            var user = users.FirstOrDefault(x => x.Id == id);
+            if (user == null) return;
+            try
+            {
+                itemOffboardingHistory.Enabled = offboardingService.CanAccess(TPConfigs.LoginUser.Id, id, EmployeeOffboardingService.ViewPermission);
+                itemOffboardingUpload.Enabled = (user.Status == 1 || user.ResignPlan.HasValue)
+                    && offboardingService.CanAccess(TPConfigs.LoginUser.Id, id, EmployeeOffboardingService.UploadPermission);
+                if (itemOffboardingHistory.Enabled) e.Menu.Items.Add(itemOffboardingHistory);
+                if (itemOffboardingUpload.Enabled) e.Menu.Items.Add(itemOffboardingUpload);
+            }
+            catch (Exception ex)
+            {
+                itemOffboardingHistory.Enabled = false;
+                itemOffboardingUpload.Enabled = false;
+                new Logger.TPLogger(typeof(uc401_UserManage).FullName).Error("離職文件權限", ex.ToString());
             }
         }
 

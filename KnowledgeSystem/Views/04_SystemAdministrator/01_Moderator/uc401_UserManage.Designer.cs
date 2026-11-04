@@ -32,6 +32,7 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(uc401_UserManage));
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
             this.gcData = new DevExpress.XtraGrid.GridControl();
+            this.employeeTextEditor = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
             this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gColIdUser = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn2 = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -61,6 +62,8 @@
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
             this.barManager1 = new DevExpress.XtraBars.BarManager(this.components);
             this.bar2 = new DevExpress.XtraBars.Bar();
+            this.statusFilter = new DevExpress.XtraBars.BarEditItem();
+            this.statusFilterEditor = new DevExpress.XtraEditors.Repository.RepositoryItemComboBox();
             this.btnCreate = new DevExpress.XtraBars.BarButtonItem();
             this.btnRefresh = new DevExpress.XtraBars.BarButtonItem();
             this.btnExportExcel = new DevExpress.XtraBars.BarButtonItem();
@@ -76,6 +79,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)this.statusFilterEditor).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)this.employeeTextEditor).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -102,10 +107,17 @@
             this.gcData.Location = new System.Drawing.Point(12, 12);
             this.gcData.MainView = this.gvData;
             this.gcData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
+            this.employeeTextEditor.Name = "employeeTextEditor";
+            this.employeeTextEditor.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            this.employeeTextEditor.Appearance.Options.UseFont = true;
+            this.gcData.RepositoryItems.Add(this.employeeTextEditor);
+            this.gridColumn2.ColumnEdit = this.employeeTextEditor;
+            this.gridColumn7.ColumnEdit = this.employeeTextEditor;
             this.gcData.Name = "gcData";
             this.gcData.Size = new System.Drawing.Size(1391, 480);
             this.gcData.TabIndex = 4;
             this.gcData.UseEmbeddedNavigator = true;
+            this.gcData.EmbeddedNavigator.TextStringFormat = "第 {0} 筆，共 {1} 筆";
             this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvData});
             // 
@@ -152,6 +164,10 @@
             this.gvData.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
             this.gvData.OptionsView.ColumnAutoWidth = false;
             this.gvData.OptionsView.EnableAppearanceOddRow = true;
+            this.gvData.OptionsBehavior.Editable = false;
+            this.gvData.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gvData.OptionsView.ColumnAutoWidth = false;
+            this.gvData.OptionsView.RowAutoHeight = true;
             this.gvData.OptionsView.ShowAutoFilterRow = true;
             this.gvData.OptionsView.ShowGroupPanel = false;
             this.gvData.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvData_PopupMenuShowing);
@@ -164,22 +180,22 @@
             this.gColIdUser.Caption = "人員代號";
             this.gColIdUser.FieldName = "Data.Id";
             this.gColIdUser.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
-            this.gColIdUser.MinWidth = 23;
             this.gColIdUser.Name = "gColIdUser";
+            this.gColIdUser.MinWidth = 140;
+            this.gColIdUser.Width = 140;
             this.gColIdUser.Visible = true;
             this.gColIdUser.VisibleIndex = 0;
-            this.gColIdUser.Width = 87;
             // 
             // gridColumn2
             // 
             this.gridColumn2.Caption = "名稱";
             this.gridColumn2.FieldName = "DisplayName";
             this.gridColumn2.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
-            this.gridColumn2.MinWidth = 23;
             this.gridColumn2.Name = "gridColumn2";
+            this.gridColumn2.MinWidth = 200;
+            this.gridColumn2.Width = 200;
             this.gridColumn2.Visible = true;
             this.gridColumn2.VisibleIndex = 1;
-            this.gridColumn2.Width = 87;
             // 
             // gridColumn7
             // 
@@ -187,6 +203,8 @@
             this.gridColumn7.FieldName = "DeptName";
             this.gridColumn7.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
             this.gridColumn7.Name = "gridColumn7";
+            this.gridColumn7.MinWidth = 180;
+            this.gridColumn7.Width = 180;
             this.gridColumn7.Visible = true;
             this.gridColumn7.VisibleIndex = 2;
             // 
@@ -200,7 +218,7 @@
             // 
             // gridColumn6
             // 
-            this.gridColumn6.Caption = "IdRole";
+            this.gridColumn6.Caption = "????";
             this.gridColumn6.FieldName = "Data.IdRole";
             this.gridColumn6.Name = "gridColumn6";
             // 
@@ -210,11 +228,11 @@
             this.gridColumn5.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
             this.gridColumn5.Caption = "報到日期";
             this.gridColumn5.FieldName = "Data.DateCreate";
-            this.gridColumn5.MinWidth = 23;
             this.gridColumn5.Name = "gridColumn5";
+            this.gridColumn5.MinWidth = 130;
+            this.gridColumn5.Width = 130;
             this.gridColumn5.Visible = true;
             this.gridColumn5.VisibleIndex = 6;
-            this.gridColumn5.Width = 87;
             // 
             // gridColumn8
             // 
@@ -223,6 +241,8 @@
             this.gridColumn8.Caption = "出生日期";
             this.gridColumn8.FieldName = "Data.DOB";
             this.gridColumn8.Name = "gridColumn8";
+            this.gridColumn8.MinWidth = 130;
+            this.gridColumn8.Width = 130;
             this.gridColumn8.Visible = true;
             this.gridColumn8.VisibleIndex = 8;
             // 
@@ -231,6 +251,8 @@
             this.gridColumn9.Caption = "身份證號";
             this.gridColumn9.FieldName = "Data.CitizenID";
             this.gridColumn9.Name = "gridColumn9";
+            this.gridColumn9.MinWidth = 160;
+            this.gridColumn9.Width = 160;
             this.gridColumn9.Visible = true;
             this.gridColumn9.VisibleIndex = 9;
             // 
@@ -241,6 +263,8 @@
             this.gridColumn10.Caption = "國籍";
             this.gridColumn10.FieldName = "Data.Nationality";
             this.gridColumn10.Name = "gridColumn10";
+            this.gridColumn10.MinWidth = 80;
+            this.gridColumn10.Width = 80;
             this.gridColumn10.Visible = true;
             this.gridColumn10.VisibleIndex = 10;
             // 
@@ -251,6 +275,8 @@
             this.gridColumn16.Caption = "性別";
             this.gridColumn16.FieldName = "SexName";
             this.gridColumn16.Name = "gridColumn16";
+            this.gridColumn16.MinWidth = 80;
+            this.gridColumn16.Width = 80;
             this.gridColumn16.Visible = true;
             this.gridColumn16.VisibleIndex = 11;
             // 
@@ -268,6 +294,8 @@
             this.gridColumn14.Caption = "電話號碼";
             this.gridColumn14.FieldName = "Data.PhoneNum1";
             this.gridColumn14.Name = "gridColumn14";
+            this.gridColumn14.MinWidth = 140;
+            this.gridColumn14.Width = 140;
             this.gridColumn14.Visible = true;
             this.gridColumn14.VisibleIndex = 13;
             // 
@@ -276,6 +304,8 @@
             this.gridColumn13.Caption = "居住地點";
             this.gridColumn13.FieldName = "Data.Addr";
             this.gridColumn13.Name = "gridColumn13";
+            this.gridColumn13.MinWidth = 200;
+            this.gridColumn13.Width = 200;
             this.gridColumn13.Visible = true;
             this.gridColumn13.VisibleIndex = 15;
             // 
@@ -284,6 +314,8 @@
             this.gridColumn12.Caption = "家人電話";
             this.gridColumn12.FieldName = "Data.PhoneNum2";
             this.gridColumn12.Name = "gridColumn12";
+            this.gridColumn12.MinWidth = 140;
+            this.gridColumn12.Width = 140;
             this.gridColumn12.Visible = true;
             this.gridColumn12.VisibleIndex = 14;
             // 
@@ -300,6 +332,8 @@
             this.gridColumn15.Caption = "實際職務";
             this.gridColumn15.FieldName = "ActualJobName";
             this.gridColumn15.Name = "gridColumn15";
+            this.gridColumn15.MinWidth = 140;
+            this.gridColumn15.Width = 140;
             this.gridColumn15.Visible = true;
             this.gridColumn15.VisibleIndex = 3;
             // 
@@ -308,6 +342,8 @@
             this.gridColumn4.Caption = "編制職務";
             this.gridColumn4.FieldName = "JobName";
             this.gridColumn4.Name = "gridColumn4";
+            this.gridColumn4.MinWidth = 140;
+            this.gridColumn4.Width = 140;
             this.gridColumn4.Visible = true;
             this.gridColumn4.VisibleIndex = 4;
             // 
@@ -316,6 +352,8 @@
             this.gColStatus.Caption = "狀態";
             this.gColStatus.FieldName = "StatusName";
             this.gColStatus.Name = "gColStatus";
+            this.gColStatus.MinWidth = 100;
+            this.gColStatus.Width = 100;
             this.gColStatus.Visible = true;
             this.gColStatus.VisibleIndex = 12;
             //
@@ -326,6 +364,8 @@
             this.gridColumn17.Caption = "職務生效日";
             this.gridColumn17.FieldName = "Data.JobEffectiveDate";
             this.gridColumn17.Name = "gridColumn17";
+            this.gridColumn17.MinWidth = 130;
+            this.gridColumn17.Width = 130;
             this.gridColumn17.Visible = true;
             this.gridColumn17.VisibleIndex = 5;
             //
@@ -342,6 +382,8 @@
             this.gridColumn20.Caption = "學校名稱";
             this.gridColumn20.FieldName = "Data.EducationName";
             this.gridColumn20.Name = "gridColumn20";
+            this.gridColumn20.MinWidth = 200;
+            this.gridColumn20.Width = 200;
             this.gridColumn20.Visible = true;
             this.gridColumn20.VisibleIndex = 8;
             //
@@ -370,6 +412,8 @@
             this.gridColumn19.Caption = "離職日期";
             this.gridColumn19.FieldName = "Data.ResignDate";
             this.gridColumn19.Name = "gridColumn19";
+            this.gridColumn19.MinWidth = 130;
+            this.gridColumn19.Width = 130;
             this.gridColumn19.Visible = true;
             this.gridColumn19.VisibleIndex = 18;
             // 
@@ -404,17 +448,40 @@
             this.barManager1.DockControls.Add(this.barDockControlRight);
             this.barManager1.Form = this;
             this.barManager1.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
+            this.statusFilter,
             this.btnCreate,
             this.btnRefresh,
             this.btnExportExcel,
             this.btnExportReportExcel});
             this.barManager1.MainMenu = this.bar2;
-            this.barManager1.MaxItemId = 6;
+            this.barManager1.MaxItemId = 7;
+            this.barManager1.RepositoryItems.Add(this.statusFilterEditor);
+            this.statusFilter.Caption = "人員篩選";
+            this.statusFilter.Id = 6;
+            this.statusFilter.Name = "statusFilter";
+            this.statusFilter.Edit = this.statusFilterEditor;
+            this.statusFilter.EditWidth = 170;
+            this.statusFilter.EditValue = "在職人員";
+            this.statusFilter.EditValueChanged += this.StatusFilter_EditValueChanged;
+            this.statusFilterEditor.Name = "statusFilterEditor";
+            this.statusFilterEditor.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.statusFilterEditor.Items.AddRange(new object[] { "在職人員", "已離職人員", "全部人員" });
+            this.statusFilterEditor.Buttons.Add(new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo));
+            this.statusFilterEditor.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.statusFilterEditor.Appearance.ForeColor = System.Drawing.Color.Black;
+            this.statusFilterEditor.Appearance.Options.UseFont = true;
+            this.statusFilterEditor.Appearance.Options.UseForeColor = true;
+            this.statusFilterEditor.AppearanceDropDown.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.statusFilterEditor.AppearanceDropDown.Options.UseFont = true;
+            this.statusFilterEditor.AppearanceDropDown.ForeColor = System.Drawing.Color.Black;
+            this.statusFilterEditor.AppearanceDropDown.Options.UseForeColor = true;
+            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            this.bar2.BarAppearance.Disabled.Options.UseFont = true;
             // 
             // bar2
             // 
             this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.bar2.BarAppearance.Hovered.Options.UseFont = true;
             this.bar2.BarAppearance.Hovered.Options.UseForeColor = true;
             this.bar2.BarAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
@@ -425,11 +492,12 @@
             this.bar2.BarAppearance.Pressed.ForeColor = System.Drawing.Color.Black;
             this.bar2.BarAppearance.Pressed.Options.UseFont = true;
             this.bar2.BarAppearance.Pressed.Options.UseForeColor = true;
-            this.bar2.BarName = "Main menu";
+            this.bar2.BarName = "人員工具列";
             this.bar2.DockCol = 0;
             this.bar2.DockRow = 0;
             this.bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
             this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
+            new DevExpress.XtraBars.LinkPersistInfo(this.statusFilter, true),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnCreate, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(this.btnRefresh, true),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
@@ -439,7 +507,7 @@
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.bar2.OptionsBar.MultiLine = true;
             this.bar2.OptionsBar.UseWholeRow = true;
-            this.bar2.Text = "Main menu";
+            this.bar2.Text = "人員工具列";
             // 
             // btnCreate
             // 
@@ -534,6 +602,16 @@
             ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)this.statusFilterEditor).EndInit();
+            ((System.ComponentModel.ISupportInitialize)this.employeeTextEditor).EndInit();
+            this.gColIdUser.VisibleIndex = 0;
+            this.gridColumn2.VisibleIndex = 1;
+            this.gridColumn7.VisibleIndex = 2;
+            this.gColStatus.VisibleIndex = 3;
+            this.gridColumn5.VisibleIndex = 4;
+            this.gridColumn19.VisibleIndex = 5;
+            this.gridColumn15.VisibleIndex = 6;
+            this.gridColumn4.VisibleIndex = 7;
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -541,6 +619,9 @@
 
         #endregion
 
+        private DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit employeeTextEditor;
+        private DevExpress.XtraBars.BarEditItem statusFilter;
+        private DevExpress.XtraEditors.Repository.RepositoryItemComboBox statusFilterEditor;
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private DevExpress.XtraLayout.LayoutControlGroup Root;
         private DevExpress.XtraGrid.GridControl gcData;

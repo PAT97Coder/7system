@@ -34,6 +34,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         {
             InitializeComponent();
             InitializeIcon();
+            OffboardingGridLocalizer.Activate();
             cbbStatus.EditValueChanged += cbbStatus_EditValueChanged;
         }
 
@@ -286,7 +287,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                     EnabledController(false);
                     break;
                 case EventFormInfo.View:
-                    Text = $"{formName}信息";
+                    Text = $"{formName}資訊";
 
                     btnConfirm.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
                     btnEdit.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
@@ -588,7 +589,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
             if (!IsValidate)
             {
-                MsgTP.MsgError("請填寫所有信息<color=red>(*)</color>");
+                MsgTP.MsgError("請填寫所有必要資訊<color=red>(*)</color>");
                 return;
             }
 
@@ -894,7 +895,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                         if (dialogResult != DialogResult.Yes) return;
 
                         result = dm_UserBUS.Instance.Remove(userInfo.Id);
-                        dm_UserRoleBUS.Instance.RemoveRangeByUID(userInfo.Id);
+                        if (result) dm_UserRoleBUS.Instance.RemoveRangeByUID(userInfo.Id);
                         break;
                     default:
                         break;
@@ -912,6 +913,21 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 //        logger.Warning(_eventInfo.ToString(), msg);
                 //        break;
                 //}
+                if (_eventUpdate == UpdateEvent.Resign && eventInfo == EventFormInfo.Update)
+                {
+                    // Hồ sơ nghỉ việc đã lưu; tài liệu có thể bổ sung từ danh sách nhân viên.
+                    try
+                    {
+                        var documents = new EmployeeOffboardingService();
+                        if (documents.CanAccess(TPConfigs.LoginUser.Id, userInfo.Id, EmployeeOffboardingService.UploadPermission))
+                            using (var dialog = new f401_OffboardingUpload(userInfo.Id)) dialog.ShowDialog(this);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Logger.TPLogger(typeof(f401_UserInfo).FullName).Error("離職文件", ex.ToString());
+                        XtraMessageBox.Show("離職資料已儲存。文件暫時無法開啟，請稍後從人員清單補上附件。", TPConfigs.SoftNameTW);
+                    }
+                }
                 Close();
             }
             else
@@ -922,7 +938,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
         private void txbUserId_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            XtraMessageBox.Show("Chức năng đang lỗi!", TPConfigs.SoftNameTW);
+            XtraMessageBox.Show("此功能暫時無法使用！", TPConfigs.SoftNameTW);
         }
 
         private void cbbDept_AutoSearch(object sender, DevExpress.XtraEditors.Controls.LookUpEditAutoSearchEventArgs e)
