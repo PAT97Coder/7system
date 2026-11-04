@@ -77,7 +77,7 @@ internal static class EmployeeOffboardingPreview
             };
             grid.DataSource = people.Select(x => new
             {
-                Data = x, DisplayName = x.DisplayName + "\r\n" + x.DisplayNameVN, DeptName = "7820\r\n環境安全處",
+                Data = x, DisplayNameTW = x.DisplayName, DisplayNameVN = x.DisplayNameVN, DeptName = "7820 環境安全處",
                 JobName = "工程師", ActualJobName = "工程師", SexName = x.Sex == true ? "男" : "女", StatusName = x.Status == 1 ? "離職" : "在職"
             }).ToList();
             ShowOffscreen(host);

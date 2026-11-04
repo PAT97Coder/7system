@@ -32,10 +32,10 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(uc401_UserManage));
             this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
             this.gcData = new DevExpress.XtraGrid.GridControl();
-            this.employeeTextEditor = new DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit();
             this.gvData = new DevExpress.XtraGrid.Views.Grid.GridView();
             this.gColIdUser = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn2 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.gColDisplayNameVN = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn7 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn3 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn6 = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -80,7 +80,6 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)this.statusFilterEditor).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)this.employeeTextEditor).BeginInit();
             this.SuspendLayout();
             // 
             // layoutControl1
@@ -107,12 +106,6 @@
             this.gcData.Location = new System.Drawing.Point(12, 12);
             this.gcData.MainView = this.gvData;
             this.gcData.Margin = new System.Windows.Forms.Padding(4, 3, 4, 3);
-            this.employeeTextEditor.Name = "employeeTextEditor";
-            this.employeeTextEditor.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
-            this.employeeTextEditor.Appearance.Options.UseFont = true;
-            this.gcData.RepositoryItems.Add(this.employeeTextEditor);
-            this.gridColumn2.ColumnEdit = this.employeeTextEditor;
-            this.gridColumn7.ColumnEdit = this.employeeTextEditor;
             this.gcData.Name = "gcData";
             this.gcData.Size = new System.Drawing.Size(1391, 480);
             this.gcData.TabIndex = 4;
@@ -136,6 +129,7 @@
             this.gvData.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
             this.gColIdUser,
             this.gridColumn2,
+            this.gColDisplayNameVN,
             this.gridColumn7,
             this.gridColumn3,
             this.gridColumn6,
@@ -167,7 +161,8 @@
             this.gvData.OptionsBehavior.Editable = false;
             this.gvData.OptionsSelection.EnableAppearanceFocusedCell = false;
             this.gvData.OptionsView.ColumnAutoWidth = false;
-            this.gvData.OptionsView.RowAutoHeight = true;
+            this.gvData.OptionsView.RowAutoHeight = false;
+            this.gvData.RowHeight = 28;
             this.gvData.OptionsView.ShowAutoFilterRow = true;
             this.gvData.OptionsView.ShowGroupPanel = false;
             this.gvData.PopupMenuShowing += new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventHandler(this.gvData_PopupMenuShowing);
@@ -188,12 +183,21 @@
             // 
             // gridColumn2
             // 
-            this.gridColumn2.Caption = "名稱";
-            this.gridColumn2.FieldName = "DisplayName";
+            this.gColDisplayNameVN.Name = "gColDisplayNameVN";
+            this.gColDisplayNameVN.OptionsColumn.AllowSize = true;
+            this.gColDisplayNameVN.Caption = "越文姓名";
+            this.gColDisplayNameVN.FieldName = "DisplayNameVN";
+            this.gColDisplayNameVN.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
+            this.gColDisplayNameVN.Visible = true;
+            this.gColDisplayNameVN.MinWidth = 90;
+            this.gColDisplayNameVN.Width = 180;
+            this.gridColumn2.Caption = "中文姓名";
+            this.gridColumn2.FieldName = "DisplayNameTW";
             this.gridColumn2.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
             this.gridColumn2.Name = "gridColumn2";
-            this.gridColumn2.MinWidth = 200;
-            this.gridColumn2.Width = 200;
+            this.gridColumn2.OptionsColumn.AllowSize = true;
+            this.gridColumn2.MinWidth = 60;
+            this.gridColumn2.Width = 110;
             this.gridColumn2.Visible = true;
             this.gridColumn2.VisibleIndex = 1;
             // 
@@ -203,7 +207,8 @@
             this.gridColumn7.FieldName = "DeptName";
             this.gridColumn7.Fixed = DevExpress.XtraGrid.Columns.FixedStyle.Left;
             this.gridColumn7.Name = "gridColumn7";
-            this.gridColumn7.MinWidth = 180;
+            this.gridColumn7.OptionsColumn.AllowSize = true;
+            this.gridColumn7.MinWidth = 90;
             this.gridColumn7.Width = 180;
             this.gridColumn7.Visible = true;
             this.gridColumn7.VisibleIndex = 2;
@@ -603,15 +608,15 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManager1)).EndInit();
             ((System.ComponentModel.ISupportInitialize)this.statusFilterEditor).EndInit();
-            ((System.ComponentModel.ISupportInitialize)this.employeeTextEditor).EndInit();
             this.gColIdUser.VisibleIndex = 0;
             this.gridColumn2.VisibleIndex = 1;
-            this.gridColumn7.VisibleIndex = 2;
-            this.gColStatus.VisibleIndex = 3;
-            this.gridColumn5.VisibleIndex = 4;
-            this.gridColumn19.VisibleIndex = 5;
-            this.gridColumn15.VisibleIndex = 6;
-            this.gridColumn4.VisibleIndex = 7;
+            this.gColDisplayNameVN.VisibleIndex = 2;
+            this.gridColumn7.VisibleIndex = 3;
+            this.gColStatus.VisibleIndex = 4;
+            this.gridColumn5.VisibleIndex = 5;
+            this.gridColumn19.VisibleIndex = 6;
+            this.gridColumn15.VisibleIndex = 7;
+            this.gridColumn4.VisibleIndex = 8;
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -619,7 +624,6 @@
 
         #endregion
 
-        private DevExpress.XtraEditors.Repository.RepositoryItemMemoEdit employeeTextEditor;
         private DevExpress.XtraBars.BarEditItem statusFilter;
         private DevExpress.XtraEditors.Repository.RepositoryItemComboBox statusFilterEditor;
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
@@ -629,6 +633,7 @@
         private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;
         private DevExpress.XtraGrid.Columns.GridColumn gColIdUser;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn2;
+        private DevExpress.XtraGrid.Columns.GridColumn gColDisplayNameVN;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn3;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn5;
         private DevExpress.XtraBars.BarManager barManager1;

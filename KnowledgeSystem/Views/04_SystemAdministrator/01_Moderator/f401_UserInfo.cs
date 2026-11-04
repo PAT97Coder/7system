@@ -146,7 +146,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             editor.Properties.Appearance.Options.UseForeColor = true;
             editor.Properties.AppearanceDropDown.Font = fontUI14;
             editor.Properties.AppearanceDropDown.Options.UseFont = true;
+            editor.Properties.Buttons.Clear();
             editor.Properties.Buttons.AddRange(new[] { new EditorButton(ButtonPredefines.Combo) });
+            editor.Properties.CalendarTimeProperties.Buttons.Clear();
             editor.Properties.CalendarTimeProperties.Buttons.AddRange(new[] { new EditorButton(ButtonPredefines.Combo) });
             editor.Properties.MaskSettings.Set("mask", "yyyy/MM/dd");
             editor.Properties.UseMaskAsDisplayFormat = true;

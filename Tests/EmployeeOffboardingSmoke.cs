@@ -116,6 +116,7 @@ internal static class EmployeeOffboardingSmoke
             Render(true, output);
             Render(false, output);
             TestUploadState();
+            TestEditorButtons(output);
             Console.WriteLine("PASS: separate upload/history forms, ISO styling, layout bounds, resize and save/dirty states.");
             return 0;
         }
@@ -246,6 +247,79 @@ internal static class EmployeeOffboardingSmoke
             var closing = new FormClosingEventArgs(CloseReason.UserClosing, false);
             form.GetType().GetMethod("Form_FormClosing", BindingFlags.NonPublic | BindingFlags.Instance).Invoke(form, new object[] { form, closing });
             Assert(closing.Cancel, "Form closes during upload.");
+        }
+    }
+
+    private static void TestEditorButtons(string output)
+    {
+        using (var owner = new f401_UserInfo())
+        {
+            var load = owner.GetType().GetMethod("f401_UserInfo_Load", BindingFlags.NonPublic | BindingFlags.Instance);
+            owner.Load -= (EventHandler)Delegate.CreateDelegate(typeof(EventHandler), owner, load);
+            foreach (string field in new[] { "txbDOB", "txbDateStart", "txbJobEffectiveDate", "txbResignDate" })
+            {
+                var editor = Field<DateEdit>(owner, field);
+                Assert(editor.Properties.Buttons.Count == 1, field + " has duplicate dropdown buttons.");
+            }
+            foreach (string prompt in new[] { "請選離職日期", "請選職務生效日", "請選調任日期" })
+            {
+                Exception failure = null;
+                using (var timer = new Timer { Interval = 150 })
+                {
+                    timer.Tick += (s, e) =>
+                    {
+                        var dialog = Application.OpenForms.Cast<Form>().LastOrDefault(x => x != owner);
+                        if (dialog == null) return;
+                        timer.Stop();
+                        try
+                        {
+                            var editor = Descendants(dialog).OfType<DateEdit>().Single();
+                            Assert(editor.Properties.Buttons.Count == 1, "Date prompt has duplicate dropdown buttons.");
+                            Assert(editor.Properties.CalendarTimeProperties.Buttons.Count == 1, "Date calendar has duplicate buttons.");
+                            DateTime selected = editor.DateTime.Date;
+                            editor.ShowPopup();
+                            Application.DoEvents();
+                            Assert(editor.IsPopupOpen, "Date dropdown does not open.");
+                            editor.ClosePopup();
+                            Assert(editor.DateTime.Date == selected, "Opening the calendar changed the date.");
+                            if (prompt == "請選離職日期")
+                                using (var bitmap = new Bitmap(dialog.Width, dialog.Height))
+                                {
+                                    dialog.DrawToBitmap(bitmap, new Rectangle(Point.Empty, bitmap.Size));
+                                    bitmap.Save(Path.Combine(output, "date-single-arrow.png"));
+                                }
+                        }
+                        catch (Exception ex) { failure = ex; }
+                        finally { dialog.DialogResult = DialogResult.Cancel; dialog.Close(); }
+                    };
+                    timer.Start();
+                    var result = owner.GetType().GetMethod("TryPromptDate", BindingFlags.NonPublic | BindingFlags.Instance)
+                        .Invoke(owner, new object[] { prompt, new DateTime(2026,11,4), new DateTime(2026,11,4) });
+                    if (failure != null) throw failure;
+                    Assert(!(bool)result, "Cancelling the date prompt changed the result.");
+                }
+            }
+        }
+        using (var spare = new KnowledgeSystem.Views._03_DepartmentManage._09_SparePart.f309_Transaction_Info())
+        {
+            Assert(Field<ImageComboBoxEdit>(spare, "cbbRecoveryOption").Properties.Buttons.Count == 1, "Recovery option has duplicate buttons.");
+            Assert(Field<DateEdit>(spare, "dePlannedDisposeDate").Properties.Buttons.Count == 1, "Disposal date has duplicate buttons.");
+            Assert(Field<DateEdit>(spare, "dePlannedDisposeDate").Properties.CalendarTimeProperties.Buttons.Count == 1, "Disposal calendar has duplicate buttons.");
+            Assert(Field<LookUpEdit>(spare, "cbbRestockStorage").Properties.Buttons.Count == 1, "Restock storage has duplicate buttons.");
+            Assert(Field<SearchLookUpEdit>(spare, "sleAssignedUser").Properties.Buttons.Count == 1, "Assigned user has duplicate buttons.");
+        }
+        using (var screen = new uc401_UserManage())
+            Assert(Field<DevExpress.XtraEditors.Repository.RepositoryItemComboBox>(screen, "statusFilterEditor").Buttons.Count == 1,
+                "Personnel status filter has duplicate buttons.");
+        Console.WriteLine("PASS: single dropdown button in personnel date prompts, fixed date editors, status filter and Spare recovery editors; calendar opening/cancelling.");
+    }
+
+    private static System.Collections.Generic.IEnumerable<Control> Descendants(Control parent)
+    {
+        foreach (Control child in parent.Controls)
+        {
+            yield return child;
+            foreach (Control descendant in Descendants(child)) yield return descendant;
         }
     }
 

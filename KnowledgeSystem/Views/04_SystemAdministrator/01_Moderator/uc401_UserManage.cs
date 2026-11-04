@@ -210,15 +210,15 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                                 from g in dtg.DefaultIfEmpty()
                                 join actualJob in lsJobTitles on data.ActualJobCode equals actualJob.Id into atg
                                 from a in atg.DefaultIfEmpty()
-                                let displayName = $"{data.DisplayName}{(!string.IsNullOrEmpty(data.DisplayNameVN) ? $"\r\n{data.DisplayNameVN}" : "")}"
-                                let deptName = $"{data.IdDepartment}\r\n{depts.DisplayName}"
+                                let deptName = $"{data.IdDepartment} {depts.DisplayName}"
                                 let sexName = data.Sex == null ? "" : data.Sex.Value ? "男" : "女"
                                 let statusName = (data.ResignPlan != null && data.Status == 0) ? "預報離職" : (data.Status == null ? "" : TPConfigs.lsUserStatus[data.Status.Value])
                                 select new
                                 {
                                     Data = data,
                                     Depts = depts,
-                                    DisplayName = displayName,
+                                    DisplayNameTW = data.DisplayName,
+                                    DisplayNameVN = data.DisplayNameVN,
                                     DeptName = deptName,
                                     JobName = g != null ? g.DisplayName : "",
                                     ActualJobName = a != null ? a.DisplayName : "",
@@ -229,7 +229,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             sourceUsers.DataSource = lsUserManage;
 
             helper.LoadViewInfo();
-            gvData.BestFitColumns();
             gcData.RefreshDataSource();
         }
 
