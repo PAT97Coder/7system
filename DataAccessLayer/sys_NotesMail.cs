@@ -22,5 +22,6 @@ namespace DataAccessLayer
         public string CCUsers { get; set; }
         public string Attachments { get; set; }
         public Nullable<System.DateTime> TimeNotify { get; set; }
+        public string EventKey { get; set; }
     }
 }

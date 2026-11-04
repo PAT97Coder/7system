@@ -1811,6 +1811,7 @@
           <Property Name="CCUsers" Type="varchar(max)" />
           <Property Name="Attachments" Type="varchar(max)" />
           <Property Name="TimeNotify" Type="datetime" />
+          <Property Name="EventKey" Type="varchar" MaxLength="180" />
         </EntityType>
         <EntityType Name="sys_StaticValue">
           <Key>
@@ -2650,6 +2651,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="CCUsers" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Attachments" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TimeNotify" Type="DateTime" Precision="3" />
+          <Property Name="EventKey" Type="String" MaxLength="180" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
@@ -4661,6 +4663,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="sys_NotesMail">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.sys_NotesMail">
               <MappingFragment StoreEntitySet="sys_NotesMail">
+                <ScalarProperty Name="EventKey" ColumnName="EventKey" />
                 <ScalarProperty Name="TimeNotify" ColumnName="TimeNotify" />
                 <ScalarProperty Name="Attachments" ColumnName="Attachments" />
                 <ScalarProperty Name="CCUsers" ColumnName="CCUsers" />
