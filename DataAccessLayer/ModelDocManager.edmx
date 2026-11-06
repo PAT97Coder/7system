@@ -1301,6 +1301,8 @@
           <Property Name="DisplayName" Type="nvarchar" MaxLength="2048" Nullable="false" />
           <Property Name="ImageName" Type="varchar" MaxLength="128" />
           <Property Name="IsmultiAns" Type="bit" Nullable="false" />
+          <Property Name="IsEssay" Type="bit" Nullable="false" />
+          <Property Name="ReferenceAnswer" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="dt312_Setting">
           <Key>
@@ -1654,6 +1656,86 @@
           <Property Name="Total" Type="numeric" Precision="5" Scale="1" Nullable="false" />
           <Property Name="SubmittedAt" Type="datetime2" Precision="0" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt320_AuditItem">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="CycleType" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="Description" Type="nvarchar" MaxLength="1000" />
+          <Property Name="IsActive" Type="bit" Nullable="false" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt320_Plan">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdAuditItem" Type="int" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="200" Nullable="false" />
+          <Property Name="AuditAt" Type="datetime" Nullable="false" />
+          <Property Name="CycleType" Type="char" MaxLength="1" Nullable="false" />
+          <Property Name="PeriodYear" Type="smallint" Nullable="false" />
+          <Property Name="PeriodNo" Type="tinyint" Nullable="false" />
+          <Property Name="Remark" Type="nvarchar" MaxLength="1000" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt320_PlanDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdPlan" Type="int" Nullable="false" />
+          <Property Name="IdDept" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="ParticipationType" Type="tinyint" Nullable="false" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt320_PlanUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdPlanDepartment" Type="int" Nullable="false" />
+          <Property Name="IdUser" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt320_Report">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdPlanDepartment" Type="int" Nullable="false" />
+          <Property Name="Remark" Type="nvarchar" MaxLength="2000" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt320_ReportFile">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdReport" Type="int" Nullable="false" />
+          <Property Name="IdAdt" Type="int" Nullable="false" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
         <EntityType Name="dt403_04_HardnessStandardLog">
           <Key>
             <PropertyRef Name="Id" />
@@ -1749,6 +1831,7 @@
           <Property Name="CCUsers" Type="varchar(max)" />
           <Property Name="Attachments" Type="varchar(max)" />
           <Property Name="TimeNotify" Type="datetime" />
+          <Property Name="EventKey" Type="varchar" MaxLength="180" />
         </EntityType>
         <EntityType Name="sys_StaticValue">
           <Key>
@@ -2045,6 +2128,12 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt315_InterviewReport" EntityType="Self.dt315_InterviewReport" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScore" EntityType="Self.dt315_InterviewScore" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScoreAudit" EntityType="Self.dt315_InterviewScoreAudit" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_AuditItem" EntityType="Self.dt320_AuditItem" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_Plan" EntityType="Self.dt320_Plan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_PlanDepartment" EntityType="Self.dt320_PlanDepartment" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_PlanUser" EntityType="Self.dt320_PlanUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_Report" EntityType="Self.dt320_Report" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt320_ReportFile" EntityType="Self.dt320_ReportFile" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_HardnessStandardLog" EntityType="Self.dt403_04_HardnessStandardLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_StandardInfo" EntityType="Self.dt403_04_StandardInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_05_Standard" EntityType="Self.dt403_05_Standard" Schema="dbo" store:Type="Tables" />
@@ -2305,6 +2394,12 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             <End Role="dt315_InterviewScore" EntitySet="dt315_InterviewScore" />
             <End Role="dt315_InterviewScoreAudit" EntitySet="dt315_InterviewScoreAudit" />
           </AssociationSet>
+          <EntitySet Name="dt320_AuditItem" EntityType="DBDocumentManagementSystemModel.dt320_AuditItem" />
+          <EntitySet Name="dt320_Plan" EntityType="DBDocumentManagementSystemModel.dt320_Plan" />
+          <EntitySet Name="dt320_PlanDepartment" EntityType="DBDocumentManagementSystemModel.dt320_PlanDepartment" />
+          <EntitySet Name="dt320_PlanUser" EntityType="DBDocumentManagementSystemModel.dt320_PlanUser" />
+          <EntitySet Name="dt320_Report" EntityType="DBDocumentManagementSystemModel.dt320_Report" />
+          <EntitySet Name="dt320_ReportFile" EntityType="DBDocumentManagementSystemModel.dt320_ReportFile" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -2578,6 +2673,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="CCUsers" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Attachments" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TimeNotify" Type="DateTime" Precision="3" />
+          <Property Name="EventKey" Type="String" MaxLength="180" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
@@ -3489,6 +3585,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="2048" FixedLength="false" Unicode="true" />
           <Property Name="ImageName" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
           <Property Name="IsmultiAns" Type="Boolean" Nullable="false" />
+          <Property Name="IsEssay" Type="Boolean" Nullable="false" />
+          <Property Name="ReferenceAnswer" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="dt312_Setting">
           <Key>
@@ -4233,6 +4331,86 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="dt320_AuditItem">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="CycleType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="Description" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="IsActive" Type="Boolean" Nullable="false" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt320_Plan">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdAuditItem" Type="Int32" Nullable="false" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="200" FixedLength="false" Unicode="true" />
+          <Property Name="AuditAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CycleType" Type="String" Nullable="false" MaxLength="1" FixedLength="true" Unicode="false" />
+          <Property Name="PeriodYear" Type="Int16" Nullable="false" />
+          <Property Name="PeriodNo" Type="Byte" Nullable="false" />
+          <Property Name="Remark" Type="String" MaxLength="1000" FixedLength="false" Unicode="true" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt320_PlanDepartment">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdPlan" Type="Int32" Nullable="false" />
+          <Property Name="IdDept" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="ParticipationType" Type="Byte" Nullable="false" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt320_PlanUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdPlanDepartment" Type="Int32" Nullable="false" />
+          <Property Name="IdUser" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt320_Report">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdPlanDepartment" Type="Int32" Nullable="false" />
+          <Property Name="Remark" Type="String" MaxLength="2000" FixedLength="false" Unicode="true" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt320_ReportFile">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdReport" Type="Int32" Nullable="false" />
+          <Property Name="IdAdt" Type="Int32" Nullable="false" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
@@ -4527,6 +4705,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="sys_NotesMail">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.sys_NotesMail">
               <MappingFragment StoreEntitySet="sys_NotesMail">
+                <ScalarProperty Name="EventKey" ColumnName="EventKey" />
                 <ScalarProperty Name="TimeNotify" ColumnName="TimeNotify" />
                 <ScalarProperty Name="Attachments" ColumnName="Attachments" />
                 <ScalarProperty Name="CCUsers" ColumnName="CCUsers" />
@@ -5517,6 +5696,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="dt312_Questions">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_Questions">
               <MappingFragment StoreEntitySet="dt312_Questions">
+                <ScalarProperty Name="ReferenceAnswer" ColumnName="ReferenceAnswer" />
+                <ScalarProperty Name="IsEssay" ColumnName="IsEssay" />
                 <ScalarProperty Name="IsmultiAns" ColumnName="IsmultiAns" />
                 <ScalarProperty Name="ImageName" ColumnName="ImageName" />
                 <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
@@ -6145,6 +6326,92 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="ActorId" ColumnName="ActorId" />
                 <ScalarProperty Name="Action" ColumnName="Action" />
                 <ScalarProperty Name="ScoreId" ColumnName="ScoreId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_AuditItem">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_AuditItem">
+              <MappingFragment StoreEntitySet="dt320_AuditItem">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="IsActive" ColumnName="IsActive" />
+                <ScalarProperty Name="Description" ColumnName="Description" />
+                <ScalarProperty Name="CycleType" ColumnName="CycleType" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_Plan">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_Plan">
+              <MappingFragment StoreEntitySet="dt320_Plan">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="PeriodNo" ColumnName="PeriodNo" />
+                <ScalarProperty Name="PeriodYear" ColumnName="PeriodYear" />
+                <ScalarProperty Name="CycleType" ColumnName="CycleType" />
+                <ScalarProperty Name="AuditAt" ColumnName="AuditAt" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="IdAuditItem" ColumnName="IdAuditItem" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_PlanDepartment">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_PlanDepartment">
+              <MappingFragment StoreEntitySet="dt320_PlanDepartment">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="ParticipationType" ColumnName="ParticipationType" />
+                <ScalarProperty Name="IdDept" ColumnName="IdDept" />
+                <ScalarProperty Name="IdPlan" ColumnName="IdPlan" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_PlanUser">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_PlanUser">
+              <MappingFragment StoreEntitySet="dt320_PlanUser">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="IdUser" ColumnName="IdUser" />
+                <ScalarProperty Name="IdPlanDepartment" ColumnName="IdPlanDepartment" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_Report">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_Report">
+              <MappingFragment StoreEntitySet="dt320_Report">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="Remark" ColumnName="Remark" />
+                <ScalarProperty Name="IdPlanDepartment" ColumnName="IdPlanDepartment" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt320_ReportFile">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt320_ReportFile">
+              <MappingFragment StoreEntitySet="dt320_ReportFile">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="IdAdt" ColumnName="IdAdt" />
+                <ScalarProperty Name="IdReport" ColumnName="IdReport" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>

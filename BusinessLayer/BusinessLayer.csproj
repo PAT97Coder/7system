@@ -193,6 +193,12 @@
     <Compile Include="dt314\dt314_HskExamQuestionBUS.cs" />
     <Compile Include="dt314\dt314_HskExamUserBUS.cs" />
     <Compile Include="dt314\dt314_HskQuestionsBUS.cs" />
+    <Compile Include="dt320\dt320_AuditItemBUS.cs" />
+    <Compile Include="dt320\dt320_PlanBUS.cs" />
+    <Compile Include="dt320\dt320_PlanDepartmentBUS.cs" />
+    <Compile Include="dt320\dt320_PlanUserBUS.cs" />
+    <Compile Include="dt320\dt320_ReportBUS.cs" />
+    <Compile Include="dt320\dt320_ReportFileBUS.cs" />
     <Compile Include="dt403\dt403_05_StandardAttBUS.cs" />
     <Compile Include="dt403\dt403_05_StandardBUS.cs" />
     <Compile Include="dt403\dt403_SoftwareManualBUS.cs" />

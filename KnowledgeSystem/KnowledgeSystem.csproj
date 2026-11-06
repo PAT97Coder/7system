@@ -655,6 +655,18 @@
       <SubType>UserControl</SubType>
     </Compile>
     <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\Exam317TemplateExporter.cs" />
+    <Compile Include="Views\03_DepartmentManage\20_AuditManagement\f320_Add.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\20_AuditManagement\f320_Add.Designer.cs">
+      <DependentUpon>f320_Add.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\20_AuditManagement\uc320_mainjihua.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\20_AuditManagement\uc320_mainjihua.Designer.cs">
+      <DependentUpon>uc320_mainjihua.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\17_ExamStatistics\uc317_ExamStatistics.Designer.cs">
       <DependentUpon>uc317_ExamStatistics.cs</DependentUpon>
     </Compile>
@@ -1732,6 +1744,12 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_RecheckBatch.resx">
       <DependentUpon>uc309_RecheckBatch.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\20_AuditManagement\f320_Add.resx">
+      <DependentUpon>f320_Add.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Views\03_DepartmentManage\20_AuditManagement\uc320_mainjihua.resx">
+      <DependentUpon>uc320_mainjihua.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Views\03_DepartmentManage\09_SparePart\uc309_SparePartMain.resx">
       <DependentUpon>uc309_SparePartMain.cs</DependentUpon>

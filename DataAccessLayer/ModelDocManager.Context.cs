@@ -16,7 +16,7 @@ namespace DataAccessLayer
     public partial class DBDocumentManagementSystemEntities : DbContext
     {
         public DBDocumentManagementSystemEntities()
-            : base(SingleConnection.ConString)
+            : base("name=DBDocumentManagementSystemEntities")
         {
         }
     
@@ -166,5 +166,11 @@ namespace DataAccessLayer
         public virtual DbSet<dt315_InterviewReport> dt315_InterviewReport { get; set; }
         public virtual DbSet<dt315_InterviewScore> dt315_InterviewScore { get; set; }
         public virtual DbSet<dt315_InterviewScoreAudit> dt315_InterviewScoreAudit { get; set; }
+        public virtual DbSet<dt320_AuditItem> dt320_AuditItem { get; set; }
+        public virtual DbSet<dt320_Plan> dt320_Plan { get; set; }
+        public virtual DbSet<dt320_PlanDepartment> dt320_PlanDepartment { get; set; }
+        public virtual DbSet<dt320_PlanUser> dt320_PlanUser { get; set; }
+        public virtual DbSet<dt320_Report> dt320_Report { get; set; }
+        public virtual DbSet<dt320_ReportFile> dt320_ReportFile { get; set; }
     }
 }
