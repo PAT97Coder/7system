@@ -514,53 +514,51 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             LockControl();
         }
 
-        private void Trigger310(string displayName)
+        private void Trigger310(string displayName, string sourceDeptId = null)
         {
-            // 1. Chuẩn bị dữ liệu Department ID an toàn
-            var deptId = userInfo.IdDepartment ?? "";
+            var deptId = sourceDeptId ?? userInfo.IdDepartment ?? "";
             var psmDeptId = deptId.Length >= 2 ? deptId.Substring(0, 2) : deptId;
-
-            // 2. Lấy ID các nhóm (Helper function hoặc Dictionary để code gọn hơn)
-            int GetGroupId(string name) => dm_GroupBUS.Instance.GetItemByName(name)?.Id ?? -1;
-
-            int ehsGroupId = GetGroupId($"安衛環{deptId}");      // Safety/EHS
-            int level2GroupId = GetGroupId($"二級{deptId}");      // Level 2 Manager
-            int psmGroupId = GetGroupId($"PSM專人{psmDeptId}");   // PSM Specialist
-            int level1GroupId = GetGroupId($"一級{deptId}");      // Level 1 Manager
-
-            // 3. Tạo bản ghi chính (Master data)
-            var updateLeaveUser = new dt310_UpdateLeaveUser
+            try
             {
-                IdUserLeave = userInfo.Id,
-                DisplayName = displayName,
-                IsProcess = true,
-                IsCancel = false,
-                IdGroupProcess = ehsGroupId,
-                CreateBy = TPConfigs.LoginUser.Id,
-                CreateAt = DateTime.Now
-            };
-
-            int idUpdateData = dt310_UpdateLeaveUserBUS.Instance.Add(updateLeaveUser);
-
-            // 4. Tạo các bước chi tiết (Detail steps) bằng danh sách
-            // Cấu trúc: (GroupId, StepIndex)
-            var steps = new[]
-            {
-                (GroupId: ehsGroupId, Index: 0),
-                (GroupId: level2GroupId, Index: 1),
-                (GroupId: psmGroupId, Index: 2),
-                (GroupId: level1GroupId, Index: 3)
-            };
-
-            foreach (var step in steps)
-            {
-                var detail = new dt310_UpdateLeaveUser_detail
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
                 {
-                    IdUpdateData = idUpdateData,
-                    IdGroup = step.GroupId,
-                    IndexStep = step.Index
-                };
-                dt310_UpdateLeaveUser_detailBUS.Instance.Add(detail);
+                    // Planned resignation and effective resignation share the same pending handover.
+                    if (context.dt310_UpdateLeaveUser.Any(r => r.IdUserLeave == userInfo.Id && r.IsProcess)) return;
+                    string[] names = { $"安衛環{deptId}", $"二級{deptId}", $"PSM專人{psmDeptId}", $"一級{deptId}" };
+                    var groups = context.dm_Group.Where(r => names.Contains(r.DisplayName)).ToList();
+                    var missing = names.Where(name => !groups.Any(r => r.DisplayName == name)).ToList();
+                    if (missing.Count > 0)
+                        throw new InvalidOperationException("缺少交接審核群組：" + string.Join("、", missing));
+                    var workflow = new dt310_UpdateLeaveUser
+                    {
+                        IdUserLeave = userInfo.Id,
+                        DisplayName = displayName,
+                        IsProcess = true,
+                        IsCancel = false,
+                        IdGroupProcess = groups.First(r => r.DisplayName == names[0]).Id,
+                        CreateBy = TPConfigs.LoginUser.Id,
+                        CreateAt = DateTime.Now
+                    };
+                    context.dt310_UpdateLeaveUser.Add(workflow);
+                    context.SaveChanges();
+                    for (int i = 0; i < names.Length; i++)
+                    {
+                        string groupName = names[i];
+                        context.dt310_UpdateLeaveUser_detail.Add(new dt310_UpdateLeaveUser_detail
+                        {
+                            IdUpdateData = workflow.Id,
+                            IdGroup = groups.First(r => r.DisplayName == groupName).Id,
+                            IndexStep = i
+                        });
+                    }
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgTP.MsgError("人員資料已儲存，但 310 交接申請建立失敗，請聯絡管理員確認：\n" + ex.Message);
             }
         }
 
@@ -794,6 +792,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                                 updateReq.TypeChange = "離職";
                                 updateReq.Describe = $"調任從「{templateData.deptfrom}」到「{templateData.deptto}」";
                                 dt201_UpdateUsrReqBUS.Instance.Add(updateReq);
+
+                                if (dt310_EquipmentInfoBUS.Instance.GetListByManagerId(userInfo.Id).Count > 0)
+                                    Trigger310("部門調任設備交接", oldUserData.IdDepartment);
 
                                 break;
                             case UpdateEvent.Resign:

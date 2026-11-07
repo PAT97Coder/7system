@@ -20,6 +20,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         public f310_UpdateLeaveUser_Info()
         {
             InitializeComponent();
+            InitializeEquipmentTab();
             InitializeIcon();
         }
 
@@ -31,6 +32,55 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         BindingSource sourceUnitEHSOrg = new BindingSource();
         BindingSource sourceEHSFunction = new BindingSource();
         BindingSource sourceArea5SResponsible = new BindingSource();
+        private DevExpress.XtraGrid.Views.Grid.GridView gvEquipment;
+        private DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit equipmentUserEditor;
+        private List<EquipmentHandoverData> equipmentHandovers = new List<EquipmentHandoverData>();
+
+        public class EquipmentHandoverData
+        {
+            public int EquipmentId { get; set; }
+            public string Code { get; set; }
+            public string NameVN { get; set; }
+            public string NameTW { get; set; }
+            public string DeptId { get; set; }
+            public string PreviousManagerId { get; set; }
+            public string UserId { get; set; }
+        }
+
+        private void InitializeEquipmentTab()
+        {
+            var grid = new DevExpress.XtraGrid.GridControl();
+            grid.MenuManager = barManagerTP;
+            grid.UseEmbeddedNavigator = true;
+            grid.EmbeddedNavigator.Buttons.Append.Visible = false;
+            grid.EmbeddedNavigator.Buttons.CancelEdit.Visible = false;
+            grid.EmbeddedNavigator.Buttons.Edit.Visible = false;
+            grid.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
+            grid.EmbeddedNavigator.Buttons.Remove.Visible = false;
+            gvEquipment = new DevExpress.XtraGrid.Views.Grid.GridView(grid);
+            grid.MainView = gvEquipment;
+            gvEquipment.Appearance.Assign(gvArea5SResponsible.Appearance);
+            gvEquipment.OptionsView.ShowGroupPanel = false;
+            gvEquipment.OptionsView.ColumnAutoWidth = false;
+            gvEquipment.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
+            gvEquipment.OptionsView.ShowAutoFilterRow = true;
+            gvEquipment.OptionsView.EnableAppearanceOddRow = true;
+            equipmentUserEditor = (DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit)itemCbbUser03.Clone();
+            grid.RepositoryItems.Add(equipmentUserEditor);
+            string[] fields = { "Code", "NameVN", "NameTW", "DeptId", "PreviousManagerId", "UserId" };
+            string[] captions = { "設備編號", "設備名稱（越文）", "設備名稱（中文）", "管理部門", "原管理人", "接任人" };
+            for (int i = 0; i < fields.Length; i++)
+            {
+                var column = gvEquipment.Columns.AddVisible(fields[i], captions[i]);
+                if (fields[i] == "UserId") column.ColumnEdit = equipmentUserEditor;
+            }
+            ConfigureGridEdit(gvEquipment);
+            layoutControl1.Controls.Add(grid);
+            var tab = tabbedControlGroup1.AddTabPage("設備交接");
+            var item = tab.AddItem();
+            item.Control = grid;
+            item.TextVisible = false;
+        }
 
         public class UpdateLeaveUserData
         {
@@ -63,6 +113,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             public List<UpdateLeaveUserData> UnitEHSOrg { get; set; }
             public List<UpdateLeaveUserData> EHSFunction { get; set; }
             public List<UpdateLeaveUserData> Area5SResponsible { get; set; }
+            public List<EquipmentHandoverData> Equipment { get; set; }
         }
 
         private void ConfigureGridEdit(DevExpress.XtraGrid.Views.Grid.GridView view)
@@ -96,9 +147,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             ConfigureGridEdit(gvArea5SResponsible);
 
             updateLeaveUser = dt310_UpdateLeaveUserBUS.Instance.GetItemById(idDataUpdate);
+            if (updateLeaveUser == null || updateLeaveUser.IdGroupProcess == -1 ||
+                !dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id).Any(r => r.IdGroup == updateLeaveUser.IdGroupProcess))
+            {
+                MsgTP.MsgNoPermission();
+                Close();
+                return;
+            }
             userId = updateLeaveUser.IdUserLeave;
 
-            var usrs = dm_UserBUS.Instance.GetList().Where(r => r.Status == 0).Select(r => new
+            var usrs = dm_UserBUS.Instance.GetList().Where(r => r.Status == 0 && r.Id != userId).Select(r => new
             {
                 DisplayName = $"LG{r.IdDepartment}/{r.DisplayName}",
                 Id = r.Id,
@@ -118,6 +176,18 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             itemCbbUser03.ValueMember = "Id";
 
             itemCbbUser01.NullText = itemCbbUser02.NullText = itemCbbUser03.NullText = "【請選擇接任人】";
+            equipmentUserEditor.DataSource = usrs;
+            equipmentUserEditor.DisplayMember = "DisplayName";
+            equipmentUserEditor.ValueMember = "Id";
+            equipmentUserEditor.NullText = "【請選擇接任人】";
+            equipmentHandovers = dt310_EquipmentInfoBUS.Instance.GetListByManagerId(userId)
+                .Select(r => new EquipmentHandoverData
+                {
+                    EquipmentId = r.Id, Code = r.Code, NameVN = r.DisplayNameVN,
+                    NameTW = r.DisplayNameTW, DeptId = r.DeptId, PreviousManagerId = r.ManagerId
+                }).ToList();
+            gvEquipment.GridControl.DataSource = equipmentHandovers;
+            gvEquipment.BestFitColumns();
 
             var UnitEHSOrgData = dt310_UnitEHSOrgBUS.Instance.GetListByUserId(userId);
             var EHSFunctionData = dt310_EHSFunctionBUS.Instance.GetListByUserId(userId);
@@ -184,9 +254,32 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             gvUnitEHSOrg.CloseEditor();
             gvEHSFunction.CloseEditor();
             gvArea5SResponsible.CloseEditor();
+            gvEquipment.CloseEditor();
+            gvEquipment.UpdateCurrentRow();
 
             // Focus vào control khác để kích hoạt validation
             this.ActiveControl = null;
+            var latest = dt310_UpdateLeaveUserBUS.Instance.GetItemById(idDataUpdate);
+            if (latest == null || !latest.IsProcess || latest.DataJson != updateLeaveUser.DataJson ||
+                latest.IdGroupProcess != updateLeaveUser.IdGroupProcess || latest.IdGroupProcess == -1 ||
+                !dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id).Any(r => r.IdGroup == latest.IdGroupProcess))
+            {
+                MsgTP.MsgNoPermission();
+                return;
+            }
+            var activeUsers = new HashSet<string>(dm_UserBUS.Instance.GetList().Where(r => r.Status == 0 && r.Id != userId).Select(r => r.Id));
+            if (equipmentHandovers.Any(r => string.IsNullOrWhiteSpace(r.UserId) || !activeUsers.Contains(r.UserId)))
+            {
+                MsgTP.MsgError("請為每台設備選擇在職接任人，且不可選擇原管理人。");
+                return;
+            }
+            var currentEquipment = dt310_EquipmentInfoBUS.Instance.GetListByManagerId(userId);
+            if (currentEquipment.Count != equipmentHandovers.Count || currentEquipment.Any(r =>
+                !equipmentHandovers.Any(h => h.EquipmentId == r.Id && h.DeptId == r.DeptId)))
+            {
+                MsgTP.MsgError("設備資料已變更，請關閉後重新載入交接申請。");
+                return;
+            }
 
             var unitEHSOrgList = sourceUnitEHSOrg.DataSource as List<UpdateLeaveUserData>;
             var ehsFunctionList = sourceEHSFunction.DataSource as List<UpdateLeaveUserData>;
@@ -221,35 +314,53 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             {
                 UnitEHSOrg = unitEHSOrgList,
                 EHSFunction = ehsFunctionList,
-                Area5SResponsible = area5SResponsibleList
+                Area5SResponsible = area5SResponsibleList,
+                Equipment = equipmentHandovers
             };
 
             string json = JsonConvert.SerializeObject(jsonData, Formatting.Indented);
 
-            var detail = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndIdGroup(updateLeaveUser.Id, (int)updateLeaveUser.IdGroupProcess);
-            detail.IdUser = TPConfigs.LoginUser.Id;
-            detail.TimeSubmit = DateTime.Now;
-            dt310_UpdateLeaveUser_detailBUS.Instance.AddOrUpdate(detail);
-
-            var nextStep = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndStep(updateLeaveUser.Id, detail.IndexStep + 1);
-
-            updateLeaveUser.IdGroupProcess = nextStep.IdGroup;
-            updateLeaveUser.DataJson = json;
-            updateLeaveUser.IsProcess = true;
-            updateLeaveUser.IsCancel = false;
-            dt310_UpdateLeaveUserBUS.Instance.AddOrUpdate(updateLeaveUser);
-
-            var details = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdData(updateLeaveUser.Id);
-
-            // Reset lại các trường từ nextStep trở đi vì có thể sẽ bị trả về nên cần reset về ban đầu
-            var stepsToReset = details.Where(d => d.IndexStep >= nextStep.IndexStep).ToList();
-            foreach (var step in stepsToReset)
+            try
             {
-                step.IdUser = null;
-                step.TimeSubmit = null;
-                step.TimeNotify = null;
-                step.Description = null;
-                dt310_UpdateLeaveUser_detailBUS.Instance.AddOrUpdate(step);
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+                {
+                    var workflow = context.dt310_UpdateLeaveUser.First(r => r.Id == idDataUpdate);
+                    if (!workflow.IsProcess || workflow.IdGroupProcess != latest.IdGroupProcess || workflow.DataJson != latest.DataJson ||
+                        !context.dm_GroupUser.Any(r => r.IdUser == TPConfigs.LoginUser.Id && r.IdGroup == workflow.IdGroupProcess))
+                        throw new InvalidOperationException("申請狀態或權限已變更，請重新載入。");
+                    var owned = context.dt310_EquipmentInfo.Where(r => r.ManagerId == userId && r.DeletedAt == null).ToList();
+                    if (owned.Count != equipmentHandovers.Count || owned.Any(r => !equipmentHandovers.Any(h => h.EquipmentId == r.Id && h.DeptId == r.DeptId)))
+                        throw new InvalidOperationException("設備資料已變更，請重新載入。");
+                    var receiverIds = equipmentHandovers.Select(r => r.UserId)
+                        .Concat(unitEHSOrgList.Select(r => r.UserId)).Concat(ehsFunctionList.Select(r => r.UserId))
+                        .Concat(area5SResponsibleList.Select(r => r.UserId)).Distinct().ToList();
+                    if (receiverIds.Any(r => r == userId) || context.dm_User.Count(r => receiverIds.Contains(r.Id) && r.Status == 0) != receiverIds.Count)
+                        throw new InvalidOperationException("接任人必須是在職人員，且不可為原管理人。");
+                    var detail = context.dt310_UpdateLeaveUser_detail.First(r => r.IdUpdateData == workflow.Id && r.IdGroup == workflow.IdGroupProcess);
+                    var nextStep = context.dt310_UpdateLeaveUser_detail.FirstOrDefault(r => r.IdUpdateData == workflow.Id && r.IndexStep == detail.IndexStep + 1);
+                    if (nextStep == null) throw new InvalidOperationException("交接申請缺少下一級審核設定，請聯絡管理員。");
+                    detail.IdUser = TPConfigs.LoginUser.Id;
+                    detail.TimeSubmit = DateTime.Now;
+                    detail.Description = null;
+                    workflow.IdGroupProcess = nextStep.IdGroup;
+                    workflow.DataJson = json;
+                    workflow.IsCancel = false;
+                    foreach (var step in context.dt310_UpdateLeaveUser_detail.Where(r => r.IdUpdateData == workflow.Id && r.IndexStep >= nextStep.IndexStep))
+                    {
+                        step.IdUser = null;
+                        step.TimeSubmit = null;
+                        step.TimeNotify = null;
+                        step.Description = null;
+                    }
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgTP.MsgError(ex.Message);
+                return;
             }
 
 
