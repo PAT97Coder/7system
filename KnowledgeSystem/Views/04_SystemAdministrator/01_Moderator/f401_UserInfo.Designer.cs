@@ -1043,7 +1043,7 @@
             this.layoutControlGroup1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlGroup1.Name = "layoutControlGroup1";
             this.layoutControlGroup1.Size = new System.Drawing.Size(633, 360);
-            this.layoutControlGroup1.Text = "信息";
+            this.layoutControlGroup1.Text = "基本資料";
             // 
             // lcUserId
             // 
@@ -1205,7 +1205,7 @@
             this.lcJobTitle.Location = new System.Drawing.Point(0, 180);
             this.lcJobTitle.Name = "lcJobTitle";
             this.lcJobTitle.Size = new System.Drawing.Size(316, 36);
-            this.lcJobTitle.Text = "編制備註";
+            this.lcJobTitle.Text = "編制職務";
             this.lcJobTitle.TextSize = new System.Drawing.Size(76, 24);
             // 
             // lcPhone1
@@ -1277,7 +1277,7 @@
             this.lcActualJob.Location = new System.Drawing.Point(0, 144);
             this.lcActualJob.Name = "lcActualJob";
             this.lcActualJob.Size = new System.Drawing.Size(316, 36);
-            this.lcActualJob.Text = "實際備註";
+            this.lcActualJob.Text = "實際職務";
             this.lcActualJob.TextSize = new System.Drawing.Size(76, 24);
             // 
             // lcPhone2
@@ -1479,7 +1479,8 @@
             this.Appearance.Options.UseBackColor = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(677, 485);
+            this.Font = new System.Drawing.Font("Microsoft JhengHei UI", 9F);
+            this.ClientSize = new System.Drawing.Size(760, 540);
             this.Controls.Add(this.layoutControl1);
             this.Controls.Add(this.barDockControlLeft);
             this.Controls.Add(this.barDockControlRight);

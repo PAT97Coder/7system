@@ -30,6 +30,7 @@ namespace KnowledgeSystem.Helpers
         public static readonly SvgImage EmailSend = LoadSvg("icons_email_send.svg");
         public static readonly SvgImage Progress = LoadSvg("StepProcess.svg");
         public static readonly SvgImage Close = LoadSvg("icons_close.svg");
+        public static readonly SvgImage Logout = LoadSvg("icons_logout.svg");
         public static readonly SvgImage Search = LoadSvg("Search_more.svg");
         public static readonly SvgImage UploadFile = LoadSvg("icons_upload_to_ftp.svg");
         public static readonly SvgImage Excel = LoadSvg("icons_excel.svg");

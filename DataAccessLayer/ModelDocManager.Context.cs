@@ -25,6 +25,8 @@ namespace DataAccessLayer
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<EmployeeOffboarding> EmployeeOffboardings { get; set; }
+        public virtual DbSet<EmployeeOffboardingFile> EmployeeOffboardingFiles { get; set; }
         public virtual DbSet<dm_Function> dm_Function { get; set; }
         public virtual DbSet<dm_FunctionRole> dm_FunctionRole { get; set; }
         public virtual DbSet<dm_GroupUser> dm_GroupUser { get; set; }
