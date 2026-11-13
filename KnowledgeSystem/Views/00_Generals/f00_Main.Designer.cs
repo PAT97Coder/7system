@@ -120,7 +120,7 @@ namespace KnowledgeSystem.Views._00_Generals
             this.tileMain.Groups.Add(this.tileGroup5);
             this.tileMain.Location = new System.Drawing.Point(12, 12);
             this.tileMain.Margin = new System.Windows.Forms.Padding(4);
-            this.tileMain.MaxId = 27;
+            this.tileMain.MaxId = 29;
             this.tileMain.Name = "tileMain";
             this.tileMain.Padding = new System.Windows.Forms.Padding(24, 22, 24, 22);
             this.tileMain.ShowGroupText = true;
