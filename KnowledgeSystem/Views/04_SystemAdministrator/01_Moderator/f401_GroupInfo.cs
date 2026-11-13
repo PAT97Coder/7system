@@ -131,6 +131,8 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             LockControl();
 
             var lsDepts = dm_DeptBUS.Instance.GetList().Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id} {r.DisplayName}" }).ToList();
+            if (_group?.IdDept == "*")
+                lsDepts.Add(new dm_Departments { Id = "*", DisplayName = "* 全部門" });
             cbbDept.Properties.DataSource = lsDepts;
             cbbDept.Properties.DisplayMember = "DisplayName";
             cbbDept.Properties.ValueMember = "Id";
