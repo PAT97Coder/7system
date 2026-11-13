@@ -1,0 +1,177 @@
+using BusinessLayer;
+using DevExpress.XtraCharts;
+using DevExpress.XtraEditors;
+using KnowledgeSystem.Helpers;
+using System;
+using System.Data;
+using System.Drawing;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace KnowledgeSystem.Views._02_StandardsAndTechs._08_LabEnvironment
+{
+    public partial class f208_ReadingHistory : XtraForm
+    {
+        private readonly string userId, sn;
+        private DataTable readings;
+        private bool busy;
+        public f208_ReadingHistory(string userId, string sn)
+        {
+            Lab208Ui.InitializeLocalization(); InitializeComponent(); this.userId = userId; this.sn = sn;
+            Text = "溫濕度歷史 — " + sn;
+            dateFrom.EditValue = dt208_EnvironmentRules.VietnamNow.Date; dateTo.EditValue = dateFrom.EditValue;
+            FormClosing += (s, e) => { if (busy) e.Cancel = true; };
+            Load += async (s, e) => await LoadReadingsAsync();
+        }
+        private DataRow SelectedReading() => view.GetFocusedDataRow();
+        private bool CanHandleReading(DataRow row) => row != null && !row.IsNull("CanHandle") && Convert.ToBoolean(row["CanHandle"])
+            && row.Table.Columns.Contains("IsReportSample") && Convert.ToBoolean(row["IsReportSample"])
+            && row["Status"].ToString().Contains("超限");
+        private void PrepareReadings(DataTable data)
+        {
+            var sampleIds = dt208_EnvironmentRules.ReportSampleIds(data.AsEnumerable());
+            data.Columns.Add("Status");
+            data.Columns.Add("IsReportSample", typeof(bool));
+            data.Columns.Add("ReportSample");
+            data.Columns.Add("ReasonStatus");
+            foreach (DataRow row in data.Rows)
+            {
+                row["Status"] = dt208_EnvironmentRules.MeasurementStatus(row);
+                bool sample = sampleIds.Contains(Convert.ToInt64(row["Id"]));
+                row["IsReportSample"] = sample;
+                var target = sample ? dt208_EnvironmentRules.ReportTarget((DateTime)row["MeasuredAt"]) : null;
+                row["ReportSample"] = target.HasValue ? target.Value.ToString("HH:mm") : "非月表取樣";
+                bool needsReason = sample && row["Status"].ToString().Contains("超限");
+                row["ReasonStatus"] = !needsReason ? "無須填寫" : data.Columns.Contains("Cause") && !string.IsNullOrWhiteSpace(row["Cause"].ToString()) ? "已填原因" : "待填原因";
+            }
+        }
+        private void Reading_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
+        {
+            if (e.Menu == null || !e.HitInfo.InRow || !view.IsDataRow(e.HitInfo.RowHandle)) return;
+            view.FocusedRowHandle = e.HitInfo.RowHandle;
+            UpdateButtons();
+            var row = SelectedReading();
+            if (row == null) return;
+            e.Menu.Items.Add(Lab208Ui.Menu("處理紀錄", ActionHistory_Click, TPSvgimages.View, btnActionHistory.Enabled, true));
+            if (Convert.ToInt32(row["ConflictCount"]) > 0)
+                e.Menu.Items.Add(Lab208Ui.Menu("資料衝突", Conflicts_Click, TPSvgimages.Info, btnConflicts.Enabled));
+            if (CanHandleReading(row))
+                e.Menu.Items.Add(Lab208Ui.Menu("處理超限", Action_Click, TPSvgimages.Edit, btnAction.Enabled, true));
+        }
+        private void UpdateButtons()
+        {
+            var row = SelectedReading();
+            btnLoad.Enabled = dateFrom.Enabled = dateTo.Enabled = !busy;
+            btnAction.Enabled = !busy && CanHandleReading(row);
+            btnActionHistory.Enabled = !busy && row != null;
+            btnConflicts.Enabled = !busy && row != null && Convert.ToInt32(row["ConflictCount"]) > 0;
+            btnExport.Enabled = btnPrint.Enabled = !busy && readings != null;
+        }
+        private async Task LoadReadingsAsync()
+        {
+            if (busy) return;
+            DateTime from = Convert.ToDateTime(dateFrom.EditValue).Date, to = Convert.ToDateTime(dateTo.EditValue).Date;
+            if (dateFrom.EditValue == null || dateTo.EditValue == null || from > to || to >= DateTime.MaxValue.Date)
+            { MsgTP.MsgError("請選擇有效的起迄日期。"); return; }
+            busy = true; UpdateButtons();
+            try
+            {
+                var data = await Task.Run(() => dt208_EnvironmentBUS.Instance.GetHistory(userId, sn, from, to.AddDays(1)));
+                if (data.Rows.Count > 10000)
+                {
+                    readings = null; grid.DataSource = null; chartTemperature.Series.Clear(); chartHumidity.Series.Clear();
+                    lblSummary.Caption = "資料超過10,000筆，請縮小日期範圍。"; return;
+                }
+                PrepareReadings(data);
+                data.DefaultView.Sort = "MeasuredAt ASC";
+                readings = data; grid.DataSource = data.DefaultView;
+                f208_DataList.FormatColumns(view);
+                ApplyFilter(); DrawCharts();
+                int abnormal = data.AsEnumerable().Count(r => r["Status"].ToString().Contains("超限"));
+                int pending = data.AsEnumerable().Count(r => r["ReasonStatus"].ToString() == "待填原因");
+                lblSummary.Caption = $"設備序號 {sn} | 共 {data.Rows.Count} 筆 | 超限 {abnormal} 筆 | 取樣待填原因 {pending} 筆 | 時間 UTC+07";
+            }
+            catch (Exception ex) { MsgTP.MsgError("歷史載入失敗：\r\n" + ex.Message); }
+            finally { busy = false; UpdateButtons(); }
+        }
+        private void ApplyFilter()
+        {
+            if (readings == null) return;
+            string filter = chkReportSamples.Checked ? "IsReportSample = true" : "";
+            if (chkAbnormal.Checked) filter += (filter.Length > 0 ? " AND " : "") + "Status LIKE '%超限%'";
+            readings.DefaultView.RowFilter = filter;
+        }
+        private void DrawCharts()
+        {
+            DrawChart(chartTemperature, "溫度 °C", "Temperature", "TempMin", "TempMax");
+            DrawChart(chartHumidity, "濕度 %RH", "Humidity", "HumidityMin", "HumidityMax");
+        }
+        private void DrawChart(ChartControl chart, string caption, string value, string min, string max)
+        {
+            chart.Series.Clear();
+            var actual = new Series(caption, ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
+            var lower = new Series("下限", ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
+            var upper = new Series("上限", ViewType.Line) { ArgumentScaleType = ScaleType.DateTime };
+            foreach (var series in new[] { actual, lower, upper })
+            {
+                series.CrosshairLabelPattern = "{S}: {V:0.##}";
+                series.ToolTipPointPattern = "{A:yyyy/MM/dd HH:mm:ss} (UTC+07)\n{S}: {V:0.##}";
+            }
+            ((LineSeriesView)actual.View).Color = Color.RoyalBlue; ((LineSeriesView)lower.View).Color = Color.DarkOrange; ((LineSeriesView)upper.View).Color = Color.Firebrick;
+            // The thresholds are taken from the configuration effective for each reading.
+            foreach (DataRow row in readings.AsEnumerable().OrderBy(r => r["MeasuredAt"]))
+            {
+                DateTime time = (DateTime)row["MeasuredAt"];
+                actual.Points.Add(new SeriesPoint(time, Convert.ToDouble(row[value])));
+                lower.Points.Add(new SeriesPoint(time, row.IsNull(min) ? double.NaN : Convert.ToDouble(row[min])));
+                upper.Points.Add(new SeriesPoint(time, row.IsNull(max) ? double.NaN : Convert.ToDouble(row[max])));
+            }
+            chart.Series.AddRange(new[] { actual, lower, upper });
+            if (chart.Diagram is XYDiagram diagram)
+            {
+                diagram.AxisX.DateTimeScaleOptions.ScaleMode = ScaleMode.Continuous;
+                diagram.AxisX.Label.TextPattern = "{A:MM/dd HH:mm}";
+                diagram.AxisY.Title.Text = caption; diagram.AxisY.Title.Visibility = DevExpress.Utils.DefaultBoolean.True;
+                diagram.AxisY.WholeRange.AlwaysShowZeroLevel = false;
+                diagram.AxisY.WholeRange.Auto = true;
+                diagram.AxisY.WholeRange.AutoSideMargins = true;
+                diagram.AxisY.VisualRange.Auto = true;
+                diagram.EnableAxisXZooming = true; diagram.EnableAxisXScrolling = true;
+            }
+        }
+        private async void Load_Click(object sender, EventArgs e) { await LoadReadingsAsync(); }
+        private async void Action_Click(object sender, EventArgs e)
+        {
+            var row = SelectedReading();
+            if (!btnAction.Enabled || row == null) return;
+            using (var form = new f208_ReadingAction(userId, Convert.ToInt64(row["Id"]), true))
+                if (form.ShowDialog(this) != DialogResult.OK) return;
+            await LoadReadingsAsync();
+        }
+        private async void ActionHistory_Click(object sender, EventArgs e)
+        {
+            var row = SelectedReading(); if (busy || row == null) return;
+            long id = Convert.ToInt64(row["Id"]);
+            await ShowDataAsync("處理紀錄", () => dt208_EnvironmentBUS.Instance.GetActions(userId, id));
+        }
+        private async void Conflicts_Click(object sender, EventArgs e)
+        {
+            var row = SelectedReading(); if (busy || row == null) return;
+            long id = Convert.ToInt64(row["Id"]);
+            await ShowDataAsync("同時點資料衝突 — 原始數據保持不變", () => dt208_EnvironmentBUS.Instance.GetConflicts(userId, id));
+        }
+        private async Task ShowDataAsync(string title, Func<DataTable> query)
+        {
+            busy = true; UpdateButtons();
+            try { var data = await Task.Run(query); using (var form = new f208_DataList(title, data)) form.ShowDialog(this); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+            finally { busy = false; UpdateButtons(); }
+        }
+        private void Export_Click(object sender, EventArgs e)
+        {
+            using (var dialog = new SaveFileDialog { Filter = "Excel (*.xlsx)|*.xlsx", FileName = "溫濕度_" + DateTime.Now.ToString("yyyyMMdd") + ".xlsx" })
+                if (dialog.ShowDialog() == DialogResult.OK) try { grid.ExportToXlsx(dialog.FileName); } catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+    }
+}
