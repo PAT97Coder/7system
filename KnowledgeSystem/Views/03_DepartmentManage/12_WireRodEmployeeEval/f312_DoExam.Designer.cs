@@ -37,6 +37,8 @@
             this.lbTime = new System.Windows.Forms.Label();
             this.lbQuesNo = new System.Windows.Forms.Label();
             this.txbUserAns = new DevExpress.XtraEditors.TokenEdit();
+            this.essayAnswer = new DevExpress.XtraEditors.MemoEdit();
+            this.essayAnswerItem = new DevExpress.XtraLayout.LayoutControlItem();
             this.btnPreviousQues = new DevExpress.XtraEditors.SimpleButton();
             this.btnNextQues = new DevExpress.XtraEditors.SimpleButton();
             this.btnSubmit = new DevExpress.XtraEditors.SimpleButton();
@@ -90,6 +92,23 @@
             this.layoutControl1.Controls.Add(this.lbTime);
             this.layoutControl1.Controls.Add(this.lbQuesNo);
             this.layoutControl1.Controls.Add(this.txbUserAns);
+            this.layoutControl1.Controls.Add(this.essayAnswer);
+            this.essayAnswer.StyleController = this.layoutControl1;
+            this.essayAnswer.Properties.MaxLength = 16000;
+            this.essayAnswer.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.essayAnswer.Properties.Appearance.Options.UseFont = true;
+            this.essayAnswerItem.Control = this.essayAnswer;
+            this.essayAnswerItem.Name = "essayAnswerItem";
+            this.essayAnswerItem.Text = "申論作答（不計分）";
+            this.essayAnswerItem.TextLocation = DevExpress.Utils.Locations.Top;
+            this.essayAnswerItem.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.essayAnswerItem.AppearanceItemCaption.Options.UseFont = true;
+            this.essayAnswerItem.Location = new System.Drawing.Point(0, 450);
+            this.essayAnswerItem.Size = new System.Drawing.Size(831, 180);
+            this.essayAnswerItem.MinSize = new System.Drawing.Size(200, 140);
+            this.essayAnswerItem.MaxSize = new System.Drawing.Size(0, 240);
+            this.essayAnswerItem.SizeConstraintsType = DevExpress.XtraLayout.SizeConstraintsType.Custom;
+            this.essayAnswerItem.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
             this.layoutControl1.Controls.Add(this.btnPreviousQues);
             this.layoutControl1.Controls.Add(this.btnNextQues);
             this.layoutControl1.Controls.Add(this.btnSubmit);
@@ -208,6 +227,7 @@
             this.gcData.Size = new System.Drawing.Size(309, 613);
             this.gcData.TabIndex = 6;
             this.gcData.UseEmbeddedNavigator = true;
+            this.gcData.EmbeddedNavigator.TextStringFormat = "{0}／{1}";
             this.gcData.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
             this.gvData});
             this.gcData.DoubleClick += new System.EventHandler(this.gcData_DoubleClick);
@@ -384,7 +404,7 @@
             this.layoutControlItem1.Control = this.webViewQues;
             this.layoutControlItem1.Location = new System.Drawing.Point(0, 0);
             this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(831, 630);
+            this.layoutControlItem1.Size = new System.Drawing.Size(831, 450);
             this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem1.TextVisible = false;
             // 
@@ -394,6 +414,121 @@
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1164, 690);
             this.Controls.Add(this.layoutControl1);
+            // Keep question, answer and navigation in distinct rows; the sidebar spans the full height.
+            this.Root.Items.Clear();
+            this.Root.LayoutMode = DevExpress.XtraLayout.Utils.LayoutMode.Table;
+            this.Root.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.Root.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Width = 300 });
+            this.Root.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.examContentGroup = new DevExpress.XtraLayout.LayoutControlGroup { GroupBordersVisible = false, LayoutMode = DevExpress.XtraLayout.Utils.LayoutMode.Table, Padding = new DevExpress.XtraLayout.Utils.Padding(0, 10, 0, 0) };
+            this.examContentGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.answerRow = new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Height = 190 };
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(this.answerRow);
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Height = 52 });
+            this.answerGroup = new DevExpress.XtraLayout.LayoutControlGroup { Text = "作答區", Padding = new DevExpress.XtraLayout.Utils.Padding(12), LayoutMode = DevExpress.XtraLayout.Utils.LayoutMode.Table };
+            this.answerGroup.AppearanceGroup.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.answerGroup.AppearanceGroup.Options.UseFont = true;
+            this.answerGroup.OptionsTableLayoutItem.RowIndex = 1;
+            this.answerGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.answerGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.navigationGroup = new DevExpress.XtraLayout.LayoutControlGroup { GroupBordersVisible = false, LayoutMode = DevExpress.XtraLayout.Utils.LayoutMode.Table, Padding = new DevExpress.XtraLayout.Utils.Padding(0) };
+            this.navigationGroup.OptionsTableLayoutItem.RowIndex = 2;
+            foreach (int width in new[] { 110, 0, 150, 110, 110 })
+                this.navigationGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = width == 0 ? System.Windows.Forms.SizeType.Percent : System.Windows.Forms.SizeType.Absolute, Width = width == 0 ? 100 : width });
+            this.navigationGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.sidebarGroup = new DevExpress.XtraLayout.LayoutControlGroup { Text = "作答進度", LayoutMode = DevExpress.XtraLayout.Utils.LayoutMode.Table, Padding = new DevExpress.XtraLayout.Utils.Padding(8) };
+            this.sidebarGroup.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.sidebarGroup.AppearanceGroup.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.sidebarGroup.AppearanceGroup.Options.UseFont = true;
+            this.sidebarGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.sidebarGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Height = 64 });
+            this.sidebarGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            foreach (var item in new[] { this.layoutControlItem1, this.layoutControlItem2, this.layoutControlItem3, this.layoutControlItem4, this.layoutControlItem5, this.layoutControlItem6, this.layoutControlItem7, this.layoutControlItem8, this.essayAnswerItem })
+            {
+                item.SizeConstraintsType = DevExpress.XtraLayout.SizeConstraintsType.Default;
+                item.MaxSize = System.Drawing.Size.Empty; item.MinSize = System.Drawing.Size.Empty;
+            }
+            this.layoutControlItem1.OptionsTableLayoutItem.RowIndex = 0;
+            this.layoutControlItem6.Text = "請選擇答案";
+            this.layoutControlItem6.TextLocation = DevExpress.Utils.Locations.Top;
+            this.essayAnswerItem.TextVisible = false;
+            this.txbUserAns.MaximumSize = new System.Drawing.Size(0, 40);
+            this.txbUserAns.MinimumSize = new System.Drawing.Size(0, 40);
+            this.essayAnswerItem.OptionsTableLayoutItem.RowIndex = this.layoutControlItem6.OptionsTableLayoutItem.RowIndex = 0;
+            this.layoutControlItem2.OptionsTableLayoutItem.RowIndex = 1;
+            this.layoutControlItem8.OptionsTableLayoutItem.RowIndex = 0;
+            this.layoutControlItem3.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.emptySpaceItem1.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.layoutControlItem7.OptionsTableLayoutItem.ColumnIndex = 2;
+            this.layoutControlItem5.OptionsTableLayoutItem.ColumnIndex = 3;
+            this.layoutControlItem4.OptionsTableLayoutItem.ColumnIndex = 4;
+            this.answerGroup.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.layoutControlItem6, this.essayAnswerItem });
+            this.navigationGroup.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.layoutControlItem3, this.emptySpaceItem1, this.layoutControlItem7, this.layoutControlItem5, this.layoutControlItem4 });
+            this.examContentGroup.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.layoutControlItem1, this.answerGroup, this.navigationGroup });
+            this.sidebarGroup.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.layoutControlItem8, this.layoutControlItem2 });
+            this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] { this.examContentGroup, this.sidebarGroup });
+            // Table positions must be applied after reparenting the existing layout items.
+            this.examContentGroup.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.sidebarGroup.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.layoutControlItem1.OptionsTableLayoutItem.RowIndex = 0;
+            this.answerGroup.OptionsTableLayoutItem.RowIndex = 1;
+            this.navigationGroup.OptionsTableLayoutItem.RowIndex = 2;
+            this.layoutControlItem8.OptionsTableLayoutItem.RowIndex = 0;
+            this.layoutControlItem2.OptionsTableLayoutItem.RowIndex = 1;
+            this.layoutControlItem3.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.emptySpaceItem1.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.layoutControlItem7.OptionsTableLayoutItem.ColumnIndex = 2;
+            this.layoutControlItem5.OptionsTableLayoutItem.ColumnIndex = 3;
+            this.layoutControlItem4.OptionsTableLayoutItem.ColumnIndex = 4;
+            this.layoutControlItem6.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.essayAnswerItem.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.layoutControlItem6.OptionsTableLayoutItem.RowIndex = 0;
+            this.essayAnswerItem.OptionsTableLayoutItem.RowIndex = 0;
+            this.answerGroup.OptionsTableLayoutGroup.ColumnDefinitions.Clear();
+            this.answerGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.answerGroup.OptionsTableLayoutGroup.RowDefinitions.Clear();
+            this.answerGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.Root.OptionsTableLayoutGroup.ColumnDefinitions.Clear();
+            this.Root.OptionsTableLayoutGroup.RowDefinitions.Clear();
+            this.Root.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.Root.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Width = 300 });
+            this.Root.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.examContentGroup.OptionsTableLayoutGroup.ColumnDefinitions.Clear();
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Clear();
+            this.examContentGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(this.answerRow);
+            this.examContentGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Height = 52 });
+            this.navigationGroup.OptionsTableLayoutGroup.ColumnDefinitions.Clear();
+            this.navigationGroup.OptionsTableLayoutGroup.RowDefinitions.Clear();
+            foreach (int width in new[] { 110, 0, 150, 110, 110 })
+                this.navigationGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = width == 0 ? System.Windows.Forms.SizeType.Percent : System.Windows.Forms.SizeType.Absolute, Width = width == 0 ? 100 : width });
+            this.navigationGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.sidebarGroup.OptionsTableLayoutGroup.ColumnDefinitions.Clear();
+            this.sidebarGroup.OptionsTableLayoutGroup.RowDefinitions.Clear();
+            this.sidebarGroup.OptionsTableLayoutGroup.ColumnDefinitions.Add(new DevExpress.XtraLayout.ColumnDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Width = 100 });
+            this.sidebarGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Absolute, Height = 64 });
+            this.sidebarGroup.OptionsTableLayoutGroup.RowDefinitions.Add(new DevExpress.XtraLayout.RowDefinition { SizeType = System.Windows.Forms.SizeType.Percent, Height = 100 });
+            this.lbTime.Font = new System.Drawing.Font("Microsoft JhengHei UI", 20F);
+            this.examContentGroup.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.sidebarGroup.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.layoutControlItem1.OptionsTableLayoutItem.RowIndex = 0;
+            this.answerGroup.OptionsTableLayoutItem.RowIndex = 1;
+            this.navigationGroup.OptionsTableLayoutItem.RowIndex = 2;
+            this.layoutControlItem8.OptionsTableLayoutItem.RowIndex = 0;
+            this.layoutControlItem2.OptionsTableLayoutItem.RowIndex = 1;
+            this.layoutControlItem3.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.emptySpaceItem1.OptionsTableLayoutItem.ColumnIndex = 1;
+            this.layoutControlItem7.OptionsTableLayoutItem.ColumnIndex = 2;
+            this.layoutControlItem5.OptionsTableLayoutItem.ColumnIndex = 3;
+            this.layoutControlItem4.OptionsTableLayoutItem.ColumnIndex = 4;
+            this.layoutControlItem6.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.essayAnswerItem.OptionsTableLayoutItem.ColumnIndex = 0;
+            this.layoutControlItem6.OptionsTableLayoutItem.RowIndex = 0;
+            this.essayAnswerItem.OptionsTableLayoutItem.RowIndex = 0;
+            this.btnPreviousQues.Text = "上一題"; this.btnNextQues.Text = "下一題";
+            this.gcData.UseEmbeddedNavigator = false;
             this.Name = "f312_DoExam";
             this.Text = "f312_DoExam";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.f312_DoExam_FormClosing);
@@ -419,6 +554,11 @@
         }
 
         #endregion
+
+        private DevExpress.XtraEditors.MemoEdit essayAnswer;
+        private DevExpress.XtraLayout.LayoutControlGroup examContentGroup, answerGroup, navigationGroup, sidebarGroup;
+        private DevExpress.XtraLayout.RowDefinition answerRow;
+        private DevExpress.XtraLayout.LayoutControlItem essayAnswerItem;
 
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private System.Windows.Forms.WebBrowser webViewQues;

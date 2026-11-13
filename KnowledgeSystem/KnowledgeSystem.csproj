@@ -1,4 +1,4 @@
-﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="..\packages\Scriban.5.9.0\build\Scriban.props" Condition="Exists('..\packages\Scriban.5.9.0\build\Scriban.props')" />
   <PropertyGroup>
@@ -2577,5 +2577,47 @@
     <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.cs"><SubType>Form</SubType></Compile>
     <Compile Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.Designer.cs"><DependentUpon>f208_DataList.cs</DependentUpon></Compile>
     <EmbeddedResource Include="Views\02_StandardsAndTechs\08_LabEnvironment\f208_DataList.resx"><DependentUpon>f208_DataList.cs</DependentUpon></EmbeddedResource>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312Ui.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\Exam312QuestionExcel.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\rp312_ExamAnalysis.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\rp312_ExamAnalysis.Designer.cs">
+      <DependentUpon>rp312_ExamAnalysis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312_ExamAnalysis.Designer.cs">
+      <DependentUpon>uc312_ExamAnalysis.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Helpers\TraditionalGridLocalizer.cs" />
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExternalCandidate.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExternalCandidate.Designer.cs">
+      <DependentUpon>f312_ExternalCandidate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312ExamTest.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\uc312ExamTest.Designer.cs">
+      <DependentUpon>uc312ExamTest.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_PracticeExam.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_EssayQuestion.Designer.cs">
+      <DependentUpon>f312_EssayQuestion.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\12_WireRodEmployeeEval\f312_ExamReview.Designer.cs">
+      <DependentUpon>f312_ExamReview.cs</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
