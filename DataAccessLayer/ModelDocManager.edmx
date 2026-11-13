@@ -5,6 +5,29 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="DBDocumentManagementSystemModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="EmployeeOffboarding">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="Reason" Type="nvarchar" Nullable="false" MaxLength="2000" />
+          <Property Name="ResignDate" Type="date" Nullable="true" />
+          <Property Name="DepartmentId" Type="varchar" Nullable="true" MaxLength="4" />
+          <Property Name="JobCode" Type="varchar" Nullable="true" MaxLength="32" />
+          <Property Name="DisplayNameTW" Type="nvarchar" Nullable="true" MaxLength="256" />
+          <Property Name="DisplayNameVN" Type="nvarchar" Nullable="true" MaxLength="256" />
+          <Property Name="CreatedByUserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="CreatedAt" Type="datetime2" Nullable="false" Precision="7" />
+        </EntityType>
+        <EntityType Name="EmployeeOffboardingFile">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="OffboardingId" Type="int" Nullable="false" />
+          <Property Name="OriginalName" Type="nvarchar" Nullable="false" MaxLength="256" />
+          <Property Name="StoredPath" Type="nvarchar" Nullable="false" MaxLength="512" />
+          <Property Name="FileSize" Type="bigint" Nullable="false" />
+          <Property Name="CreatedByUserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="CreatedAt" Type="datetime2" Nullable="false" Precision="7" />
+        </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
             <PropertyRef Name="Id" />
@@ -2021,6 +2044,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="DBDocumentManagementSystemModelStoreContainer">
+          <EntitySet Name="EmployeeOffboarding" EntityType="Self.EmployeeOffboarding" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeOffboardingFile" EntityType="Self.EmployeeOffboardingFile" Schema="dbo" store:Type="Tables" />
+
           <EntitySet Name="dm_Attachment" EntityType="Self.dm_Attachment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dm_Departments" EntityType="Self.dm_Departments" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dm_DeptGroups" EntityType="Self.dm_DeptGroups" Schema="dbo" store:Type="Tables" />
@@ -2236,7 +2262,33 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DBDocumentManagementSystemModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+                <EntityType Name="EmployeeOffboarding">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="Reason" Type="String" Nullable="false" MaxLength="2000" Unicode="true" FixedLength="false" />
+          <Property Name="ResignDate" Type="DateTime" Nullable="true" />
+          <Property Name="DepartmentId" Type="String" Nullable="true" MaxLength="4" Unicode="false" FixedLength="false" />
+          <Property Name="JobCode" Type="String" Nullable="true" MaxLength="32" Unicode="false" FixedLength="false" />
+          <Property Name="DisplayNameTW" Type="String" Nullable="true" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="DisplayNameVN" Type="String" Nullable="true" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="CreatedByUserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+        </EntityType>
+        <EntityType Name="EmployeeOffboardingFile">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OffboardingId" Type="Int32" Nullable="false" />
+          <Property Name="OriginalName" Type="String" Nullable="false" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="StoredPath" Type="String" Nullable="false" MaxLength="512" Unicode="true" FixedLength="false" />
+          <Property Name="FileSize" Type="Int64" Nullable="false" />
+          <Property Name="CreatedByUserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+        </EntityType>
         <EntityContainer Name="DBDocumentManagementSystemEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="EmployeeOffboardings" EntityType="Self.EmployeeOffboarding" />
+          <EntitySet Name="EmployeeOffboardingFiles" EntityType="Self.EmployeeOffboardingFile" />
+
           <EntitySet Name="dm_Function" EntityType="DBDocumentManagementSystemModel.dm_Function" />
           <EntitySet Name="dm_FunctionRole" EntityType="DBDocumentManagementSystemModel.dm_FunctionRole" />
           <EntitySet Name="dm_GroupUser" EntityType="DBDocumentManagementSystemModel.dm_GroupUser" />
@@ -4473,6 +4525,28 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="DBDocumentManagementSystemModelStoreContainer" CdmEntityContainer="DBDocumentManagementSystemEntities">
+          <EntitySetMapping Name="EmployeeOffboardings"><EntityTypeMapping TypeName="DBDocumentManagementSystemModel.EmployeeOffboarding"><MappingFragment StoreEntitySet="EmployeeOffboarding">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="UserId" ColumnName="UserId" />
+            <ScalarProperty Name="Reason" ColumnName="Reason" />
+            <ScalarProperty Name="ResignDate" ColumnName="ResignDate" />
+            <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
+            <ScalarProperty Name="JobCode" ColumnName="JobCode" />
+            <ScalarProperty Name="DisplayNameTW" ColumnName="DisplayNameTW" />
+            <ScalarProperty Name="DisplayNameVN" ColumnName="DisplayNameVN" />
+            <ScalarProperty Name="CreatedByUserId" ColumnName="CreatedByUserId" />
+            <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="EmployeeOffboardingFiles"><EntityTypeMapping TypeName="DBDocumentManagementSystemModel.EmployeeOffboardingFile"><MappingFragment StoreEntitySet="EmployeeOffboardingFile">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="OffboardingId" ColumnName="OffboardingId" />
+            <ScalarProperty Name="OriginalName" ColumnName="OriginalName" />
+            <ScalarProperty Name="StoredPath" ColumnName="StoredPath" />
+            <ScalarProperty Name="FileSize" ColumnName="FileSize" />
+            <ScalarProperty Name="CreatedByUserId" ColumnName="CreatedByUserId" />
+            <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+
           <EntitySetMapping Name="dm_Function">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dm_Function">
               <MappingFragment StoreEntitySet="dm_Function">
