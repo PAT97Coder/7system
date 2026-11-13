@@ -12,9 +12,7 @@
 
 # Advanced Install
 /Installer/Staging/
-/tmp/installer-validation/
-/tmp/version-check/
-/tmp/iso-members-103/
+/tmp/
 */SetupDocumentSystem-cache
 *.cab
 SetupDocumentSystem/

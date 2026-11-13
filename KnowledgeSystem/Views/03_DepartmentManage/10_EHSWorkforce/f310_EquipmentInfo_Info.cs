@@ -31,6 +31,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             InitializeComponent();
             InitializeIcon();
+            txbCode.Properties.MaxLength = 50;
+            txbNameVN.Properties.MaxLength = txbNameTW.Properties.MaxLength = 255;
+            txbNote.Properties.MaxLength = 500;
         }
 
         private void InitializeIcon()
@@ -143,6 +146,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
             foreach (var item in lcImpControls)
             {
+                item.Text = item.Text.Replace("<color=red>*</color>", "");
                 if (item.Control.Enabled)
                 {
                     item.Text += "<color=red>*</color>";
@@ -154,7 +158,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private void LoadLookupData(string currentDeptId = null)
+        private void LoadLookupData(string currentDeptId = null, string currentManagerId = null)
         {
             var depts = dm_DeptBUS.Instance.GetActiveAllChildren(0)
                 .Where(r => r.IsGroup != true)
@@ -185,14 +189,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             cbbDept.Properties.NullText = "";
 
             var usrs = dm_UserBUS.Instance.GetList()
-                .Where(r => r.Status == 0)
+                .Where(r => r.Status == 0 || r.Id == currentManagerId)
                 .OrderBy(r => r.IdDepartment)
                 .ThenBy(r => r.DisplayName)
                 .Select(r => new
                 {
                     r.Id,
                     r.IdDepartment,
-                    DisplayName = $"LG{r.IdDepartment}/{r.DisplayName} {r.DisplayNameVN}"
+                    DisplayName = $"LG{r.IdDepartment}/{r.DisplayName} {r.DisplayNameVN}" + (r.Status == 0 ? "" : "（已離職）")
                 })
                 .ToList();
 
@@ -205,7 +209,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 }
 
                 usrs = usrs
-                    .Where(r => visibleDeptIds.Contains(r.IdDepartment))
+                    .Where(r => visibleDeptIds.Contains(r.IdDepartment) || r.Id == currentManagerId)
                     .ToList();
             }
 
@@ -216,6 +220,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         }
 
         private void f310_EquipmentInfo_Info_Load(object sender, EventArgs e)
+        {
+            try { LoadEquipmentInfo(); }
+            catch (Exception ex)
+            {
+                MsgTP.MsgError(ex.Message);
+                Close();
+            }
+        }
+
+        private void LoadEquipmentInfo()
         {
             lcControls = new List<LayoutControlItem> { lcCode, lcNameVN, lcNameTW, lcDept, lcManager, lcNote };
             lcImpControls = new List<LayoutControlItem> { lcCode, lcNameVN, lcNameTW, lcDept, lcManager };
@@ -246,7 +260,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
 
             ResolvePermission();
-            LoadLookupData(equipmentInfo?.DeptId);
+            LoadLookupData(equipmentInfo?.DeptId, equipmentInfo?.ManagerId);
 
             switch (eventInfo)
             {
@@ -288,9 +302,40 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void btnConfirm_ItemClick(object sender, ItemClickEventArgs e)
         {
+            try { SaveEquipmentInfo(); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+
+        private dt310_EquipmentInfo CreateEquipmentDraft()
+        {
+            return new dt310_EquipmentInfo
+            {
+                Id = equipmentInfo.Id,
+                Code = txbCode.EditValue?.ToString().Trim(),
+                DisplayNameVN = txbNameVN.EditValue?.ToString().Trim(),
+                DisplayNameTW = txbNameTW.EditValue?.ToString().Trim(),
+                DeptId = cbbDept.EditValue?.ToString(),
+                ManagerId = cbbManager.EditValue?.ToString(),
+                Note = txbNote.EditValue?.ToString().Trim(),
+                CreatedAt = equipmentInfo.CreatedAt,
+                CreatedBy = equipmentInfo.CreatedBy
+            };
+        }
+
+        private void SaveEquipmentInfo()
+        {
             if (!CanManageCurrentRecord())
             {
                 MsgTP.MsgNoPermission();
+                return;
+            }
+
+            if (eventInfo == EventFormInfo.Delete)
+            {
+                if (XtraMessageBox.Show($"確認刪除設備 {equipmentInfo.Code}？", TPConfigs.SoftNameTW,
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                if (dt310_EquipmentInfoBUS.Instance.RemoveById(equipmentInfo.Id, TPConfigs.LoginUser.Id, equipmentInfo)) Close();
+                else MsgTP.MsgErrorDB();
                 return;
             }
 
@@ -314,11 +359,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
 
             string code = txbCode.EditValue?.ToString().Trim();
-            string nameVN = txbNameVN.EditValue?.ToString().Trim();
-            string nameTW = txbNameTW.EditValue?.ToString().Trim();
             string deptId = cbbDept.EditValue?.ToString();
             string managerId = cbbManager.EditValue?.ToString();
-            string note = txbNote.EditValue?.ToString().Trim();
+            var manager = dm_UserBUS.Instance.GetItemById(managerId);
+            if (manager == null || manager.Status != 0)
+            {
+                MsgTP.MsgError("管理人必須是在職人員，請重新選擇。");
+                return;
+            }
 
             if (!isEHSAdmin && !CanManageDept(deptId))
             {
@@ -333,41 +381,20 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 return;
             }
 
-            if (eventInfo == EventFormInfo.Delete)
-            {
-                var dialogResult = XtraMessageBox.Show(
-                    $"您確認要刪除{formName}\r\n{equipmentInfo.Code}：{equipmentInfo.DisplayNameTW}",
-                    TPConfigs.SoftNameTW,
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-                if (dialogResult != DialogResult.Yes)
-                {
-                    return;
-                }
-            }
-
             bool result = false;
             using (var handle = SplashScreenManager.ShowOverlayForm(this))
             {
-                equipmentInfo.Code = code;
-                equipmentInfo.DisplayNameVN = nameVN;
-                equipmentInfo.DisplayNameTW = nameTW;
-                equipmentInfo.DeptId = deptId;
-                equipmentInfo.ManagerId = managerId;
-                equipmentInfo.Note = note;
+                dt310_EquipmentInfo draft = CreateEquipmentDraft();
 
                 switch (eventInfo)
                 {
                     case EventFormInfo.Create:
-                        equipmentInfo.CreatedAt = DateTime.Now;
-                        equipmentInfo.CreatedBy = TPConfigs.LoginUser.Id;
-                        result = dt310_EquipmentInfoBUS.Instance.Add(equipmentInfo);
+                        draft.CreatedAt = DateTime.Now;
+                        draft.CreatedBy = TPConfigs.LoginUser.Id;
+                        result = dt310_EquipmentInfoBUS.Instance.Add(draft);
                         break;
                     case EventFormInfo.Update:
-                        result = dt310_EquipmentInfoBUS.Instance.AddOrUpdate(equipmentInfo);
-                        break;
-                    case EventFormInfo.Delete:
-                        result = dt310_EquipmentInfoBUS.Instance.RemoveById(equipmentInfo.Id, TPConfigs.LoginUser.Id);
+                        result = dt310_EquipmentInfoBUS.Instance.AddOrUpdate(draft, TPConfigs.LoginUser.Id, equipmentInfo);
                         break;
                 }
             }
