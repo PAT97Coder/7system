@@ -258,6 +258,21 @@
         </tbody>
     </table>
 
+    {{ if equipmentlist.size > 0 }}
+    <h3 class="section-title">四。設備管理交接</h3>
+    <table>
+        <thead><tr><th>設備編號</th><th>設備名稱</th><th>管理部門</th><th>原管理人</th><th>接任人</th></tr></thead>
+        <tbody>
+            {{ for item in equipmentlist }}
+            <tr>
+                <td>{{ item.code }}</td><td>{{ item.namevn }}<br>{{ item.nametw }}</td>
+                <td>{{ item.dept }}</td><td>{{ item.oldemp }}</td><td>{{ item.reciver }}</td>
+            </tr>
+            {{ end }}
+        </tbody>
+    </table>
+    {{ end }}
+
     <div class="signature-wrap">
         <div class="sig-box">
             <div class="sig-title">經辦人</div>

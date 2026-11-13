@@ -297,11 +297,18 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void f310_UpdateApproval_Load(object sender, EventArgs e)
         {
+            try { LoadApproval(); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); Close(); }
+        }
+
+        private void LoadApproval()
+        {
             var users = dm_UserBUS.Instance.GetList();
             var roles = dt310_RoleBUS.Instance.GetList();
             var funcs = dt310_FunctionBUS.Instance.GetList();
             var areas = dt310_Area5SBUS.Instance.GetList();
             updateLeaveUser = dt310_UpdateLeaveUserBUS.Instance.GetItemById(idDataUpdate);
+            if (updateLeaveUser == null) throw new InvalidOperationException("交接申請已刪除或不存在。");
             var dataDetail = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdData(idDataUpdate);
             bool isEHSAssign = updateLeaveUser.DataType == "EHSAssign";
 
@@ -379,6 +386,15 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                     displaydata = BuildFuncDisplayText(r, funcs)
                 }).ToList(),
                 arealist = BuildAreaTemplateRows(areaList, users, areas),
+                equipmentlist = (data?.Equipment ?? new List<EquipmentHandoverData>()).Select(r => new
+                {
+                    code = System.Net.WebUtility.HtmlEncode(r.Code),
+                    namevn = System.Net.WebUtility.HtmlEncode(r.NameVN),
+                    nametw = System.Net.WebUtility.HtmlEncode(r.NameTW),
+                    dept = System.Net.WebUtility.HtmlEncode(r.DeptId),
+                    oldemp = System.Net.WebUtility.HtmlEncode(FormatUserDisplay(r.PreviousManagerId, users)),
+                    reciver = System.Net.WebUtility.HtmlEncode(FormatUserDisplay(r.UserId, users))
+                }).ToList(),
                 sign1st = signApplicant ?? GetEmptySignatureInfo(),
                 sign2nd = signLevel2 ?? GetEmptySignatureInfo(),
                 sign3th = signPsm ?? GetEmptySignatureInfo(),
@@ -395,7 +411,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             webViewUpdateData.DocumentText = pageContent;
         }
 
-        private void ApplyUnitChange(UpdateLeaveUserData item)
+        private void ApplyUnitChange(UpdateLeaveUserData item, DBDocumentManagementSystemEntities context)
         {
             string action = NormalizeChangeAction(item?.ActionType);
 
@@ -407,7 +423,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    dt310_UnitEHSOrgBUS.Instance.Add(new dt310_UnitEHSOrg
+                    context.dt310_UnitEHSOrg.Add(new dt310_UnitEHSOrg
                     {
                         DeptId = item.DeptId,
                         RoleId = item.RoleId.Value,
@@ -420,7 +436,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 case "Delete":
                     if (item?.UnitEHSOrgData != null)
                     {
-                        dt310_UnitEHSOrgBUS.Instance.RemoveById(item.UnitEHSOrgData.Id, TPConfigs.LoginUser.Id);
+                        var removedUnit = context.dt310_UnitEHSOrg.FirstOrDefault(r => r.Id == item.UnitEHSOrgData.Id);
+                        if (removedUnit == null) throw new InvalidOperationException("組織資料已變更，請重新載入。");
+                        removedUnit.DeletedAt = DateTime.Now;
+                        removedUnit.DeletedBy = TPConfigs.LoginUser.Id;
                     }
                     break;
                 default:
@@ -429,22 +448,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    var unitEHSOrg = dt310_UnitEHSOrgBUS.Instance.GetItemById(item.UnitEHSOrgData.Id);
-                    if (unitEHSOrg == null)
+                    var unitEHSOrg = context.dt310_UnitEHSOrg.FirstOrDefault(r => r.Id == item.UnitEHSOrgData.Id);
+                    if (unitEHSOrg == null || unitEHSOrg.DeletedAt.HasValue)
                     {
-                        return;
+                        throw new InvalidOperationException("組織資料已變更，請重新載入交接申請。");
                     }
 
                     unitEHSOrg.DeptId = item.DeptId ?? unitEHSOrg.DeptId;
                     unitEHSOrg.RoleId = item.RoleId ?? unitEHSOrg.RoleId;
                     unitEHSOrg.EmployeeId = item.UserId ?? unitEHSOrg.EmployeeId;
                     unitEHSOrg.StartDate = item.StartDate ?? unitEHSOrg.StartDate;
-                    dt310_UnitEHSOrgBUS.Instance.AddOrUpdate(unitEHSOrg);
                     break;
             }
         }
 
-        private void ApplyFuncChange(UpdateLeaveUserData item)
+        private void ApplyFuncChange(UpdateLeaveUserData item, DBDocumentManagementSystemEntities context)
         {
             string action = NormalizeChangeAction(item?.ActionType);
 
@@ -456,7 +474,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    dt310_EHSFunctionBUS.Instance.Add(new dt310_EHSFunction
+                    context.dt310_EHSFunction.Add(new dt310_EHSFunction
                     {
                         DeptId = item.DeptId,
                         FunctionId = item.FunctionId.Value,
@@ -469,7 +487,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 case "Delete":
                     if (item?.EHSFunctionData != null)
                     {
-                        dt310_EHSFunctionBUS.Instance.RemoveById(item.EHSFunctionData.Id, TPConfigs.LoginUser.Id);
+                        var removedFunc = context.dt310_EHSFunction.FirstOrDefault(r => r.Id == item.EHSFunctionData.Id);
+                        if (removedFunc == null) throw new InvalidOperationException("機能資料已變更，請重新載入。");
+                        removedFunc.DeletedAt = DateTime.Now;
+                        removedFunc.DeletedBy = TPConfigs.LoginUser.Id;
                     }
                     break;
                 default:
@@ -478,29 +499,28 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    var ehsFunction = dt310_EHSFunctionBUS.Instance.GetItemById(item.EHSFunctionData.Id);
-                    if (ehsFunction == null)
+                    var ehsFunction = context.dt310_EHSFunction.FirstOrDefault(r => r.Id == item.EHSFunctionData.Id);
+                    if (ehsFunction == null || ehsFunction.DeletedAt.HasValue)
                     {
-                        return;
+                        throw new InvalidOperationException("機能資料已變更，請重新載入交接申請。");
                     }
 
                     ehsFunction.DeptId = item.DeptId ?? ehsFunction.DeptId;
                     ehsFunction.FunctionId = item.FunctionId ?? ehsFunction.FunctionId;
                     ehsFunction.EmployeeId = item.UserId ?? ehsFunction.EmployeeId;
                     ehsFunction.StartDate = item.StartDate ?? ehsFunction.StartDate;
-                    dt310_EHSFunctionBUS.Instance.AddOrUpdate(ehsFunction);
                     break;
             }
         }
 
-        private void ApplyAreaChange(UpdateLeaveUserData item)
+        private void ApplyAreaChange(UpdateLeaveUserData item, DBDocumentManagementSystemEntities context)
         {
             if (item?.Area5SResponsibleData != null && !string.IsNullOrWhiteSpace(item.FieldName) && !string.IsNullOrWhiteSpace(item.UserId))
             {
-                var legacyArea = dt310_Area5SResponsibleBUS.Instance.GetItemById(item.Area5SResponsibleData.Id);
-                if (legacyArea == null)
+                var legacyArea = context.dt310_Area5SResponsible.FirstOrDefault(r => r.Id == item.Area5SResponsibleData.Id);
+                if (legacyArea == null || legacyArea.DeletedAt.HasValue)
                 {
-                    return;
+                    throw new InvalidOperationException("區域資料已變更，請重新載入交接申請。");
                 }
 
                 if (item.FieldName == "EmployeeId")
@@ -511,8 +531,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 {
                     legacyArea.AgentId = item.UserId;
                 }
-
-                dt310_Area5SResponsibleBUS.Instance.AddOrUpdate(legacyArea);
                 return;
             }
 
@@ -530,7 +548,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    dt310_Area5SResponsibleBUS.Instance.Add(new dt310_Area5SResponsible
+                    context.dt310_Area5SResponsible.Add(new dt310_Area5SResponsible
                     {
                         DeptId = item.DeptId,
                         AreaId = item.AreaId.Value,
@@ -546,7 +564,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 case "Delete":
                     if (item?.Area5SResponsibleData != null)
                     {
-                        dt310_Area5SResponsibleBUS.Instance.RemoveById(item.Area5SResponsibleData.Id);
+                        var removedArea = context.dt310_Area5SResponsible.FirstOrDefault(r => r.Id == item.Area5SResponsibleData.Id);
+                        if (removedArea == null) throw new InvalidOperationException("區域資料已變更，請重新載入。");
+                        context.dt310_Area5SResponsible.Remove(removedArea);
                     }
                     break;
                 default:
@@ -555,10 +575,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                         return;
                     }
 
-                    var area5S = dt310_Area5SResponsibleBUS.Instance.GetItemById(item.Area5SResponsibleData.Id);
-                    if (area5S == null)
+                    var area5S = context.dt310_Area5SResponsible.FirstOrDefault(r => r.Id == item.Area5SResponsibleData.Id);
+                    if (area5S == null || area5S.DeletedAt.HasValue)
                     {
-                        return;
+                        throw new InvalidOperationException("區域資料已變更，請重新載入交接申請。");
                     }
 
                     area5S.DeptId = item.DeptId ?? area5S.DeptId;
@@ -568,17 +588,65 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                     area5S.BossId = item.BossId ?? area5S.BossId;
                     area5S.AreaCode = item.AreaCode ?? area5S.AreaCode;
                     area5S.AreaName = item.AreaName ?? area5S.AreaName;
-                    dt310_Area5SResponsibleBUS.Instance.AddOrUpdate(area5S);
                     break;
             }
         }
 
+        private void ApplyRelatedChanges(UpdateLeaveUserJson data, DBDocumentManagementSystemEntities context)
+        {
+            var receivers = new List<string>();
+            receivers.AddRange((data?.UnitEHSOrg ?? new List<UpdateLeaveUserData>())
+                .Where(r => NormalizeChangeAction(r.ActionType) != "Delete").Select(r => r.UserId ?? r.UnitEHSOrgData?.EmployeeId));
+            receivers.AddRange((data?.EHSFunction ?? new List<UpdateLeaveUserData>())
+                .Where(r => NormalizeChangeAction(r.ActionType) != "Delete").Select(r => r.UserId ?? r.EHSFunctionData?.EmployeeId));
+            foreach (var area in data?.Area5SResponsible ?? new List<UpdateLeaveUserData>())
+            {
+                if (NormalizeChangeAction(area.ActionType) == "Delete") continue;
+                if (!string.IsNullOrWhiteSpace(area.FieldName)) receivers.Add(area.UserId);
+                else
+                {
+                    receivers.Add(area.EmployeeId ?? area.Area5SResponsibleData?.EmployeeId);
+                    receivers.Add(area.AgentId ?? area.Area5SResponsibleData?.AgentId);
+                    receivers.Add(area.BossId ?? area.Area5SResponsibleData?.BossId);
+                }
+            }
+            var uniqueIds = receivers.Distinct().ToList();
+            if (uniqueIds.Any(string.IsNullOrWhiteSpace) || context.dm_User.Count(r => uniqueIds.Contains(r.Id) && r.Status == 0) != uniqueIds.Count)
+                throw new InvalidOperationException("接任人狀態已變更，請退回重新選擇在職接任人。");
+            foreach (var item in data?.UnitEHSOrg ?? new List<UpdateLeaveUserData>()) ApplyUnitChange(item, context);
+            foreach (var item in data?.EHSFunction ?? new List<UpdateLeaveUserData>()) ApplyFuncChange(item, context);
+            foreach (var item in data?.Area5SResponsible ?? new List<UpdateLeaveUserData>()) ApplyAreaChange(item, context);
+        }
+
         private void btnApproval_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            try { ApproveCurrentWorkflow(); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+
+        private dt310_UpdateLeaveUser GetCurrentWorkflow(DBDocumentManagementSystemEntities context)
+        {
+            var workflow = context.dt310_UpdateLeaveUser.FirstOrDefault(r => r.Id == idDataUpdate);
+            if (workflow == null || !workflow.IsProcess || workflow.IsCancel || workflow.IdGroupProcess == -1 ||
+                workflow.IdGroupProcess != updateLeaveUser.IdGroupProcess || workflow.DataJson != updateLeaveUser.DataJson ||
+                !context.dm_GroupUser.Any(r => r.IdUser == TPConfigs.LoginUser.Id && r.IdGroup == workflow.IdGroupProcess))
+                throw new InvalidOperationException("申請狀態或審核權限已變更，請重新載入。");
+            return workflow;
+        }
+
+        private void ApproveCurrentWorkflow()
+        {
+            var latest = dt310_UpdateLeaveUserBUS.Instance.GetItemById(idDataUpdate);
+            if (latest == null || !latest.IsProcess || latest.IsCancel || latest.IdGroupProcess == -1 ||
+                latest.IdGroupProcess != updateLeaveUser.IdGroupProcess || latest.DataJson != updateLeaveUser.DataJson ||
+                !dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id).Any(r => r.IdGroup == latest.IdGroupProcess))
+            {
+                MsgTP.MsgError("申請狀態或審核權限已變更，請重新載入。");
+                return;
+            }
             var detail = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndIdGroup(updateLeaveUser.Id, (int)updateLeaveUser.IdGroupProcess);
             detail.IdUser = TPConfigs.LoginUser.Id;
             detail.TimeSubmit = DateTime.Now;
-            dt310_UpdateLeaveUser_detailBUS.Instance.AddOrUpdate(detail);
 
             var nextStep = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndStep(updateLeaveUser.Id, detail.IndexStep + 1);
 
@@ -587,42 +655,56 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 string json = updateLeaveUser?.DataJson ?? "{}";
                 var data = JsonConvert.DeserializeObject<UpdateLeaveUserJson>(json);
 
-                if (data != null)
+                try
                 {
-                    if (data.UnitEHSOrg != null)
+                    if (updateLeaveUser.DataType != "EHSAssign")
                     {
-                        foreach (var item in data.UnitEHSOrg)
-                        {
-                            ApplyUnitChange(item);
-                        }
+                        dt310_EquipmentInfoBUS.Instance.TransferManagers(
+                            (data?.Equipment ?? new List<EquipmentHandoverData>()).Select(r => new dt310_EquipmentInfoBUS.ManagerChange
+                            {
+                                EquipmentId = r.EquipmentId, PreviousManagerId = r.PreviousManagerId,
+                                DeptId = r.DeptId, NewManagerId = r.UserId
+                            }).ToList(), TPConfigs.LoginUser.Id, updateLeaveUser.Id, updateLeaveUser.DataJson,
+                            context => ApplyRelatedChanges(data, context));
                     }
-
-                    if (data.EHSFunction != null)
+                    else
                     {
-                        foreach (var item in data.EHSFunction)
+                        using (var context = new DBDocumentManagementSystemEntities())
+                        using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
                         {
-                            ApplyFuncChange(item);
-                        }
-                    }
-
-                    if (data.Area5SResponsible != null)
-                    {
-                        foreach (var item in data.Area5SResponsible)
-                        {
-                            ApplyAreaChange(item);
+                            var workflow = GetCurrentWorkflow(context);
+                            ApplyRelatedChanges(data, context);
+                            var currentDetail = context.dt310_UpdateLeaveUser_detail.First(r => r.Id == detail.Id);
+                            currentDetail.IdUser = TPConfigs.LoginUser.Id;
+                            currentDetail.TimeSubmit = DateTime.Now;
+                            workflow.IsProcess = false;
+                            workflow.IdGroupProcess = -1;
+                            context.SaveChanges();
+                            transaction.Commit();
                         }
                     }
                 }
-
-                updateLeaveUser.IsProcess = false;
-                updateLeaveUser.IdGroupProcess = -1;
-                dt310_UpdateLeaveUserBUS.Instance.AddOrUpdate(updateLeaveUser);
+                catch (Exception ex)
+                {
+                    MsgTP.MsgError(ex.Message);
+                    return;
+                }
                 XtraMessageBox.Show("審核完成！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                updateLeaveUser.IdGroupProcess = nextStep.IdGroup;
-                dt310_UpdateLeaveUserBUS.Instance.AddOrUpdate(updateLeaveUser);
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+                {
+                    var workflow = GetCurrentWorkflow(context);
+                    var currentDetail = context.dt310_UpdateLeaveUser_detail.First(r => r.Id == detail.Id);
+                    var next = context.dt310_UpdateLeaveUser_detail.First(r => r.IdUpdateData == workflow.Id && r.IndexStep == currentDetail.IndexStep + 1);
+                    currentDetail.IdUser = TPConfigs.LoginUser.Id;
+                    currentDetail.TimeSubmit = DateTime.Now;
+                    workflow.IdGroupProcess = next.IdGroup;
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
                 XtraMessageBox.Show("已送交下一級審核！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
 
@@ -630,6 +712,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         }
 
         private void btnCancel_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            try { RejectCurrentWorkflow(); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+
+        private void RejectCurrentWorkflow()
         {
             XtraInputBoxArgs args = new XtraInputBoxArgs
             {
@@ -650,17 +738,20 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 return;
             }
 
-            var detail = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndIdGroup(updateLeaveUser.Id, (int)updateLeaveUser.IdGroupProcess);
-            detail.IdUser = TPConfigs.LoginUser.Id;
-            detail.TimeSubmit = DateTime.Now;
-            detail.Description = reason;
-            dt310_UpdateLeaveUser_detailBUS.Instance.AddOrUpdate(detail);
-
-            var nextStep = dt310_UpdateLeaveUser_detailBUS.Instance.GetItemByIdDataAndStep(updateLeaveUser.Id, 0);
-
-            updateLeaveUser.IdGroupProcess = nextStep.IdGroup;
-            updateLeaveUser.IsCancel = true;
-            dt310_UpdateLeaveUserBUS.Instance.AddOrUpdate(updateLeaveUser);
+            using (var context = new DBDocumentManagementSystemEntities())
+            using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
+            {
+                var workflow = GetCurrentWorkflow(context);
+                var detail = context.dt310_UpdateLeaveUser_detail.First(r => r.IdUpdateData == workflow.Id && r.IdGroup == workflow.IdGroupProcess);
+                var firstStep = context.dt310_UpdateLeaveUser_detail.First(r => r.IdUpdateData == workflow.Id && r.IndexStep == 0);
+                detail.IdUser = TPConfigs.LoginUser.Id;
+                detail.TimeSubmit = DateTime.Now;
+                detail.Description = reason;
+                workflow.IdGroupProcess = firstStep.IdGroup;
+                workflow.IsCancel = true;
+                context.SaveChanges();
+                transaction.Commit();
+            }
 
             XtraMessageBox.Show("已退回！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Information);
             Close();

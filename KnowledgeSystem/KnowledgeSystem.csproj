@@ -948,6 +948,12 @@
     <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EHSFunc_Info.Designer.cs">
       <DependentUpon>f310_EHSFunc_Info.cs</DependentUpon>
     </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentHistory.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentHistory.Designer.cs">
+      <DependentUpon>f310_EquipmentHistory.cs</DependentUpon>
+    </Compile>
     <Compile Include="Views\03_DepartmentManage\10_EHSWorkforce\f310_EquipmentInfo_Info.cs">
       <SubType>Form</SubType>
     </Compile>

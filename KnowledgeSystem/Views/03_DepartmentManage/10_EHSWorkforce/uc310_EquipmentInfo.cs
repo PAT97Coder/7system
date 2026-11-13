@@ -1,4 +1,4 @@
-using BusinessLayer;
+﻿using BusinessLayer;
 using DataAccessLayer;
 using DevExpress.Utils.Menu;
 using DevExpress.Utils.Svg;
@@ -32,6 +32,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         private DXMenuItem itemBatchManager;
         private DXMenuItem itemMultiselect;
         private DXMenuItem itemPrintStamp;
+        private DXMenuItem itemHistory;
 
         public uc310_EquipmentInfo()
         {
@@ -47,6 +48,43 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             btnAdd.ImageOptions.SvgImage = TPSvgimages.Add;
             btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
+            AddToolbarButton("待交接設備", TPSvgimages.View, (s, e) =>
+            {
+                var column = gvData.Columns["ManagerStatus"];
+                column.FilterInfo = string.IsNullOrEmpty(column.FilterInfo.FilterString)
+                    ? new DevExpress.XtraGrid.Columns.ColumnFilterInfo("Contains([ManagerStatus], '待')")
+                    : new DevExpress.XtraGrid.Columns.ColumnFilterInfo();
+            });
+            gvData.Columns.AddVisible("ManagerStatus", "管理狀態");
+        }
+
+        private DevExpress.XtraBars.BarButtonItem AddToolbarButton(string caption, SvgImage icon, EventHandler action)
+        {
+            var button = new DevExpress.XtraBars.BarButtonItem(barManagerTP, caption);
+            button.ImageOptions.SvgImage = icon;
+            button.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
+            button.ItemClick += (s, e) => action(s, e);
+            bar2.AddItem(button);
+            return button;
+        }
+
+        private void ShowHistory(object sender, EventArgs e)
+        {
+            var item = equipmentInfos.FirstOrDefault(r => r.Id == Convert.ToInt32(gvData.GetFocusedRowCellValue(gColId) ?? -1));
+            if (item == null) return;
+            try
+            {
+                using (var form = CreateHistoryDialog(item.Code, dt310_EquipmentInfoBUS.Instance.GetHistory(item.Id)))
+                {
+                    form.ShowDialog(this);
+                }
+            }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+
+        private static XtraForm CreateHistoryDialog(string equipmentCode, List<dt310_EquipmentInfoBUS.EquipmentHistory> history)
+        {
+            return new f310_EquipmentHistory(equipmentCode, history);
         }
 
         private DXMenuItem CreateMenuItem(string caption, EventHandler clickEvent, SvgImage svgImage)
@@ -60,35 +98,52 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         private void InitializeMenuItems()
         {
             itemViewInfo = CreateMenuItem("查看信息", ItemViewInfo_Click, TPSvgimages.View);
-            itemBatchManager = CreateMenuItem("批量修改管理人", ItemBatchManager_Click, TPSvgimages.Edit);
+            itemBatchManager = CreateMenuItem("交接管理人", ItemBatchManager_Click, TPSvgimages.Edit);
             itemMultiselect = CreateMenuItem("啟用多選", ItemMultiselect_Click, TPSvgimages.CheckedRadio);
-            itemPrintStamp = CreateMenuItem("執行列印", ItemPrintStamp_Click, TPSvgimages.Print);
+            itemPrintStamp = CreateMenuItem("列印設備標籤", ItemPrintStamp_Click, TPSvgimages.Print);
+            itemHistory = CreateMenuItem("交接紀錄", ShowHistory, TPSvgimages.View);
         }
 
         private void LoadData()
         {
-            using (var handle = SplashScreenManager.ShowOverlayForm(gcData))
+            try
             {
-                equipmentInfos = vw310_EquipmentInfoBUS.Instance.GetList();
-
-                var displayData = equipmentInfos
-                    .Select(r => new
-                    {
-                        r.Id,
-                        r.Code,
-                        r.DisplayNameVN,
-                        r.DisplayNameTW,
-                        DeptDisplay = string.Join(" ", new[] { r.DeptId, r.DeptNameTW }.Where(x => !string.IsNullOrWhiteSpace(x))),
-                        ManagerDisplay = string.Join(" ", new[] { r.ManagerId, r.ManagerNameTW, r.ManagerNameVN }.Where(x => !string.IsNullOrWhiteSpace(x))),
-                        r.Note
-                    })
-                    .ToList();
-
-                sourceData.DataSource = displayData;
-                gcData.DataSource = sourceData;
-
-                gvData.BestFitColumns();
+                using (var handle = SplashScreenManager.ShowOverlayForm(gcData))
+                {
+                    var activeIds = new HashSet<int>(dt310_EquipmentInfoBUS.Instance.GetList().Select(r => r.Id));
+                    var items = vw310_EquipmentInfoBUS.Instance.GetList().Where(r => activeIds.Contains(r.Id)).ToList();
+                    BindEquipmentData(items, dm_UserBUS.Instance.GetList());
+                }
             }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
+        }
+
+        private void BindEquipmentData(List<vw310_EquipmentInfo> items, List<dm_User> allUsers)
+        {
+            var users = allUsers.ToDictionary(r => r.Id);
+            equipmentInfos = items;
+
+            var displayData = equipmentInfos
+                .Select(r => new
+                {
+                    r.Id,
+                    r.Code,
+                    r.DisplayNameVN,
+                    r.DisplayNameTW,
+                    DeptDisplay = string.Join(" ", new[] { r.DeptId, r.DeptNameTW }.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    ManagerDisplay = string.Join(" ", new[] { r.ManagerId, r.ManagerNameTW, r.ManagerNameVN }.Where(x => !string.IsNullOrWhiteSpace(x))),
+                    ManagerStatus = !users.ContainsKey(r.ManagerId ?? "") ? "待指定管理人"
+                        : users[r.ManagerId].Status != 0 ? "待交接：已離職"
+                        : users[r.ManagerId].ResignPlan.HasValue ? "待交接：預報離職"
+                        : users[r.ManagerId].IdDepartment != r.DeptId ? "待確認：跨部門管理" : "正常",
+                    r.Note
+                })
+                .ToList();
+
+            sourceData.DataSource = displayData;
+            gcData.DataSource = sourceData;
+
+            gvData.BestFitColumns();
         }
 
         private void ResolvePermission()
@@ -179,11 +234,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 .ToList();
         }
 
-        private string SelectManagerId(List<dm_User> managers)
+        private static SearchLookUpEdit CreateManagerEditor(List<dm_User> managers)
         {
-            SearchLookUpEdit editor = new SearchLookUpEdit();
-            GridView popupView = new GridView();
-
+            var editor = new SearchLookUpEdit();
+            var popupView = new GridView();
             editor.Properties.PopupView = popupView;
             editor.Properties.DataSource = managers.Select(r => new
             {
@@ -214,21 +268,41 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             popupView.Columns.AddVisible("Id", "工號");
             popupView.Columns.AddVisible("DisplayName", "姓名");
 
-            XtraInputBoxArgs args = new XtraInputBoxArgs
-            {
-                Caption = TPConfigs.SoftNameTW,
-                Prompt = "請選擇新的管理人",
-                DefaultButtonIndex = 0,
-                Editor = editor
-            };
+            popupView.OptionsView.ColumnAutoWidth = false;
+            popupView.Columns["IdDepartment"].Width = 100;
+            popupView.Columns["Id"].Width = 160;
+            popupView.Columns["DisplayName"].Width = 460;
+            editor.Properties.PopupFormSize = new Size(760, 400);
+            editor.Properties.Appearance.Options.UseFont = true;
+            return editor;
+        }
 
-            object result = XtraInputBox.Show(args);
-            return result?.ToString();
+        private string SelectManagerId(List<dm_User> managers)
+        {
+            using (SearchLookUpEdit editor = CreateManagerEditor(managers))
+            {
+                XtraInputBoxArgs args = new XtraInputBoxArgs
+                {
+                    Caption = TPConfigs.SoftNameTW,
+                    Prompt = "\u8acb\u9078\u64c7\u65b0\u7684\u7ba1\u7406\u4eba",
+                    DefaultButtonIndex = 0,
+                    Editor = editor
+                };
+                return XtraInputBox.Show(args)?.ToString();
+            }
         }
 
         private void ShowPrintPreview(IEnumerable<vw310_EquipmentInfo> items)
         {
-            List<object> labels = items
+            var selectedIds = new HashSet<int>(items.Select(r => r.Id));
+            if (selectedIds.Count == 0)
+            {
+                XtraMessageBox.Show("請先選擇要列印的設備資料。", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            var activeIds = new HashSet<int>(dt310_EquipmentInfoBUS.Instance.GetList().Select(r => r.Id));
+            List<object> labels = vw310_EquipmentInfoBUS.Instance.GetList()
+                .Where(r => selectedIds.Contains(r.Id) && activeIds.Contains(r.Id))
                 .Select(r => new
                 {
                     NameVN = r.DisplayNameVN ?? string.Empty,
@@ -247,15 +321,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 return;
             }
 
-            XtraReport report = new rpDeviceManagement();
-            report.DataSource = labels;
-            report.CreateDocument();
-            report.PrintingSystem.ShowMarginsWarning = false;
-
-            using (f00_PrintReport printReport = new f00_PrintReport())
+            using (XtraReport report = new rpDeviceManagement())
             {
-                printReport.ViewerReport.DocumentSource = report;
-                printReport.ShowDialog(this);
+                report.DataSource = labels;
+                report.CreateDocument();
+                report.PrintingSystem.ShowMarginsWarning = false;
+
+                using (f00_PrintReport printReport = new f00_PrintReport())
+                {
+                    printReport.ViewerReport.DocumentSource = report;
+                    printReport.ShowDialog(this);
+                }
             }
         }
 
@@ -275,7 +351,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void ItemPrintStamp_Click(object sender, EventArgs e)
         {
-            ShowPrintPreview(GetSelectedEquipmentInfos());
+            try { ShowPrintPreview(GetSelectedEquipmentInfos()); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
         }
 
         private void ItemViewInfo_Click(object sender, EventArgs e)
@@ -301,18 +378,23 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void uc310_EquipmentInfo_Load(object sender, EventArgs e)
         {
-            ResolvePermission();
-
-            if (!canManage)
+            try
             {
-                btnAdd.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+                ResolvePermission();
+
+                if (!canManage)
+                {
+                    btnAdd.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+                }
+
+                gvData.ReadOnlyGridView();
+                gvData.OptionsBehavior.Editable = false;
+                gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
+                gvData.OptionsView.ShowGroupPanel = false;
+
+                LoadData();
             }
-
-            gvData.ReadOnlyGridView();
-            gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
-            gvData.OptionsView.ShowGroupPanel = false;
-
-            LoadData();
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
         }
 
         private void btnAdd_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -377,29 +459,32 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 return;
             }
 
-            bool isSuccess = true;
-            using (var handle = SplashScreenManager.ShowOverlayForm(this))
+            var selectedManager = managers.FirstOrDefault(r => r.Id == selectedManagerId);
+            if (selectedManager == null)
             {
-                foreach (vw310_EquipmentInfo item in selectedItems)
-                {
-                    dt310_EquipmentInfo entity = dt310_EquipmentInfoBUS.Instance.GetItemById(item.Id);
-                    if (entity == null)
-                    {
-                        isSuccess = false;
-                        continue;
-                    }
+                MsgTP.MsgError("請從清單選擇有效的接任人。");
+                return;
+            }
+            string managerName = selectedManager.DisplayName;
+            if (XtraMessageBox.Show($"確認將 {selectedItems.Count} 台設備交接給 {managerName}？", TPConfigs.SoftNameTW,
+                MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
 
-                    entity.ManagerId = selectedManagerId;
-                    if (!dt310_EquipmentInfoBUS.Instance.AddOrUpdate(entity))
-                    {
-                        isSuccess = false;
-                    }
+            try
+            {
+                using (var handle = SplashScreenManager.ShowOverlayForm(this))
+                {
+                    dt310_EquipmentInfoBUS.Instance.TransferManagers(selectedItems
+                        .Where(r => r.ManagerId != selectedManagerId)
+                        .Select(r => new dt310_EquipmentInfoBUS.ManagerChange
+                        {
+                            EquipmentId = r.Id, PreviousManagerId = r.ManagerId,
+                            DeptId = r.DeptId, NewManagerId = selectedManagerId
+                        }).ToList(), TPConfigs.LoginUser.Id);
                 }
             }
-
-            if (!isSuccess)
+            catch (Exception ex)
             {
-                MsgTP.MsgErrorDB();
+                MsgTP.MsgError(ex.Message);
             }
 
             LoadData();
@@ -407,27 +492,42 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void ItemBatchManager_Click(object sender, EventArgs e)
         {
-            ExecuteBatchManagerUpdate();
+            try { ExecuteBatchManagerUpdate(); }
+            catch (Exception ex) { MsgTP.MsgError(ex.Message); }
         }
 
         private void gvData_PopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
+            if (e.Menu != null && e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
-                gvData.FocusedRowHandle = e.HitInfo.RowHandle;
-
-                bool multiSelect = gvData.OptionsSelection.MultiSelect;
-                itemMultiselect.Caption = multiSelect ? "啟用單選" : "啟用多選";
-                itemMultiselect.BeginGroup = true;
-
-                e.Menu.Items.Add(itemViewInfo);
-                if (canManage)
-                {
-                    e.Menu.Items.Add(itemBatchManager);
-                }
-                e.Menu.Items.Add(itemMultiselect);
-                e.Menu.Items.Add(itemPrintStamp);
+                PopulateEquipmentMenu(e.Menu, e.HitInfo.RowHandle);
             }
+        }
+
+        private void PopulateEquipmentMenu(DXPopupMenu menu, int rowHandle)
+        {
+            if (!gvData.IsDataRow(rowHandle)) return;
+            if (gvData.OptionsSelection.MultiSelect && !gvData.IsRowSelected(rowHandle))
+            {
+                gvData.ClearSelection();
+                gvData.SelectRow(rowHandle);
+            }
+            gvData.FocusedRowHandle = rowHandle;
+
+            bool multiSelect = gvData.OptionsSelection.MultiSelect;
+            itemMultiselect.Caption = multiSelect ? "啟用單選" : "啟用多選";
+            itemMultiselect.BeginGroup = true;
+
+            menu.Items.Add(itemViewInfo);
+            menu.Items.Add(itemHistory);
+            if (canManage)
+            {
+                itemBatchManager.BeginGroup = true;
+                itemBatchManager.Enabled = GetSelectedEquipmentInfos().All(r => CanManageDept(r.DeptId));
+                menu.Items.Add(itemBatchManager);
+            }
+            menu.Items.Add(itemMultiselect);
+            menu.Items.Add(itemPrintStamp);
         }
     }
 }
