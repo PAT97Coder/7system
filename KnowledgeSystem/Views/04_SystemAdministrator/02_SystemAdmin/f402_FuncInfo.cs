@@ -96,7 +96,12 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._02_SystemAdmin
             LockControl();
 
             var lsControls = Assembly.GetExecutingAssembly().GetTypes()
-                .Where(a => a.BaseType == typeof(XtraForm) || a.BaseType == typeof(XtraUserControl) || a.BaseType == typeof(RibbonForm)).Select(r => r.Name).ToList();
+                .Where(a => !a.IsAbstract && !a.ContainsGenericParameters
+                    && a.GetConstructor(Type.EmptyTypes) != null
+                    && (typeof(XtraForm).IsAssignableFrom(a)
+                        || typeof(XtraUserControl).IsAssignableFrom(a)
+                        || typeof(RibbonForm).IsAssignableFrom(a)))
+                .Select(r => r.Name).OrderBy(name => name).ToList();
             cbbControl.Properties.Items.AddRange(lsControls);
 
             //var lsFuncEvents = Enum.GetValues(typeof(FuncEvent)).Cast<FuncEvent>().Select(r => r.ToString()).ToList();

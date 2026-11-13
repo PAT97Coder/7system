@@ -177,5 +177,7 @@ namespace DataAccessLayer
         public virtual DbSet<dt316_Plan> dt316_Plan { get; set; }
         public virtual DbSet<dt316_PlanUser> dt316_PlanUser { get; set; }
         public virtual DbSet<dt316_Report> dt316_Report { get; set; }
+        public virtual DbSet<dt312_ExternalParticipant> dt312_ExternalParticipant { get; set; }
+        public virtual DbSet<dt312_PracticeAttempt> dt312_PracticeAttempt { get; set; }
     }
 }

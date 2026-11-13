@@ -449,6 +449,19 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.layoutControl1);
+            if (components == null) components = new System.ComponentModel.Container();
+            practiceBarManager = new DevExpress.XtraBars.BarManager(components) { Form = this };
+            practiceBar = new DevExpress.XtraBars.Bar(practiceBarManager, "工具列") { DockStyle = DevExpress.XtraBars.BarDockStyle.Top };
+            practiceBarManager.MainMenu = practiceBar; Exam312Ui.StyleBar(practiceBar);
+            btnPractice = new DevExpress.XtraBars.BarButtonItem(practiceBarManager, "模擬測驗") { Enabled = false };
+            btnPractice.ImageOptions.SvgImage = Helpers.TPSvgimages.Start; Exam312Ui.StyleButton(btnPractice);
+            btnPractice.ItemClick += Practice_Click; practiceBar.AddItem(btnPractice);
+            var practiceTop = new DevExpress.XtraBars.BarDockControl { Manager = practiceBarManager, Dock = System.Windows.Forms.DockStyle.Top };
+            var practiceBottom = new DevExpress.XtraBars.BarDockControl { Manager = practiceBarManager, Dock = System.Windows.Forms.DockStyle.Bottom };
+            var practiceLeft = new DevExpress.XtraBars.BarDockControl { Manager = practiceBarManager, Dock = System.Windows.Forms.DockStyle.Left };
+            var practiceRight = new DevExpress.XtraBars.BarDockControl { Manager = practiceBarManager, Dock = System.Windows.Forms.DockStyle.Right };
+            Controls.AddRange(new System.Windows.Forms.Control[] { practiceTop, practiceBottom, practiceLeft, practiceRight });
+            this.layoutControl1.BringToFront();
             this.Name = "uc312_ExamMain";
             this.Size = new System.Drawing.Size(883, 598);
             this.Load += new System.EventHandler(this.uc312_ExamMain_Load);
@@ -475,6 +488,10 @@
         }
 
         #endregion
+
+        private DevExpress.XtraBars.BarManager practiceBarManager;
+        private DevExpress.XtraBars.Bar practiceBar;
+        private DevExpress.XtraBars.BarButtonItem btnPractice;
 
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
         private DevExpress.XtraGrid.GridControl gcData;
