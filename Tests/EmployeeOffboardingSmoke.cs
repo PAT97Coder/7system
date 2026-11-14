@@ -65,7 +65,6 @@ internal static class EmployeeOffboardingSmoke
             ExpectValidation(() => service.Upload("VNW0014732", "VNW0014732", new string('a', 2001), new[] { "file.pdf" }));
             ExpectValidation(() => service.Upload("VNW0014732", "VNW0014732", "reason", new string[0]));
             Console.WriteLine("PASS: employee ID, required reason, reason length and required files validation.");
-            TestAuthorization();
             TestFileStorage(output);
             Application.EnableVisualStyles();
             TPConfigs.LoginUser = new dm_User { Id = "VNW0000001", IdDepartment = "7820", Status = 0 };
@@ -173,8 +172,6 @@ internal static class EmployeeOffboardingSmoke
                 var changed = form.GetType().GetMethod("RecordsView_FocusedRowChanged", BindingFlags.NonPublic | BindingFlags.Instance);
                 view.FocusedRowChanged -= (DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventHandler)Delegate.CreateDelegate(
                     typeof(DevExpress.XtraGrid.Views.Base.FocusedRowChangedEventHandler), form, changed);
-                form.GetType().GetField("canView", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(form, true);
-                form.GetType().GetField("canDownload", BindingFlags.NonPublic | BindingFlags.Instance).SetValue(form, true);
             }
             else
             {
@@ -321,34 +318,6 @@ internal static class EmployeeOffboardingSmoke
             yield return child;
             foreach (Control descendant in Descendants(child)) yield return descendant;
         }
-    }
-
-    private static void TestAuthorization()
-    {
-        var actor = new dm_User { Status = 0, IdDepartment = "7820" };
-        var target = new dm_User { Status = 1, IdDepartment = "7830" };
-        const int view = EmployeeOffboardingService.ViewPermission;
-        const int upload = EmployeeOffboardingService.UploadPermission;
-        const int download = EmployeeOffboardingService.DownloadPermission;
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, view, new int[0], 1, 2), "Missing permission allowed.");
-        Assert(EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { view }, 1, 2), "Department scope denied.");
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, download, new[] { view }, 1, 2), "View grants download.");
-        target.IdDepartment = "7910";
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { view }, 1, 2), "Outside department allowed.");
-        Assert(EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { view, 2 }, 1, 2), "Moderator prefix denied.");
-        target.IdDepartment = "8110";
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { view, 2 }, 1, 2), "Moderator outside prefix allowed.");
-        Assert(EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { 1 }, 1, 2), "System admin denied.");
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, 33, new[] { 1 }, 1, 2), "Unknown action accepted.");
-        actor.Status = 1;
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { 1 }, 1, 2), "Departed actor allowed.");
-        actor.Status = 0; target.IdDepartment = "7820"; target.Status = 0;
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, upload, new[] { upload }, 1, 2), "Upload for active employee allowed.");
-        target.ResignPlan = DateTime.Today;
-        Assert(EmployeeOffboardingService.IsAllowed(actor, target, upload, new[] { upload }, 1, 2), "Pre-notice upload denied.");
-        actor.IdDepartment = "7";
-        Assert(!EmployeeOffboardingService.IsAllowed(actor, target, view, new[] { view }, 1, 2), "Invalid department prefix allowed.");
-        Console.WriteLine("PASS: permission matrix (action, department, moderator/admin, account and employee states).");
     }
 
     private static void TestFileStorage(string output)

@@ -78,7 +78,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
         DXMenuItem itemOffboardingHistory;
         DXMenuItem itemOffboardingUpload;
-        readonly EmployeeOffboardingService offboardingService = new EmployeeOffboardingService();
 
         DXMenuItem itemEditRole;
         DXMenuItem itemEditSign;
@@ -396,7 +395,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 summaryDepartments = GetDepartmentsForExport(allDepts).Where(r => !string.IsNullOrWhiteSpace(r.Id)).OrderBy(r => r.Id).ToList();
             }
 
-            var sheet2Departments = summaryDepartments
+            var activeSummaryDepartments = summaryDepartments
                 .Where(r => r.IsActive != false)
                 .ToList();
             var activeDepartmentIds = new HashSet<string>(
@@ -404,10 +403,10 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                     .Where(r => r.IsActive != false && !string.IsNullOrWhiteSpace(r.Id))
                     .Select(r => r.Id),
                 StringComparer.OrdinalIgnoreCase);
-            var sheet2DepartmentPrefixes = sheet2Departments.Select(r => r.Id).ToList();
-            var sheet2Users = scopedUsers
+            var activeSummaryDepartmentPrefixes = activeSummaryDepartments.Select(r => r.Id).ToList();
+            var activeDepartmentUsers = scopedUsers
                 .Where(r => activeDepartmentIds.Contains(r.IdDepartment ?? "")
-                    && sheet2DepartmentPrefixes.Any(prefix => (r.IdDepartment ?? "").StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                    && activeSummaryDepartmentPrefixes.Any(prefix => (r.IdDepartment ?? "").StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
 
             string divisionPrefix = GetDivisionPrefix();
@@ -417,8 +416,8 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             using (var package = new ExcelPackage())
             {
                 BuildSheet1(package.Workbook.Worksheets.Add("個人資料明細表"), divisionName, scopedUsers, allJobs, allDepts);
-                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, sheet2Departments, sheet2Users);
-                BuildSheet3(package.Workbook.Worksheets.Add("每月人數統計表"), divisionName, summaryDepartments, scopedUsers, startMonth, endMonth);
+                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, activeSummaryDepartments, activeDepartmentUsers);
+                BuildSheet3(package.Workbook.Worksheets.Add("每月人數統計表"), divisionName, activeSummaryDepartments, activeDepartmentUsers, startMonth, endMonth);
 
                 package.SaveAs(new FileInfo(filePath));
             }
@@ -842,20 +841,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             string id = gvData.GetFocusedRowCellValue(gColIdUser)?.ToString();
             var user = users.FirstOrDefault(x => x.Id == id);
             if (user == null) return;
-            try
-            {
-                itemOffboardingHistory.Enabled = offboardingService.CanAccess(TPConfigs.LoginUser.Id, id, EmployeeOffboardingService.ViewPermission);
-                itemOffboardingUpload.Enabled = (user.Status == 1 || user.ResignPlan.HasValue)
-                    && offboardingService.CanAccess(TPConfigs.LoginUser.Id, id, EmployeeOffboardingService.UploadPermission);
-                if (itemOffboardingHistory.Enabled) e.Menu.Items.Add(itemOffboardingHistory);
-                if (itemOffboardingUpload.Enabled) e.Menu.Items.Add(itemOffboardingUpload);
-            }
-            catch (Exception ex)
-            {
-                itemOffboardingHistory.Enabled = false;
-                itemOffboardingUpload.Enabled = false;
-                new Logger.TPLogger(typeof(uc401_UserManage).FullName).Error("離職文件權限", ex.ToString());
-            }
+            e.Menu.Items.Add(itemOffboardingHistory);
+            itemOffboardingUpload.Enabled = user.Status == 1 || user.ResignPlan.HasValue;
+            if (itemOffboardingUpload.Enabled) e.Menu.Items.Add(itemOffboardingUpload);
         }
 
         private class DepartmentHeadcountManageForm : XtraForm

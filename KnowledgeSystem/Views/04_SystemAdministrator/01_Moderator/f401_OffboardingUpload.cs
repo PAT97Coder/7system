@@ -1,4 +1,4 @@
-using BusinessLayer;
+﻿using BusinessLayer;
 using DevExpress.Utils.Menu;
 using DevExpress.XtraBars;
 using DevExpress.XtraEditors;
@@ -38,9 +38,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         {
             await Run(async () =>
             {
-                canUpload = await Task.Run(() => service.CanAccess(ActorId, userId, EmployeeOffboardingService.UploadPermission));
-                if (!canUpload) throw new OffboardingException("您沒有上傳權限，或員工尚未辦理離職／預報離職。");
                 var user = await Task.Run(() => dm_UserBUS.Instance.GetItemById(userId));
+                canUpload = user != null && (user.Status == 1 || user.ResignPlan.HasValue);
+                if (!canUpload) throw new OffboardingException("僅限已離職或預報離職的員工上傳文件。");
                 employeeEdit.Text = OffboardingUi.EmployeeCaption(user);
                 reasonEdit.Focus();
             });

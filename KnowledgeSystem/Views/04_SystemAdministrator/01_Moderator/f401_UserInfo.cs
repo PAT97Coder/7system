@@ -921,9 +921,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                     // Hồ sơ nghỉ việc đã lưu; tài liệu có thể bổ sung từ danh sách nhân viên.
                     try
                     {
-                        var documents = new EmployeeOffboardingService();
-                        if (documents.CanAccess(TPConfigs.LoginUser.Id, userInfo.Id, EmployeeOffboardingService.UploadPermission))
-                            using (var dialog = new f401_OffboardingUpload(userInfo.Id)) dialog.ShowDialog(this);
+                        using (var dialog = new f401_OffboardingUpload(userInfo.Id)) dialog.ShowDialog(this);
                     }
                     catch (Exception ex)
                     {
