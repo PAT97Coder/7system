@@ -11,6 +11,8 @@ Script dùng project Advanced Installer hiện có tại `SetupDocumentSystem/Se
 
 Script chuyển cả đường dẫn output của `BusinessLayer`, `DataAccessLayer` và `Logger` sang staging. Nếu project installer còn tham chiếu thư mục `bin/Debug`, script dừng để tránh đóng gói DLL Debug vào bộ cài Release. Kết nối DB hiện lấy từ `DataAccessLayer.SingleConnection`: bản Release dùng `.103`, Debug dùng `.153`; giá trị trong `App.config` không quyết định kết nối của context này.
 
+Snapshot ContentOutput cũ có thể chứa file trong `AppResources` đã bị xóa khỏi ứng dụng, ví dụ `f209_NotifyCalibCert.html`. Script loại tham chiếu cũ khi file không còn trong source và không còn được khai báo Content trong project ứng dụng. Nếu file vẫn được khai báo hoặc còn trong source nhưng thiếu ở staging, build dừng và báo rõ tài nguyên bị thiếu.
+
 Mặc định file nằm tại `E:\01. DEV\01.7System\04. Setup files\SetupDocumentSystem.exe`. Có thể đổi thư mục bằng `-OutputDirectory 'D:\Setup'`.
 
 Version ứng dụng có dạng `yy.MM.dd.index`, tính theo ngày Việt Nam. Ngày mới bắt đầu index 1, build tiếp trong ngày tăng index. Có thể chỉ định `-BuildIndex 5` nếu index này lớn hơn lần trước. Trạng thái lưu trong `Installer/version.json` sau khi build thành công; version cũng được đồng bộ vào `AssemblyInfo.cs` và project installer.
