@@ -148,6 +148,43 @@ try {
             $row.ParentNode.RemoveChild($row) | Out-Null
         }
     }
+    # Snapshot ContentOutput trong project installer có thể còn tài nguyên đã xóa.
+    # Chỉ loại file không còn cả trong source lẫn khai báo Content của ứng dụng.
+    $applicationDocument = [xml][IO.File]::ReadAllText($applicationProject)
+    $contentPaths = @($applicationDocument.SelectNodes('//*[local-name()="Content"]') |
+        ForEach-Object { $_.GetAttribute('Include') })
+    foreach ($output in @($aipDocument.SelectNodes('//ROW[@ProjectName="KnowledgeSystem" and @OutputGroup="ContentOutput"]'))) {
+        $fileId = $output.GetAttribute('OutputFile')
+        $directoryProperty = 'AI_PROPPATH_DIR_PERBUILD_' + $fileId
+        $filenameProperty = 'AI_PROPPATH_FILENAME_PERBUILD_' + $fileId
+        $directoryRow = $aipDocument.SelectSingleNode("//ROW[@Property='$directoryProperty']")
+        $filenameRow = $aipDocument.SelectSingleNode("//ROW[@Property='$filenameProperty']")
+        if ($null -eq $directoryRow -or $null -eq $filenameRow) { continue }
+        $sourcePath = [IO.Path]::GetFullPath((Join-Path (Split-Path -Parent $installerProject) (
+            Join-Path $directoryRow.GetAttribute('Value') $filenameRow.GetAttribute('Value'))))
+        $stagingPrefix = $stagingFullPath.TrimEnd('\') + '\'
+        if (-not $sourcePath.StartsWith($stagingPrefix, [StringComparison]::OrdinalIgnoreCase)) { continue }
+        if (Test-Path -LiteralPath $sourcePath -PathType Leaf) { continue }
+        $relativePath = $sourcePath.Substring($stagingPrefix.Length)
+        if (-not $relativePath.StartsWith('AppResources\', [StringComparison]::OrdinalIgnoreCase)) {
+            throw "Thiếu file đóng gói: $sourcePath"
+        }
+        if ($contentPaths -contains $relativePath -or (Test-Path -LiteralPath (Join-Path $applicationRoot $relativePath))) {
+            throw "Tài nguyên ứng dụng chưa được copy vào staging: $relativePath"
+        }
+        $keyComponent = $aipDocument.SelectSingleNode("//ROW[@Component and @KeyPath='$fileId']")
+        if ($null -ne $keyComponent) {
+            throw "Tài nguyên đã xóa còn là KeyPath của component installer: $relativePath"
+        }
+        Write-Host "Loại tham chiếu tài nguyên đã xóa khỏi installer: $relativePath"
+        foreach ($row in @($aipDocument.SelectNodes('//ROW'))) {
+            if ($row.GetAttribute('File') -eq $fileId -or $row.GetAttribute('OutputFile') -eq $fileId -or
+                $row.GetAttribute('Name') -eq ('AI_APPPATH_PERBUILD_' + $fileId) -or
+                $row.GetAttribute('Property') -eq $directoryProperty -or $row.GetAttribute('Property') -eq $filenameProperty) {
+                $row.ParentNode.RemoveChild($row) | Out-Null
+            }
+        }
+    }
     $aipDocument.Save($temporaryProject)
     Invoke-NativeTool $advancedInstaller @('/edit', $temporaryProject, '/SetVersion', $msiVersion)
     Invoke-NativeTool $advancedInstaller @('/edit', $temporaryProject, '/SetProperty', "FULLPRODUCTVERSION=$version")
