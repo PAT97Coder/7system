@@ -41,37 +41,4 @@ BEGIN
     CREATE INDEX IX_EmployeeOffboardingFile_OffboardingId ON dbo.EmployeeOffboardingFile(OffboardingId);
 END;
 
-IF EXISTS (SELECT 1 FROM dbo.dm_Function f
-    JOIN (VALUES (40101,'EmployeeOffboardingView'),(40102,'EmployeeOffboardingUpload'),
-                 (40103,'EmployeeOffboardingDownload')) p(Id,ControlName) ON f.Id = p.Id
-    WHERE ISNULL(f.ControlName,'') <> p.ControlName)
-    THROW 50001, N'離職文件權限代碼已被使用，請先確認設定。', 1;
-
-DECLARE @ParentId int = (SELECT TOP (1) Id FROM dbo.dm_Function WHERE ControlName = 'uc401_UserManage' ORDER BY Id);
-IF @ParentId IS NULL
-    SET @ParentId = ISNULL((SELECT TOP (1) TRY_CONVERT(int,ValueT) FROM dbo.sys_StaticValue WHERE KeyT = 'RoleSysAdmin'),0);
-
-DECLARE @NewPermissions TABLE (Id int NOT NULL PRIMARY KEY);
-
-INSERT dbo.dm_Function(Id, IdParent, DisplayName, ControlName, Prioritize, Status)
-OUTPUT inserted.Id INTO @NewPermissions(Id)
-SELECT p.Id, @ParentId, p.DisplayName, p.ControlName, p.Id, 1
-FROM (VALUES
-    (40101,N'檢視離職文件','EmployeeOffboardingView'),
-    (40102,N'上傳離職文件','EmployeeOffboardingUpload'),
-    (40103,N'下載離職文件','EmployeeOffboardingDownload')
-) p(Id,DisplayName,ControlName)
-WHERE NOT EXISTS (SELECT 1 FROM dbo.dm_Function f WHERE f.Id = p.Id);
-
--- Cấp quyền ban đầu cho vai trò đang có quyền quản lý nhân viên.
--- Chỉ seed quyền vừa tạo; chạy lại không cấp lại những quyền đã bị quản trị thu hồi.
-INSERT dbo.dm_FunctionRole(IdFunction,IdRole)
-SELECT DISTINCT p.Id,r.IdRole
-FROM dbo.dm_FunctionRole r
-CROSS JOIN @NewPermissions p
-WHERE (r.IdFunction = 33 OR r.IdFunction = @ParentId
-    OR r.IdFunction IN (SELECT TRY_CONVERT(int,ValueT) FROM dbo.sys_StaticValue
-                        WHERE KeyT IN ('RoleSysAdmin','RoleMod','RoleSafetyCertMain','RoleWorkManagementMain')))
-    AND NOT EXISTS (SELECT 1 FROM dbo.dm_FunctionRole e WHERE e.IdFunction = p.Id AND e.IdRole = r.IdRole);
-
 COMMIT TRANSACTION;

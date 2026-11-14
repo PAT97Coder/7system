@@ -22,9 +22,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         private readonly EmployeeOffboardingService service = new EmployeeOffboardingService();
         private readonly string userId;
         private bool busy;
-        private bool canView;
         private bool canUpload;
-        private bool canDownload;
         private string actorId => TPConfigs.LoginUser.Id;
 
         public f401_OffboardingDocuments()
@@ -42,23 +40,11 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         {
             await Run(async () =>
             {
-                var access = await Task.Run(() => new[]
-                {
-                    service.CanAccess(actorId, userId, EmployeeOffboardingService.ViewPermission),
-                    service.CanAccess(actorId, userId, EmployeeOffboardingService.UploadPermission),
-                    service.CanAccess(actorId, userId, EmployeeOffboardingService.DownloadPermission)
-                });
-                canView = access[0]; canUpload = access[1]; canDownload = access[2];
-                if (!canView)
-                {
-                    XtraMessageBox.Show("您沒有操作此員工離職文件的權限。", "離職文件");
-                    return;
-                }
                 var user = await Task.Run(() => dm_UserBUS.Instance.GetItemById(userId));
+                canUpload = user != null && (user.Status == 1 || user.ResignPlan.HasValue);
                 employeeEdit.Text = OffboardingUi.EmployeeCaption(user);
                 await LoadRecords();
             });
-            if (!canView) Close();
         }
 
         private async Task Run(Func<Task> action)
@@ -84,7 +70,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         private void UpdateCommands()
         {
             btnNew.Enabled = !busy && canUpload;
-            btnRefresh.Enabled = !busy && canView;
+            btnRefresh.Enabled = !busy;
             btnClose.Enabled = !busy;
             recordsGrid.Enabled = !busy;
             filesGrid.Enabled = !busy;
@@ -140,9 +126,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             if (busy || !e.HitInfo.InDataRow || e.Menu == null) return;
             filesView.FocusedRowHandle = e.HitInfo.RowHandle;
             var preview = new DXMenuItem("預覽", async (s, args) => await Preview(), TPSvgimages.View, DXMenuItemPriority.Normal)
-                { BeginGroup = true, Enabled = canView && CanPreview(filesView.GetFocusedRow() as EmployeeOffboardingFile) };
+                { BeginGroup = true, Enabled = CanPreview(filesView.GetFocusedRow() as EmployeeOffboardingFile) };
             var download = new DXMenuItem("下載", async (s, args) => await Download(), TPSvgimages.Copy, DXMenuItemPriority.Normal)
-                { Enabled = canDownload };
+                { Enabled = true };
             foreach (var item in new[] { preview, download })
             {
                 item.Appearance.Font = new Font("Microsoft JhengHei UI", 12F);
@@ -165,7 +151,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         private async Task Preview()
         {
             var file = filesView.GetFocusedRow() as EmployeeOffboardingFile;
-            if (file == null || !canView || busy) return;
+            if (file == null || busy) return;
             if (!CanPreview(file))
             {
                 XtraMessageBox.Show("此格式不支援預覽，請下載後開啟。", "離職文件");
@@ -178,7 +164,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 string path = Path.Combine(folder, Path.GetFileName(file.OriginalName));
                 try
                 {
-                    await Task.Run(() => service.CopyFile(actorId, userId, file.Id, path, false));
+                    await Task.Run(() => service.CopyFile(actorId, userId, file.Id, path));
                     using (var viewer = new f00_VIewFile(path, false)) viewer.ShowDialog(this);
                 }
                 finally
@@ -193,13 +179,13 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         private async Task Download()
         {
             var file = filesView.GetFocusedRow() as EmployeeOffboardingFile;
-            if (file == null || !canDownload || busy) return;
+            if (file == null || busy) return;
             saveDialog.FileName = Path.GetFileName(file.OriginalName);
             {
                 if (saveDialog.ShowDialog(this) != DialogResult.OK) return;
                 await Run(async () =>
                 {
-                    await Task.Run(() => service.CopyFile(actorId, userId, file.Id, saveDialog.FileName, true));
+                    await Task.Run(() => service.CopyFile(actorId, userId, file.Id, saveDialog.FileName));
                     XtraMessageBox.Show("附件下載完成。", "離職文件");
                 });
             }

@@ -48,24 +48,15 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             btnAdd.ImageOptions.SvgImage = TPSvgimages.Add;
             btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
-            AddToolbarButton("待交接設備", TPSvgimages.View, (s, e) =>
-            {
-                var column = gvData.Columns["ManagerStatus"];
-                column.FilterInfo = string.IsNullOrEmpty(column.FilterInfo.FilterString)
-                    ? new DevExpress.XtraGrid.Columns.ColumnFilterInfo("Contains([ManagerStatus], '待')")
-                    : new DevExpress.XtraGrid.Columns.ColumnFilterInfo();
-            });
             gvData.Columns.AddVisible("ManagerStatus", "管理狀態");
         }
 
-        private DevExpress.XtraBars.BarButtonItem AddToolbarButton(string caption, SvgImage icon, EventHandler action)
+        private void btnPendingHandover_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            var button = new DevExpress.XtraBars.BarButtonItem(barManagerTP, caption);
-            button.ImageOptions.SvgImage = icon;
-            button.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
-            button.ItemClick += (s, e) => action(s, e);
-            bar2.AddItem(button);
-            return button;
+            var column = gvData.Columns["ManagerStatus"];
+            column.FilterInfo = string.IsNullOrEmpty(column.FilterInfo.FilterString)
+                ? new DevExpress.XtraGrid.Columns.ColumnFilterInfo("Contains([ManagerStatus], '待')")
+                : new DevExpress.XtraGrid.Columns.ColumnFilterInfo();
         }
 
         private void ShowHistory(object sender, EventArgs e)
