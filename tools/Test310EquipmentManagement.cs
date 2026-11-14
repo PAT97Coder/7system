@@ -84,7 +84,7 @@ class EquipmentSmoke
             control.Load -= (EventHandler)Delegate.CreateDelegate(typeof(EventHandler), control, "uc310_EquipmentInfo_Load");
             form.Controls.Add(control);
             Call(control, "BindEquipmentData", new List<vw310_EquipmentInfo> {
-                new vw310_EquipmentInfo { Id = 1, Code = "EQ-1", DeptId = "7810", ManagerId = "ACTIVE" },
+                new vw310_EquipmentInfo { Id = 0, Code = "EQ-1", DeptId = "7810", ManagerId = "ACTIVE" },
                 new vw310_EquipmentInfo { Id = 2, Code = "EQ-2", DeptId = "7810", ManagerId = "LEAVER" },
                 new vw310_EquipmentInfo { Id = 3, Code = "EQ-3", DeptId = "7820", ManagerId = "MISSING" },
                 new vw310_EquipmentInfo { Id = 4, Code = "EQ-4", DeptId = "7820", ManagerId = "PLANNED" }
@@ -99,6 +99,8 @@ class EquipmentSmoke
                 Check((string)view.GetRowCellValue(1, "ManagerStatus") == "待交接：已離職" && (string)view.GetRowCellValue(2, "ManagerStatus") == "待指定管理人", "departed and missing managers flagged");
                 var viewerMenu = new DXPopupMenu();
                 Call(control, "PopulateEquipmentMenu", viewerMenu, 0);
+                Check(((List<vw310_EquipmentInfo>)Call(control, "GetSelectedEquipmentInfos")).Single().Id == 0,
+                    "equipment with ID zero remains selected for label printing");
                 Check(!viewerMenu.Items.Contains((DXMenuItem)Field(control, "itemBatchManager")), "viewer cannot access transfer action");
                 SetField(control, "canManage", true);
                 SetField(control, "editableDeptIds", new List<string> { "7810" });

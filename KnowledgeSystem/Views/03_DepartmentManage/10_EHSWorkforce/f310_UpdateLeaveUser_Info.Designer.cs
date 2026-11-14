@@ -1,4 +1,4 @@
-﻿namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
+namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 {
     partial class f310_UpdateLeaveUser_Info
     {
@@ -81,6 +81,27 @@
             this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
             this.layoutControlGroup3 = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem4 = new DevExpress.XtraLayout.LayoutControlItem();
+            this.gcEquipment = new DevExpress.XtraGrid.GridControl();
+            this.gvEquipment = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.equipmentUserEditor = new DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit();
+            this.gvEquipmentUsers = new DevExpress.XtraGrid.Views.Grid.GridView();
+            this.equipmentTab = new DevExpress.XtraLayout.LayoutControlGroup();
+            this.equipmentLayoutItem = new DevExpress.XtraLayout.LayoutControlItem();
+            this.equipmentCode = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentNameVN = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentNameTW = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentDept = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentPreviousManager = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentSuccessor = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentUserDept = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentUserId = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.equipmentUserName = new DevExpress.XtraGrid.Columns.GridColumn();
+            ((System.ComponentModel.ISupportInitialize)(this.gcEquipment)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gvEquipment)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentUserEditor)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gvEquipmentUsers)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentTab)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentLayoutItem)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
@@ -124,7 +145,7 @@
             // 
             // bar2
             // 
-            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
             this.bar2.BarAppearance.Disabled.Options.UseFont = true;
             this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
@@ -210,6 +231,7 @@
             // layoutControl1
             // 
             this.layoutControl1.AllowCustomization = false;
+            this.layoutControl1.Controls.Add(this.gcEquipment);
             this.layoutControl1.Controls.Add(this.gcArea5SResponsible);
             this.layoutControl1.Controls.Add(this.gcEHSFunction);
             this.layoutControl1.Controls.Add(this.gcUnitEHSOrg);
@@ -651,7 +673,8 @@
             this.tabbedControlGroup1.TabPages.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
             this.layoutControlGroup1,
             this.layoutControlGroup2,
-            this.layoutControlGroup3});
+            this.layoutControlGroup3,
+            this.equipmentTab});
             // 
             // layoutControlGroup1
             // 
@@ -707,6 +730,192 @@
             this.layoutControlItem4.TextSize = new System.Drawing.Size(0, 0);
             this.layoutControlItem4.TextVisible = false;
             // 
+            // gcEquipment
+            //
+            this.gcEquipment.EmbeddedNavigator.Buttons.Append.Visible = false;
+            this.gcEquipment.EmbeddedNavigator.Buttons.CancelEdit.Visible = false;
+            this.gcEquipment.EmbeddedNavigator.Buttons.Edit.Visible = false;
+            this.gcEquipment.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
+            this.gcEquipment.EmbeddedNavigator.Buttons.Remove.Visible = false;
+            this.gcEquipment.Location = new System.Drawing.Point(24, 56);
+            this.gcEquipment.MainView = this.gvEquipment;
+            this.gcEquipment.MenuManager = this.barManagerTP;
+            this.gcEquipment.Name = "gcEquipment";
+            this.gcEquipment.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
+            this.equipmentUserEditor});
+            this.gcEquipment.Size = new System.Drawing.Size(680, 537);
+            this.gcEquipment.TabIndex = 19;
+            this.gcEquipment.UseEmbeddedNavigator = true;
+            this.gcEquipment.ViewCollection.AddRange(new DevExpress.XtraGrid.Views.Base.BaseView[] {
+            this.gvEquipment});
+            //
+            // gvEquipment
+            //
+            this.gvEquipment.Appearance.FooterPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gvEquipment.Appearance.FooterPanel.Options.UseFont = true;
+            this.gvEquipment.Appearance.FooterPanel.Options.UseTextOptions = true;
+            this.gvEquipment.Appearance.FooterPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gvEquipment.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.gvEquipment.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            this.gvEquipment.Appearance.HeaderPanel.Options.UseFont = true;
+            this.gvEquipment.Appearance.HeaderPanel.Options.UseForeColor = true;
+            this.gvEquipment.Appearance.HeaderPanel.Options.UseTextOptions = true;
+            this.gvEquipment.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
+            this.gvEquipment.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gvEquipment.Appearance.Row.ForeColor = System.Drawing.Color.Black;
+            this.gvEquipment.Appearance.Row.Options.UseFont = true;
+            this.gvEquipment.Appearance.Row.Options.UseForeColor = true;
+            this.gvEquipment.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
+            this.equipmentCode,
+            this.equipmentNameVN,
+            this.equipmentNameTW,
+            this.equipmentDept,
+            this.equipmentPreviousManager,
+            this.equipmentSuccessor});
+            this.gvEquipment.GridControl = this.gcEquipment;
+            this.gvEquipment.Name = "gvEquipment";
+            this.gvEquipment.OptionsDetail.ShowDetailTabs = false;
+            this.gvEquipment.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
+            this.gvEquipment.OptionsView.ColumnAutoWidth = false;
+            this.gvEquipment.OptionsView.EnableAppearanceOddRow = true;
+            this.gvEquipment.OptionsView.ShowAutoFilterRow = true;
+            this.gvEquipment.OptionsView.ShowGroupPanel = false;
+            //
+            // equipmentCode
+            //
+            this.equipmentCode.Caption = "設備編號";
+            this.equipmentCode.FieldName = "Code";
+            this.equipmentCode.Name = "equipmentCode";
+            this.equipmentCode.Visible = true;
+            this.equipmentCode.VisibleIndex = 0;
+            this.equipmentCode.Width = 130;
+            this.equipmentCode.OptionsColumn.AllowEdit = false;
+            //
+            // equipmentNameVN
+            //
+            this.equipmentNameVN.Caption = "設備名稱（越文）";
+            this.equipmentNameVN.FieldName = "NameVN";
+            this.equipmentNameVN.Name = "equipmentNameVN";
+            this.equipmentNameVN.Visible = true;
+            this.equipmentNameVN.VisibleIndex = 1;
+            this.equipmentNameVN.Width = 210;
+            this.equipmentNameVN.OptionsColumn.AllowEdit = false;
+            //
+            // equipmentNameTW
+            //
+            this.equipmentNameTW.Caption = "設備名稱（中文）";
+            this.equipmentNameTW.FieldName = "NameTW";
+            this.equipmentNameTW.Name = "equipmentNameTW";
+            this.equipmentNameTW.Visible = true;
+            this.equipmentNameTW.VisibleIndex = 2;
+            this.equipmentNameTW.Width = 180;
+            this.equipmentNameTW.OptionsColumn.AllowEdit = false;
+            //
+            // equipmentDept
+            //
+            this.equipmentDept.Caption = "管理部門";
+            this.equipmentDept.FieldName = "DeptId";
+            this.equipmentDept.Name = "equipmentDept";
+            this.equipmentDept.Visible = true;
+            this.equipmentDept.VisibleIndex = 3;
+            this.equipmentDept.Width = 110;
+            this.equipmentDept.OptionsColumn.AllowEdit = false;
+            //
+            // equipmentPreviousManager
+            //
+            this.equipmentPreviousManager.Caption = "原管理人";
+            this.equipmentPreviousManager.FieldName = "PreviousManagerId";
+            this.equipmentPreviousManager.Name = "equipmentPreviousManager";
+            this.equipmentPreviousManager.Visible = true;
+            this.equipmentPreviousManager.VisibleIndex = 4;
+            this.equipmentPreviousManager.Width = 140;
+            this.equipmentPreviousManager.OptionsColumn.AllowEdit = false;
+            //
+            // equipmentSuccessor
+            //
+            this.equipmentSuccessor.Caption = "接任人";
+            this.equipmentSuccessor.FieldName = "UserId";
+            this.equipmentSuccessor.Name = "equipmentSuccessor";
+            this.equipmentSuccessor.Visible = true;
+            this.equipmentSuccessor.VisibleIndex = 5;
+            this.equipmentSuccessor.Width = 200;
+            this.equipmentSuccessor.ColumnEdit = this.equipmentUserEditor;
+            this.equipmentSuccessor.OptionsColumn.AllowEdit = true;
+            //
+            // equipmentUserEditor
+            //
+            this.equipmentUserEditor.AllowNullInput = DevExpress.Utils.DefaultBoolean.False;
+            this.equipmentUserEditor.AutoHeight = false;
+            this.equipmentUserEditor.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
+            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
+            this.equipmentUserEditor.Name = "equipmentUserEditor";
+            this.equipmentUserEditor.PopupView = this.gvEquipmentUsers;
+            this.equipmentUserEditor.DisplayMember = "DisplayName";
+            this.equipmentUserEditor.ValueMember = "Id";
+            this.equipmentUserEditor.NullText = "【請選擇接任人】";
+            //
+            // gvEquipmentUsers
+            //
+            this.gvEquipmentUsers.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gvEquipmentUsers.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
+            this.gvEquipmentUsers.Appearance.HeaderPanel.Options.UseFont = true;
+            this.gvEquipmentUsers.Appearance.HeaderPanel.Options.UseForeColor = true;
+            this.gvEquipmentUsers.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.gvEquipmentUsers.Appearance.Row.ForeColor = System.Drawing.Color.Black;
+            this.gvEquipmentUsers.Appearance.Row.Options.UseFont = true;
+            this.gvEquipmentUsers.Appearance.Row.Options.UseForeColor = true;
+            this.gvEquipmentUsers.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
+            this.equipmentUserDept,
+            this.equipmentUserId,
+            this.equipmentUserName});
+            this.gvEquipmentUsers.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
+            this.gvEquipmentUsers.Name = "gvEquipmentUsers";
+            this.gvEquipmentUsers.OptionsSelection.EnableAppearanceFocusedCell = false;
+            this.gvEquipmentUsers.OptionsView.EnableAppearanceOddRow = true;
+            this.gvEquipmentUsers.OptionsView.ShowGroupPanel = false;
+            //
+            // equipmentUserDept
+            //
+            this.equipmentUserDept.Caption = "部門";
+            this.equipmentUserDept.FieldName = "DeptId";
+            this.equipmentUserDept.Name = "equipmentUserDept";
+            this.equipmentUserDept.Visible = true;
+            this.equipmentUserDept.VisibleIndex = 0;
+            //
+            // equipmentUserId
+            //
+            this.equipmentUserId.Caption = "工號";
+            this.equipmentUserId.FieldName = "Id";
+            this.equipmentUserId.Name = "equipmentUserId";
+            this.equipmentUserId.Visible = true;
+            this.equipmentUserId.VisibleIndex = 1;
+            //
+            // equipmentUserName
+            //
+            this.equipmentUserName.Caption = "姓名";
+            this.equipmentUserName.FieldName = "DisplayName";
+            this.equipmentUserName.Name = "equipmentUserName";
+            this.equipmentUserName.Visible = true;
+            this.equipmentUserName.VisibleIndex = 2;
+            //
+            // equipmentTab
+            //
+            this.equipmentTab.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
+            this.equipmentLayoutItem});
+            this.equipmentTab.Location = new System.Drawing.Point(0, 0);
+            this.equipmentTab.Name = "equipmentTab";
+            this.equipmentTab.Size = new System.Drawing.Size(684, 541);
+            this.equipmentTab.Text = "安衛環設備";
+            //
+            // equipmentLayoutItem
+            //
+            this.equipmentLayoutItem.Control = this.gcEquipment;
+            this.equipmentLayoutItem.Location = new System.Drawing.Point(0, 0);
+            this.equipmentLayoutItem.Name = "equipmentLayoutItem";
+            this.equipmentLayoutItem.Size = new System.Drawing.Size(684, 541);
+            this.equipmentLayoutItem.TextSize = new System.Drawing.Size(0, 0);
+            this.equipmentLayoutItem.TextVisible = false;
+            //
             // f310_UpdateLeaveUser_Info
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
@@ -745,6 +954,12 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlGroup3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem4)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gcEquipment)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gvEquipment)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentUserEditor)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.gvEquipmentUsers)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentTab)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.equipmentLayoutItem)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -752,6 +967,21 @@
 
         #endregion
 
+        private DevExpress.XtraGrid.GridControl gcEquipment;
+        private DevExpress.XtraGrid.Views.Grid.GridView gvEquipment;
+        private DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit equipmentUserEditor;
+        private DevExpress.XtraGrid.Views.Grid.GridView gvEquipmentUsers;
+        private DevExpress.XtraLayout.LayoutControlGroup equipmentTab;
+        private DevExpress.XtraLayout.LayoutControlItem equipmentLayoutItem;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentCode;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentNameVN;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentNameTW;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentDept;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentPreviousManager;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentSuccessor;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentUserDept;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentUserId;
+        private DevExpress.XtraGrid.Columns.GridColumn equipmentUserName;
         private DevExpress.XtraBars.BarManager barManagerTP;
         private DevExpress.XtraBars.Bar bar2;
         private DevExpress.XtraBars.BarButtonItem btnEdit;

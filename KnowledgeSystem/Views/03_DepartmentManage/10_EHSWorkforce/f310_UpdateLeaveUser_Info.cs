@@ -1,4 +1,4 @@
-﻿using BusinessLayer;
+using BusinessLayer;
 using DataAccessLayer;
 using DevExpress.XtraEditors;
 using KnowledgeSystem.Helpers;
@@ -20,7 +20,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         public f310_UpdateLeaveUser_Info()
         {
             InitializeComponent();
-            InitializeEquipmentTab();
             InitializeIcon();
         }
 
@@ -32,8 +31,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         BindingSource sourceUnitEHSOrg = new BindingSource();
         BindingSource sourceEHSFunction = new BindingSource();
         BindingSource sourceArea5SResponsible = new BindingSource();
-        private DevExpress.XtraGrid.Views.Grid.GridView gvEquipment;
-        private DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit equipmentUserEditor;
         private List<EquipmentHandoverData> equipmentHandovers = new List<EquipmentHandoverData>();
 
         public class EquipmentHandoverData
@@ -45,41 +42,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             public string DeptId { get; set; }
             public string PreviousManagerId { get; set; }
             public string UserId { get; set; }
-        }
-
-        private void InitializeEquipmentTab()
-        {
-            var grid = new DevExpress.XtraGrid.GridControl();
-            grid.MenuManager = barManagerTP;
-            grid.UseEmbeddedNavigator = true;
-            grid.EmbeddedNavigator.Buttons.Append.Visible = false;
-            grid.EmbeddedNavigator.Buttons.CancelEdit.Visible = false;
-            grid.EmbeddedNavigator.Buttons.Edit.Visible = false;
-            grid.EmbeddedNavigator.Buttons.EndEdit.Visible = false;
-            grid.EmbeddedNavigator.Buttons.Remove.Visible = false;
-            gvEquipment = new DevExpress.XtraGrid.Views.Grid.GridView(grid);
-            grid.MainView = gvEquipment;
-            gvEquipment.Appearance.Assign(gvArea5SResponsible.Appearance);
-            gvEquipment.OptionsView.ShowGroupPanel = false;
-            gvEquipment.OptionsView.ColumnAutoWidth = false;
-            gvEquipment.OptionsSelection.EnableAppearanceHotTrackedRow = DevExpress.Utils.DefaultBoolean.True;
-            gvEquipment.OptionsView.ShowAutoFilterRow = true;
-            gvEquipment.OptionsView.EnableAppearanceOddRow = true;
-            equipmentUserEditor = (DevExpress.XtraEditors.Repository.RepositoryItemSearchLookUpEdit)itemCbbUser03.Clone();
-            grid.RepositoryItems.Add(equipmentUserEditor);
-            string[] fields = { "Code", "NameVN", "NameTW", "DeptId", "PreviousManagerId", "UserId" };
-            string[] captions = { "設備編號", "設備名稱（越文）", "設備名稱（中文）", "管理部門", "原管理人", "接任人" };
-            for (int i = 0; i < fields.Length; i++)
-            {
-                var column = gvEquipment.Columns.AddVisible(fields[i], captions[i]);
-                if (fields[i] == "UserId") column.ColumnEdit = equipmentUserEditor;
-            }
-            ConfigureGridEdit(gvEquipment);
-            layoutControl1.Controls.Add(grid);
-            var tab = tabbedControlGroup1.AddTabPage("設備交接");
-            var item = tab.AddItem();
-            item.Control = grid;
-            item.TextVisible = false;
         }
 
         public class UpdateLeaveUserData
@@ -177,9 +139,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
             itemCbbUser01.NullText = itemCbbUser02.NullText = itemCbbUser03.NullText = "【請選擇接任人】";
             equipmentUserEditor.DataSource = usrs;
-            equipmentUserEditor.DisplayMember = "DisplayName";
-            equipmentUserEditor.ValueMember = "Id";
-            equipmentUserEditor.NullText = "【請選擇接任人】";
             equipmentHandovers = dt310_EquipmentInfoBUS.Instance.GetListByManagerId(userId)
                 .Select(r => new EquipmentHandoverData
                 {
@@ -187,7 +146,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                     NameTW = r.DisplayNameTW, DeptId = r.DeptId, PreviousManagerId = r.ManagerId
                 }).ToList();
             gvEquipment.GridControl.DataSource = equipmentHandovers;
-            gvEquipment.BestFitColumns();
 
             var UnitEHSOrgData = dt310_UnitEHSOrgBUS.Instance.GetListByUserId(userId);
             var EHSFunctionData = dt310_EHSFunctionBUS.Instance.GetListByUserId(userId);

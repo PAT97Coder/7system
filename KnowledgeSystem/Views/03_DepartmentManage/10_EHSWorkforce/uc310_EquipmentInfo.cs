@@ -171,14 +171,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             List<int> selectedIds = gvData.GetSelectedRows()
                 .Where(r => r >= 0)
                 .Select(r => Convert.ToInt32(gvData.GetRowCellValue(r, gColId) ?? -1))
-                .Where(r => r > 0)
+                .Where(r => r >= 0)
                 .Distinct()
                 .ToList();
 
             if (selectedIds.Count == 0)
             {
                 int focusedId = Convert.ToInt32(gvData.GetRowCellValue(gvData.FocusedRowHandle, gColId) ?? -1);
-                if (focusedId > 0)
+                if (focusedId >= 0)
                 {
                     selectedIds.Add(focusedId);
                 }
