@@ -100,10 +100,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             btnAdd.ImageOptions.SvgImage = TPSvgimages.Add;
             btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
             btnSummaryTable.ImageOptions.SvgImage = TPSvgimages.Print;
-            btnSummaryTable.Caption = "導出PDF報告";
-            btnSummaryTable.Visibility = BarItemVisibility.Always;
-            btnSummaryTable.ItemClick -= btnSummaryTable_ItemClick;
-            btnSummaryTable.ItemClick += btnSummaryTable_ItemClick;
         }
 
         private void InitializeMenuItems()
@@ -213,6 +209,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             userGroups = dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id);
             int groupId = dm_GroupBUS.Instance.GetItemByName($"安衛環7")?.Id ?? -1;
             isEHSAdmin = userGroups.Any(r => r.IdGroup == groupId);
+            btnExportAll.Visibility = dt310_Area5SResponsibleBUS.Instance.CanExportAll(TPConfigs.LoginUser.Id)
+                ? BarItemVisibility.Always : BarItemVisibility.Never;
 
             if (!isEHSAdmin)
             {
@@ -309,25 +307,42 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void btnSummaryTable_ItemClick(object sender, ItemClickEventArgs e)
         {
+            ExportReport(false);
+        }
+
+        private void btnExportAll_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ExportReport(true);
+        }
+
+        private void ExportReport(bool exportAll)
+        {
+            if (exportAll && !dt310_Area5SResponsibleBUS.Instance.CanExportAll(TPConfigs.LoginUser?.Id))
+            {
+                btnExportAll.Visibility = BarItemVisibility.Never;
+                XtraMessageBox.Show("您沒有匯出全部部門資料的權限。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            LoadData();
             List<dt310_Area5S> reportAreas = (area5S ?? new List<dt310_Area5S>())
                 .Where(r => r.DeletedAt == null)
                 .OrderBy(r => r.DisplayName)
                 .ToList();
 
             reportAreas = reportAreas
-                .Where(r => BuildAreaReportRows(r.Id).Count > 0)
+                .Where(r => BuildAreaReportRows(r.Id, exportAll).Count > 0)
                 .ToList();
 
             if (reportAreas.Count == 0)
             {
-                XtraMessageBox.Show("目前登入部門沒有可導出的 5S 區域資料。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                XtraMessageBox.Show("沒有可匯出的 5S 區域資料。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "PDF Files|*.pdf";
-                saveFileDialog.FileName = BuildAreaReportFileName();
+                saveFileDialog.Filter = "PDF 檔案|*.pdf";
+                saveFileDialog.FileName = $"5S責任區域報告_{(exportAll ? "全部部門" : "本部門")}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
                 saveFileDialog.RestoreDirectory = true;
 
                 if (saveFileDialog.ShowDialog() != DialogResult.OK)
@@ -339,7 +354,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 {
                     using (var handle = SplashScreenManager.ShowOverlayForm(this))
                     {
-                        ExportAreaReportPdf(reportAreas, saveFileDialog.FileName);
+                        ExportAreaReportPdf(reportAreas, saveFileDialog.FileName, exportAll);
                     }
                     Process.Start(saveFileDialog.FileName);
                 }
@@ -350,30 +365,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private string BuildAreaReportFileName()
+        private void ExportAreaReportPdf(List<dt310_Area5S> areas, string outputPath, bool exportAll = false)
         {
-            return $"[310] 5S Area Responsibility Report {DateTime.Now:yyyyMMdd_HHmm}.pdf";
-        }
-
-        private static string SanitizeFileName(string fileName)
-        {
-            foreach (char invalidChar in Path.GetInvalidFileNameChars())
-            {
-                fileName = fileName.Replace(invalidChar, '_');
-            }
-
-            return fileName;
-        }
-
-        private void ExportAreaReportPdf(List<dt310_Area5S> areas, string outputPath)
-        {
+            if (exportAll)
+                areaResps = dt310_Area5SResponsibleBUS.Instance.GetListForFullExport(TPConfigs.LoginUser?.Id);
             Spire.License.LicenseProvider.SetLicenseKey(TPConfigs.KeySpirePPT);
 
             var exportAreas = areas
                 .Select(area => new
                 {
                     Area = area,
-                    ReportRows = BuildAreaReportRows(area.Id)
+                    ReportRows = BuildAreaReportRows(area.Id, exportAll)
                 })
                 .Where(item => item.ReportRows.Count > 0)
                 .ToList();
@@ -409,7 +411,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 document.DocumentInformation.Author = TPConfigs.LoginUser?.DisplayName ?? TPConfigs.LoginUser?.Id ?? "KnowledgeSystem";
 
                 PdfNewPage coverPage = (PdfNewPage)document.Pages.Add();
-                DrawCoverPage(coverPage, ResolveCoverDepartmentName(), ResolveCoverSignatures(), coverCompanyFont, coverTitleFont, coverSignLabelFont, coverSignHintFont, coverSignDateFont);
+                DrawCoverPage(coverPage, exportAll ? "全部部門" : ResolveCoverDepartmentName(),
+                    exportAll ? BuildDefaultCoverSignatures() : ResolveCoverSignatures(),
+                    coverCompanyFont, coverTitleFont, coverSignLabelFont, coverSignHintFont, coverSignDateFont);
 
                 for (int i = 0; i < exportAreas.Count; i++)
                 {
@@ -951,9 +955,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private List<object[]> BuildAreaReportRows(int areaId)
+        private List<object[]> BuildAreaReportRows(int areaId, bool exportAll = false)
         {
-            string exportDeptPrefix = GetExportDeptPrefix();
+            string exportDeptPrefix = exportAll ? "" : GetExportDeptPrefix();
 
             return areaResps
                 .Where(r => r.AreaId == areaId && r.DeletedAt == null)

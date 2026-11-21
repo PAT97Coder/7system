@@ -55,6 +55,7 @@
             this.btnAdd = new DevExpress.XtraBars.BarButtonItem();
             this.btnReload = new DevExpress.XtraBars.BarButtonItem();
             this.btnSummaryTable = new DevExpress.XtraBars.BarButtonItem();
+            this.btnExportAll = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
@@ -329,13 +330,14 @@
             this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.btnAdd,
             this.btnReload,
-            this.btnSummaryTable});
+            this.btnSummaryTable,
+            this.btnExportAll});
             this.barManagerTP.MainMenu = this.bar2;
-            this.barManagerTP.MaxItemId = 15;
+            this.barManagerTP.MaxItemId = 16;
             // 
             // bar2
             // 
-            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
             this.bar2.BarAppearance.Disabled.Options.UseFont = true;
             this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
@@ -357,7 +359,8 @@
             this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnAdd, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnSummaryTable, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnSummaryTable, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportAll, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.bar2.OptionsBar.MultiLine = true;
@@ -395,11 +398,22 @@
             // 
             // btnSummaryTable
             // 
-            this.btnSummaryTable.Caption = "導出彙總表";
+            this.btnSummaryTable.Caption = "匯出本部門PDF";
             this.btnSummaryTable.Id = 14;
             this.btnSummaryTable.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnSummaryTable.Name = "btnSummaryTable";
-            this.btnSummaryTable.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            this.btnSummaryTable.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
+            this.btnSummaryTable.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnSummaryTable_ItemClick);
+            //
+            // btnExportAll
+            //
+            this.btnExportAll.Caption = "匯出全部PDF";
+            this.btnExportAll.Id = 15;
+            this.btnExportAll.Name = "btnExportAll";
+            this.btnExportAll.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Print;
+            this.btnExportAll.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
+            this.btnExportAll.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            this.btnExportAll.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnExportAll_ItemClick);
             // 
             // barDockControlTop
             // 
@@ -617,6 +631,7 @@
         private DevExpress.XtraBars.BarButtonItem btnAdd;
         private DevExpress.XtraBars.BarButtonItem btnReload;
         private DevExpress.XtraBars.BarButtonItem btnSummaryTable;
+        private DevExpress.XtraBars.BarButtonItem btnExportAll;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;
         private DevExpress.XtraBars.BarDockControl barDockControlBottom;
         private DevExpress.XtraBars.BarDockControl barDockControlLeft;

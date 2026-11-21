@@ -24,6 +24,21 @@ namespace BusinessLayer
 
         private dt310_Area5SResponsibleBUS() { logger = new TPLogger(MethodBase.GetCurrentMethod().DeclaringType.FullName); }
 
+        public bool CanExportAll(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return false;
+            var group = dm_GroupBUS.Instance.GetItemByName("安衛環7");
+            return group != null && dm_GroupUserBUS.Instance
+                .GetListByUID(userId.Trim().ToUpperInvariant()).Any(r => r.IdGroup == group.Id);
+        }
+
+        public List<dt310_Area5SResponsible> GetListForFullExport(string userId)
+        {
+            if (!CanExportAll(userId))
+                throw new UnauthorizedAccessException("您沒有匯出全部部門資料的權限。");
+            return GetList();
+        }
+
         public List<dt310_Area5SResponsible> GetList()
         {
             try
