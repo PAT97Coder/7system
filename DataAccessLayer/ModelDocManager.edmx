@@ -263,6 +263,8 @@
           <Property Name="DisplayNameVN" Type="nvarchar" MaxLength="512" />
           <Property Name="DocType" Type="nvarchar" MaxLength="8" />
           <Property Name="IdRecordCode" Type="int" Nullable="false" />
+                  <Property Name="Articles" Type="nvarchar" MaxLength="512" />
+          <Property Name="DocumentCategory" Type="nvarchar" MaxLength="16" />
         </EntityType>
         <EntityType Name="dt201_Forms">
           <Key>
@@ -3166,6 +3168,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="DisplayNameVN" Type="String" MaxLength="512" FixedLength="false" Unicode="true" />
           <Property Name="DocType" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
           <Property Name="IdRecordCode" Type="Int32" Nullable="false" />
+                  <Property Name="Articles" Type="String" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="DocumentCategory" Type="String" MaxLength="16" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="dt201_RecordCode">
           <Key>
@@ -5305,6 +5309,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="dt209_Base">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_Base">
               <MappingFragment StoreEntitySet="dt209_Base">
+                <ScalarProperty Name="Articles" ColumnName="Articles" />
+                <ScalarProperty Name="DocumentCategory" ColumnName="DocumentCategory" />
                 <ScalarProperty Name="IdRecordCode" ColumnName="IdRecordCode" />
                 <ScalarProperty Name="DocType" ColumnName="DocType" />
                 <ScalarProperty Name="DisplayNameVN" ColumnName="DisplayNameVN" />

@@ -80,8 +80,13 @@ internal static class Iso209Tests
 
             Check(dt209_RecordCodeBUS.Instance.Add(new dt209_RecordCode { Id = 90, Code = "ENV-TEST", DisplayName = "Ho so moi truong\n測試環境文件", Articles = "TEST" }), "EF6 creates ISO14001 reference code");
             var parent = new dt209_Base { IdParent = -1, DocCode = "ENV-TEST", DisplayName = "環境管理文件", DisplayNameVN = "Ho so moi truong", IdDept = "7820", IsDel = false, IsFinalNode = false, IsDisable = false, IsPaperType = false, IdRecordCode = 90, DocType = "一階" };
+            parent.Articles = "6.1.2、8.1 自訂條文";
+            parent.DocumentCategory = "環保";
+            parent.DocType = "四階";
             int parentId = dt209_BaseBUS.Instance.Add(parent);
             Check(parentId > 0, "EF6 creates independent document tree");
+            var saved = dt209_BaseBUS.Instance.GetItemById(parentId);
+            Check(saved.Articles == parent.Articles && saved.DocumentCategory == "環保" && saved.DocType == "四階", "EF6 preserves handwritten articles, category and fourth level");
             var child = new dt209_Base { IdParent = parentId, DocCode = "ENV-TEST", DisplayName = "2026", DisplayNameVN = "2026", IdDept = "7820", IsDel = false, IsFinalNode = true, IsDisable = false, IsPaperType = false, IdRecordCode = 90 };
             int childId = dt209_BaseBUS.Instance.Add(child);
             Check(childId > 0 && dt209_BaseBUS.Instance.GetAllChildByParentId(parentId).Count == 2, "document hierarchy loaded through LINQ");
@@ -103,12 +108,24 @@ internal static class Iso209Tests
             using (var dialog = new f209_AddNode())
             {
                 InvokeLoad(dialog, "f209_AddNode_Load");
-                var editor = (DevExpress.XtraEditors.GridLookUpEdit)GetField(dialog, "txbIdRecord");
-                var rows = ((System.Collections.IEnumerable)editor.Properties.DataSource).Cast<object>().ToList();
-                Check(NameValue(rows, "SINGLE", "DisplayNameTW") == "單行名稱" && NameValue(rows, "SINGLE", "DisplayNameVN") == "", "single-line catalogue name loads without an index error");
-                Check(NameValue(rows, "EMPTY", "DisplayNameTW") == "EMPTY", "empty catalogue name falls back to document code");
-                Check(NameValue(rows, "VN-ONLY", "DisplayNameTW") == "Ten Viet", "missing Chinese catalogue name falls back to Vietnamese");
-                Check(NameValue(rows, "ENV-TEST", "DisplayNameTW") == "測試環境文件" && NameValue(rows, "ENV-TEST", "DisplayNameVN") == "Ho so moi truong", "bilingual catalogue retains both names");
+                var levels = ((DevExpress.XtraEditors.ComboBoxEdit)GetField(dialog, "cbbDocType"));
+                Check(levels.Properties.Items.Contains("四階"), "fourth level available with existing settings");
+                var categories = ((DevExpress.XtraEditors.ComboBoxEdit)GetField(dialog, "cbbDocumentCategory"));
+                Check(categories.Properties.Items.Count == 3 && categories.Properties.Items.Contains("共通") && categories.Properties.Items.Contains("工安") && categories.Properties.Items.Contains("環保"), "all three document categories available");
+                Check(((DevExpress.XtraEditors.TextEdit)GetField(dialog, "txbArticles")).GetType() == typeof(DevExpress.XtraEditors.TextEdit), "articles accept free text");
+                Check(dialog.GetType().GetField("txbIdRecord", BindingFlags.Instance | BindingFlags.NonPublic) == null, "record book editor removed");
+                var required = (List<DevExpress.XtraLayout.LayoutControlItem>)GetField(dialog, "lcImpControls");
+                Check(!required.Any(item => item.Name == "lcArticles"), "handwritten articles remain optional");
+                ((DevExpress.XtraEditors.TextEdit)GetField(dialog, "txbDocCode")).Text = "NO-RECORD";
+                ((DevExpress.XtraEditors.TextEdit)GetField(dialog, "txbDisplayName")).Text = "測試文件";
+                ((DevExpress.XtraEditors.TextEdit)GetField(dialog, "txbDisplayNameVN")).Text = "Tai lieu";
+                ((DevExpress.XtraEditors.TextEdit)GetField(dialog, "txbNotifyCycle")).EditValue = 0;
+                levels.EditValue = "四階";
+                categories.EditValue = "共通";
+                var dialogHandle = dialog.Handle;
+                dialog.GetType().GetMethod("btnConfirm_ItemClick", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(dialog, new object[] { null, null });
+                var savedWithoutRecord = dt209_BaseBUS.Instance.GetItemById(dialog.currentData.Id);
+                Check(savedWithoutRecord != null && savedWithoutRecord.Articles == "" && savedWithoutRecord.IdRecordCode == 0, "document saves without record book or articles");
             }
             foreach (int codeId in new[] { 91, 92, 93 }) Check(dt209_RecordCodeBUS.Instance.RemoveById(codeId), "remove catalogue regression fixture " + codeId);
             TestSigningWorkflow(childId);
@@ -272,6 +289,11 @@ internal static class Iso209Tests
             object[] args = new object[0];
             using (var control = (Control)Activator.CreateInstance(type, args))
             {
+                if (type == typeof(f209_AddNode))
+                {
+                    Check(GetField(control, "cbbDocumentCategory") != null && GetField(control, "txbArticles") is DevExpress.XtraEditors.TextEdit, "209 document dialog includes classification and handwritten articles");
+                    continue;
+                }
                 var sourceType = assembly.GetType(type.FullName.Replace("_09_ISO14001Docs", "_01_ISOAuditDocs").Replace("f209_", "f201_").Replace("uc209_", "uc201_"), true);
                 using (var source = (Control)Activator.CreateInstance(sourceType, args))
                 {

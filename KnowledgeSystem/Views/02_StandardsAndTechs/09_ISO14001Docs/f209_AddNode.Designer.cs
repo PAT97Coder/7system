@@ -45,7 +45,9 @@
             this.txbNotifyCycle = new DevExpress.XtraEditors.TextEdit();
             this.txbDisplayNameVN = new DevExpress.XtraEditors.TextEdit();
             this.cbbDocType = new DevExpress.XtraEditors.ComboBoxEdit();
-            this.txbArticles = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.txbArticles = new DevExpress.XtraEditors.TextEdit();
+            this.cbbDocumentCategory = new DevExpress.XtraEditors.ComboBoxEdit();
+            this.lcDocumentCategory = new DevExpress.XtraLayout.LayoutControlItem();
             this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
             this.lcNotifyCycle = new DevExpress.XtraLayout.LayoutControlItem();
             this.lcDept = new DevExpress.XtraLayout.LayoutControlItem();
@@ -54,16 +56,12 @@
             this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
             this.lcDisplayNameVN = new DevExpress.XtraLayout.LayoutControlItem();
             this.lcDisplayName = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lcIdRecord = new DevExpress.XtraLayout.LayoutControlItem();
             this.lcArticles = new DevExpress.XtraLayout.LayoutControlItem();
-            this.txbIdRecord = new DevExpress.XtraEditors.GridLookUpEdit();
-            this.gridLookUpEdit1View = new DevExpress.XtraGrid.Views.Grid.GridView();
-            this.gridColumn2 = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gridColumn3 = new DevExpress.XtraGrid.Columns.GridColumn();
-            this.gridColumn4 = new DevExpress.XtraGrid.Columns.GridColumn();
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
             this.layoutControl1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.cbbDocumentCategory.Properties)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lcDocumentCategory)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.cbbDept.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ckPaperType.Properties)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.txbDisplayName.Properties)).BeginInit();
@@ -80,10 +78,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcDisplayNameVN)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcDisplayName)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcIdRecord)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcArticles)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbIdRecord.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).BeginInit();
             this.SuspendLayout();
             // 
             // barManagerTP
@@ -180,12 +175,11 @@
             this.layoutControl1.Controls.Add(this.txbDisplayNameVN);
             this.layoutControl1.Controls.Add(this.cbbDocType);
             this.layoutControl1.Controls.Add(this.txbArticles);
-            this.layoutControl1.Controls.Add(this.txbIdRecord);
             this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.layoutControl1.Location = new System.Drawing.Point(0, 49);
             this.layoutControl1.Name = "layoutControl1";
             this.layoutControl1.Root = this.Root;
-            this.layoutControl1.Size = new System.Drawing.Size(530, 200);
+            this.layoutControl1.Size = new System.Drawing.Size(630, 200);
             this.layoutControl1.TabIndex = 5;
             this.layoutControl1.Text = "layoutControl1";
             // 
@@ -305,19 +299,34 @@
             this.txbArticles.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
             this.txbArticles.Properties.Appearance.Options.UseFont = true;
             this.txbArticles.Properties.Appearance.Options.UseForeColor = true;
-            this.txbArticles.Properties.AppearanceDropDown.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbArticles.Properties.AppearanceDropDown.ForeColor = System.Drawing.Color.Black;
-            this.txbArticles.Properties.AppearanceDropDown.Options.UseFont = true;
-            this.txbArticles.Properties.AppearanceDropDown.Options.UseForeColor = true;
-            this.txbArticles.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.txbArticles.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.txbArticles.Properties.MaxLength = 512;
             this.txbArticles.Size = new System.Drawing.Size(132, 32);
             this.txbArticles.StyleController = this.layoutControl1;
             this.txbArticles.TabIndex = 12;
             // 
             // Root
             // 
+            this.layoutControl1.Controls.Add(this.cbbDocumentCategory);
+            this.cbbDocumentCategory.Name = "cbbDocumentCategory";
+            this.cbbDocumentCategory.MenuManager = this.barManagerTP;
+            this.cbbDocumentCategory.StyleController = this.layoutControl1;
+            this.cbbDocumentCategory.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.cbbDocumentCategory.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
+            this.cbbDocumentCategory.Properties.Appearance.Options.UseFont = true;
+            this.cbbDocumentCategory.Properties.Appearance.Options.UseForeColor = true;
+            this.cbbDocumentCategory.Properties.AppearanceDropDown.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.cbbDocumentCategory.Properties.AppearanceDropDown.Options.UseFont = true;
+            this.cbbDocumentCategory.Properties.Buttons.Add(new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo));
+            this.cbbDocumentCategory.Properties.Items.AddRange(new object[] { "共通", "工安", "環保" });
+            this.cbbDocumentCategory.Properties.TextEditStyle = DevExpress.XtraEditors.Controls.TextEditStyles.DisableTextEditor;
+            this.lcDocumentCategory.Name = "lcDocumentCategory";
+            this.lcDocumentCategory.Control = this.cbbDocumentCategory;
+            this.lcDocumentCategory.Text = "文件大類";
+            this.lcDocumentCategory.AllowHtmlStringInCaption = true;
+            this.lcDocumentCategory.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.lcDocumentCategory.AppearanceItemCaption.Options.UseFont = true;
+            this.lcDocumentCategory.Location = new System.Drawing.Point(310, 108);
+            this.lcDocumentCategory.Size = new System.Drawing.Size(200, 36);
             this.Root.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
             this.Root.GroupBordersVisible = false;
             this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
@@ -328,10 +337,10 @@
             this.layoutControlItem3,
             this.lcDisplayNameVN,
             this.lcDisplayName,
-            this.lcIdRecord,
-            this.lcArticles});
+            this.lcArticles,
+            this.lcDocumentCategory});
             this.Root.Name = "Root";
-            this.Root.Size = new System.Drawing.Size(530, 200);
+            this.Root.Size = new System.Drawing.Size(630, 200);
             this.Root.TextVisible = false;
             // 
             // lcNotifyCycle
@@ -346,6 +355,7 @@
             this.lcNotifyCycle.ControlAlignment = System.Drawing.ContentAlignment.TopLeft;
             this.lcNotifyCycle.CustomizationFormText = "條文";
             this.lcNotifyCycle.Location = new System.Drawing.Point(212, 144);
+            this.lcNotifyCycle.AllowHtmlStringInCaption = true;
             this.lcNotifyCycle.Name = "lcNotifyCycle";
             this.lcNotifyCycle.Size = new System.Drawing.Size(219, 36);
             this.lcNotifyCycle.Text = "通知週期(月)";
@@ -365,7 +375,7 @@
             this.lcDept.Location = new System.Drawing.Point(0, 0);
             this.lcDept.Name = "lcDept";
             this.lcDept.Size = new System.Drawing.Size(212, 36);
-            this.lcDept.Text = "實驗室";
+            this.lcDept.Text = "責任單位";
             this.lcDept.TextSize = new System.Drawing.Size(76, 24);
             // 
             // lcDocCode
@@ -380,6 +390,7 @@
             this.lcDocCode.ControlAlignment = System.Drawing.ContentAlignment.TopLeft;
             this.lcDocCode.CustomizationFormText = "編碼";
             this.lcDocCode.Location = new System.Drawing.Point(212, 0);
+            this.lcDocCode.AllowHtmlStringInCaption = true;
             this.lcDocCode.Name = "lcDocCode";
             this.lcDocCode.Size = new System.Drawing.Size(298, 36);
             this.lcDocCode.Text = "文件編碼";
@@ -395,6 +406,7 @@
             this.lcDocType.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
             this.lcDocType.Control = this.cbbDocType;
             this.lcDocType.Location = new System.Drawing.Point(0, 144);
+            this.lcDocType.AllowHtmlStringInCaption = true;
             this.lcDocType.Name = "lcDocType";
             this.lcDocType.Size = new System.Drawing.Size(212, 36);
             this.lcDocType.Text = "文件類";
@@ -422,6 +434,7 @@
             this.lcDisplayNameVN.ControlAlignment = System.Drawing.ContentAlignment.TopLeft;
             this.lcDisplayNameVN.CustomizationFormText = "文件名稱";
             this.lcDisplayNameVN.Location = new System.Drawing.Point(0, 72);
+            this.lcDisplayNameVN.AllowHtmlStringInCaption = true;
             this.lcDisplayNameVN.Name = "lcDisplayNameVN";
             this.lcDisplayNameVN.Size = new System.Drawing.Size(510, 36);
             this.lcDisplayNameVN.Text = "越文名稱";
@@ -437,25 +450,11 @@
             this.lcDisplayName.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
             this.lcDisplayName.Control = this.txbDisplayName;
             this.lcDisplayName.Location = new System.Drawing.Point(0, 36);
+            this.lcDisplayName.AllowHtmlStringInCaption = true;
             this.lcDisplayName.Name = "lcDisplayName";
             this.lcDisplayName.Size = new System.Drawing.Size(510, 36);
             this.lcDisplayName.Text = "中文名稱";
             this.lcDisplayName.TextSize = new System.Drawing.Size(76, 24);
-            // 
-            // lcIdRecord
-            // 
-            this.lcIdRecord.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.lcIdRecord.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
-            this.lcIdRecord.AppearanceItemCaption.Options.UseFont = true;
-            this.lcIdRecord.AppearanceItemCaption.Options.UseForeColor = true;
-            this.lcIdRecord.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
-            this.lcIdRecord.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
-            this.lcIdRecord.Control = this.txbIdRecord;
-            this.lcIdRecord.Location = new System.Drawing.Point(0, 108);
-            this.lcIdRecord.Name = "lcIdRecord";
-            this.lcIdRecord.Size = new System.Drawing.Size(331, 36);
-            this.lcIdRecord.Text = "記錄本";
-            this.lcIdRecord.TextSize = new System.Drawing.Size(76, 24);
             // 
             // lcArticles
             // 
@@ -466,87 +465,14 @@
             this.lcArticles.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
             this.lcArticles.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
             this.lcArticles.Control = this.txbArticles;
-            this.lcArticles.Location = new System.Drawing.Point(331, 108);
+            this.lcArticles.Location = new System.Drawing.Point(0, 108);
+            this.lcArticles.AllowHtmlStringInCaption = true;
             this.lcArticles.Name = "lcArticles";
-            this.lcArticles.Size = new System.Drawing.Size(179, 36);
-            this.lcArticles.Text = "條文";
+            this.lcArticles.Size = new System.Drawing.Size(310, 36);
+            this.lcArticles.Text = "對應條文";
             this.lcArticles.TextAlignMode = DevExpress.XtraLayout.TextAlignModeItem.AutoSize;
             this.lcArticles.TextSize = new System.Drawing.Size(38, 24);
             this.lcArticles.TextToControlDistance = 5;
-            // 
-            // txbIdRecord
-            // 
-            this.txbIdRecord.EditValue = "";
-            this.txbIdRecord.Location = new System.Drawing.Point(100, 120);
-            this.txbIdRecord.Name = "txbIdRecord";
-            this.txbIdRecord.Properties.AllowNullInput = DevExpress.Utils.DefaultBoolean.False;
-            this.txbIdRecord.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbIdRecord.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txbIdRecord.Properties.Appearance.Options.UseFont = true;
-            this.txbIdRecord.Properties.Appearance.Options.UseForeColor = true;
-            this.txbIdRecord.Properties.AppearanceDropDown.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbIdRecord.Properties.AppearanceDropDown.Options.UseFont = true;
-            this.txbIdRecord.Properties.Buttons.AddRange(new DevExpress.XtraEditors.Controls.EditorButton[] {
-            new DevExpress.XtraEditors.Controls.EditorButton(DevExpress.XtraEditors.Controls.ButtonPredefines.Combo)});
-            this.txbIdRecord.Properties.NullText = "";
-            this.txbIdRecord.Properties.PopupFormMinSize = new System.Drawing.Size(700, 0);
-            this.txbIdRecord.Properties.PopupView = this.gridLookUpEdit1View;
-            this.txbIdRecord.Size = new System.Drawing.Size(239, 32);
-            this.txbIdRecord.StyleController = this.layoutControl1;
-            this.txbIdRecord.TabIndex = 17;
-            this.txbIdRecord.EditValueChanged += new System.EventHandler(this.txbIdRecord_EditValueChanged);
-            // 
-            // gridLookUpEdit1View
-            // 
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.ForeColor = System.Drawing.Color.Black;
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.Options.UseFont = true;
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.Options.UseForeColor = true;
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.Options.UseTextOptions = true;
-            this.gridLookUpEdit1View.Appearance.HeaderPanel.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Center;
-            this.gridLookUpEdit1View.Appearance.Row.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.gridLookUpEdit1View.Appearance.Row.Options.UseFont = true;
-            this.gridLookUpEdit1View.Columns.AddRange(new DevExpress.XtraGrid.Columns.GridColumn[] {
-            this.gridColumn2,
-            this.gridColumn3,
-            this.gridColumn4});
-            this.gridLookUpEdit1View.FocusRectStyle = DevExpress.XtraGrid.Views.Grid.DrawFocusRectStyle.RowFocus;
-            this.gridLookUpEdit1View.Name = "gridLookUpEdit1View";
-            this.gridLookUpEdit1View.OptionsSelection.EnableAppearanceFocusedCell = false;
-            this.gridLookUpEdit1View.OptionsView.ShowAutoFilterRow = true;
-            this.gridLookUpEdit1View.OptionsView.ShowGroupPanel = false;
-            // 
-            // gridColumn2
-            // 
-            this.gridColumn2.AppearanceCell.Font = new System.Drawing.Font("Tahoma", 11.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(163)));
-            this.gridColumn2.AppearanceCell.Options.UseFont = true;
-            this.gridColumn2.Caption = "編號";
-            this.gridColumn2.FieldName = "Code";
-            this.gridColumn2.MaxWidth = 80;
-            this.gridColumn2.MinWidth = 80;
-            this.gridColumn2.Name = "gridColumn2";
-            this.gridColumn2.Visible = true;
-            this.gridColumn2.VisibleIndex = 0;
-            this.gridColumn2.Width = 80;
-            // 
-            // gridColumn3
-            // 
-            this.gridColumn3.Caption = "越文名稱";
-            this.gridColumn3.FieldName = "DisplayNameVN";
-            this.gridColumn3.MinWidth = 200;
-            this.gridColumn3.Name = "gridColumn3";
-            this.gridColumn3.Visible = true;
-            this.gridColumn3.VisibleIndex = 1;
-            this.gridColumn3.Width = 200;
-            // 
-            // gridColumn4
-            // 
-            this.gridColumn4.Caption = "中文名稱";
-            this.gridColumn4.FieldName = "DisplayNameTW";
-            this.gridColumn4.Name = "gridColumn4";
-            this.gridColumn4.Visible = true;
-            this.gridColumn4.VisibleIndex = 2;
-            this.gridColumn4.Width = 150;
             // 
             // f209_AddNode
             // 
@@ -554,7 +480,7 @@
             this.Appearance.Options.UseBackColor = true;
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(530, 249);
+            this.ClientSize = new System.Drawing.Size(630, 249);
             this.Controls.Add(this.layoutControl1);
             this.Controls.Add(this.barDockControlLeft);
             this.Controls.Add(this.barDockControlRight);
@@ -568,6 +494,8 @@
             this.Load += new System.EventHandler(this.f209_AddNode_Load);
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.cbbDocumentCategory.Properties)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.lcDocumentCategory)).EndInit();
             this.layoutControl1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.cbbDept.Properties)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ckPaperType.Properties)).EndInit();
@@ -585,10 +513,7 @@
             ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcDisplayNameVN)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcDisplayName)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcIdRecord)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.lcArticles)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbIdRecord.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.gridLookUpEdit1View)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -620,12 +545,8 @@
         private DevExpress.XtraEditors.TextEdit txbDisplayNameVN;
         private DevExpress.XtraLayout.LayoutControlItem lcDisplayNameVN;
         private DevExpress.XtraEditors.ComboBoxEdit cbbDocType;
-        private DevExpress.XtraLayout.LayoutControlItem lcIdRecord;
-        private DevExpress.XtraEditors.ComboBoxEdit txbArticles;
-        private DevExpress.XtraEditors.GridLookUpEdit txbIdRecord;
-        private DevExpress.XtraGrid.Views.Grid.GridView gridLookUpEdit1View;
-        private DevExpress.XtraGrid.Columns.GridColumn gridColumn2;
-        private DevExpress.XtraGrid.Columns.GridColumn gridColumn3;
-        private DevExpress.XtraGrid.Columns.GridColumn gridColumn4;
+        private DevExpress.XtraEditors.TextEdit txbArticles;
+        private DevExpress.XtraEditors.ComboBoxEdit cbbDocumentCategory;
+        private DevExpress.XtraLayout.LayoutControlItem lcDocumentCategory;
     }
 }

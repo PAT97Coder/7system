@@ -55,6 +55,7 @@
             this.treeListColumn3 = new DevExpress.XtraTreeList.Columns.TreeListColumn();
             this.treeListColumn10 = new DevExpress.XtraTreeList.Columns.TreeListColumn();
             this.treeListColumn11 = new DevExpress.XtraTreeList.Columns.TreeListColumn();
+            this.colDocumentCategory = new DevExpress.XtraTreeList.Columns.TreeListColumn();
             this.colRecordNameVN = new DevExpress.XtraTreeList.Columns.TreeListColumn();
             this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
             this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
@@ -256,7 +257,7 @@
             this.treeListColumn3,
             this.treeListColumn10,
             this.treeListColumn11,
-            this.colRecordNameVN});
+            this.colRecordNameVN, this.colDocumentCategory});
             this.tlsData.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tlsData.KeyFieldName = "";
             this.tlsData.Location = new System.Drawing.Point(12, 12);
@@ -320,8 +321,14 @@
             // 
             // treeListColumn4
             // 
-            this.treeListColumn4.Caption = "條文";
-            this.treeListColumn4.FieldName = "record.Articles";
+            this.colDocumentCategory.Caption = "文件大類";
+            this.colDocumentCategory.FieldName = "data.DocumentCategory";
+            this.colDocumentCategory.Name = "colDocumentCategory";
+            this.colDocumentCategory.Visible = true;
+            this.colDocumentCategory.VisibleIndex = 12;
+            this.colDocumentCategory.Width = 100;
+            this.treeListColumn4.Caption = "對應條文";
+            this.treeListColumn4.FieldName = "data.Articles";
             this.treeListColumn4.Name = "treeListColumn4";
             this.treeListColumn4.Visible = true;
             this.treeListColumn4.VisibleIndex = 0;
@@ -461,5 +468,6 @@
         private DevExpress.XtraTreeList.Columns.TreeListColumn treeListColumn10;
         private DevExpress.XtraTreeList.Columns.TreeListColumn treeListColumn11;
         private DevExpress.XtraTreeList.Columns.TreeListColumn colRecordNameVN;
+        private DevExpress.XtraTreeList.Columns.TreeListColumn colDocumentCategory;
     }
 }
