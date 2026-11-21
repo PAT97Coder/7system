@@ -235,9 +235,36 @@ namespace BusinessLayer
             }
         }
 
-        public bool UpdateFuelInfoBatch(List<dt311_Invoice> items, out string message)
+        // Dùng quyền mở chức năng hóa đơn hiện có, không tạo mã quyền song song.
+        public bool CanImportFpgFuel(string userId)
+        {
+            if (string.IsNullOrWhiteSpace(userId)) return false;
+            userId = userId.Trim().ToUpperInvariant();
+            using (var context = new DBDocumentManagementSystemEntities())
+            {
+                return HasFpgImportPermission(context, userId);
+            }
+        }
+
+        private static bool HasFpgImportPermission(DBDocumentManagementSystemEntities context, string userId)
+        {
+            return context.dm_User.Any(user => user.Id == userId && user.Status == 0)
+                && (from userRole in context.dm_UserRole
+                    join functionRole in context.dm_FunctionRole on userRole.IdRole equals functionRole.IdRole
+                    join function in context.dm_Function on functionRole.IdFunction equals function.Id
+                    where userRole.IdUser == userId && function.ControlName == "uc311_ExpenseMain"
+                    select function.Id).Any();
+        }
+
+        public bool UpdateFuelInfoBatch(string userId, List<dt311_Invoice> items, out string message)
         {
             message = string.Empty;
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                message = "您沒有匯入加油資料的權限。";
+                return false;
+            }
+            userId = userId.Trim().ToUpperInvariant();
             if (items == null || items.Count == 0)
             {
                 message = "沒有可更新的資料。";
@@ -260,10 +287,23 @@ namespace BusinessLayer
                 var transactionIds = distinctItems.Select(item => item.TransactionID).ToList();
 
                 using (var _context = new DBDocumentManagementSystemEntities())
-                using (var transaction = _context.Database.BeginTransaction())
+                using (var transaction = _context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
                 {
+                    if (!HasFpgImportPermission(_context, userId))
+                    {
+                        message = "您沒有匯入加油資料的權限。";
+                        return false;
+                    }
+                    var actor = _context.dm_User.Single(user => user.Id == userId);
+                    if (string.IsNullOrWhiteSpace(actor.IdDepartment) || actor.IdDepartment.Length < 2)
+                    {
+                        message = "使用者部門資料不完整，無法匯入。";
+                        return false;
+                    }
+                    string departmentPrefix = actor.IdDepartment.Substring(0, 2);
                     var invoices = _context.dt311_Invoice
-                        .Where(invoice => transactionIds.Contains(invoice.TransactionID))
+                        .Where(invoice => transactionIds.Contains(invoice.TransactionID)
+                            && invoice.IdDept.StartsWith(departmentPrefix))
                         .ToList();
 
                     if (invoices.Count != transactionIds.Count)
@@ -277,6 +317,19 @@ namespace BusinessLayer
                     foreach (dt311_Invoice invoice in invoices)
                     {
                         dt311_Invoice update = updatesById[invoice.TransactionID];
+                        // Không ghi đè dữ liệu đã thay đổi sau khi mở bản xem trước.
+                        if ((!string.IsNullOrWhiteSpace(invoice.LicensePlate)
+                                && !string.Equals(
+                                    System.Text.RegularExpressions.Regex.Replace(invoice.LicensePlate, "[^A-Za-z0-9]", ""),
+                                    System.Text.RegularExpressions.Regex.Replace(update.LicensePlate ?? "", "[^A-Za-z0-9]", ""),
+                                    StringComparison.OrdinalIgnoreCase))
+                            || (invoice.OdometerReading.HasValue && invoice.OdometerReading != update.OdometerReading)
+                            || (!string.IsNullOrWhiteSpace(invoice.FuelFilledBy)
+                                && invoice.FuelFilledBy != update.FuelFilledBy))
+                        {
+                            message = "發票資料已變更，未更新任何資料。請重新匯入。";
+                            return false;
+                        }
                         invoice.LicensePlate = update.LicensePlate;
                         invoice.OdometerReading = update.OdometerReading;
                         invoice.FuelFilledBy = update.FuelFilledBy;

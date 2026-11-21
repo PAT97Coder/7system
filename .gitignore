@@ -370,3 +370,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Local installer staging and temporary verification artifacts
+/Installer/Staging/
+/tmp/

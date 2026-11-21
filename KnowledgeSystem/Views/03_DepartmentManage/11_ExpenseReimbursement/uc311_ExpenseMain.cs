@@ -105,9 +105,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         public uc311_ExpenseMain()
         {
             InitializeComponent();
+            TraditionalGridLocalizer.Install();
             InitializeMenuItems();
-            InitializeIcon();
-            InitializeFpgImportButton();
+
 
             helper = new RefreshHelper(gvData, "Id");
             DevExpress.Utils.AppearanceObject.DefaultMenuFont = new System.Drawing.Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -130,7 +130,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         DXMenuItem itemAddFile;
         DXMenuItem itemViewFuelPhoto;
         DXMenuItem itemAddFuelPhoto;
-        DevExpress.XtraBars.BarButtonItem btnImportFpgFuel;
 
         DXMenuItem CreateMenuItem(string caption, EventHandler clickEvent, SvgImage svgImage)
         {
@@ -143,37 +142,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             menuItem.ImageOptions.SvgImageSize = new Size(24, 24);
             menuItem.AppearanceHovered.ForeColor = System.Drawing.Color.Blue;
-        }
-
-        private void InitializeIcon()
-        {
-            btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
-            barSubExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
-            btnFillFuelTable.ImageOptions.SvgImage = TPSvgimages.Num1;
-            btnFuelUsageStatistics.ImageOptions.SvgImage = TPSvgimages.Num2;
-            btnFillFuelTablePdf.ImageOptions.SvgImage = TPSvgimages.Num3;
-            btnFuelUsageStatisticsChart.ImageOptions.SvgImage = TPSvgimages.Num4;
-        }
-
-        private void InitializeFpgImportButton()
-        {
-            btnImportFpgFuel = new DevExpress.XtraBars.BarButtonItem(barManagerTP, "匯入 FPG 加油資料")
-            {
-                Name = "btnImportFpgFuel"
-            };
-            btnImportFpgFuel.ImageOptions.SvgImage = TPSvgimages.UploadFile;
-            btnImportFpgFuel.ImageOptions.SvgImageSize = new Size(32, 32);
-            btnImportFpgFuel.ItemAppearance.Hovered.ForeColor = Color.Blue;
-            btnImportFpgFuel.ItemAppearance.Hovered.Options.UseForeColor = true;
-            btnImportFpgFuel.ItemAppearance.Normal.Font = TPConfigs.fontUI14;
-            btnImportFpgFuel.ItemAppearance.Normal.ForeColor = Color.Black;
-            btnImportFpgFuel.ItemAppearance.Normal.Options.UseFont = true;
-            btnImportFpgFuel.ItemAppearance.Normal.Options.UseForeColor = true;
-            btnImportFpgFuel.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
-            btnImportFpgFuel.ItemClick += btnImportFpgFuel_ItemClick;
-
-            var link = bar2.AddItem(btnImportFpgFuel);
-            link.BeginGroup = true;
         }
 
         private void InitializeMenuItems()
@@ -397,10 +365,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void btnImportFpgFuel_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            if (!dt311_InvoiceBUS.Instance.CanImportFpgFuel(TPConfigs.LoginUser?.Id))
+            {
+                btnImportFpgFuel.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+                XtraMessageBox.Show("您沒有匯入加油資料的權限。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
             using (var dialog = new OpenFileDialog())
             {
                 dialog.Title = "選擇 FPG 加油資料檔案";
-                dialog.Filter = "Excel files (*.xls;*.xlsx)|*.xls;*.xlsx";
+                dialog.Filter = "Excel 檔案 (*.xls;*.xlsx)|*.xls;*.xlsx";
                 dialog.Multiselect = false;
 
                 if (dialog.ShowDialog() != DialogResult.OK)
@@ -439,7 +413,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                         .ToList();
 
                     string message;
-                    if (!dt311_InvoiceBUS.Instance.UpdateFuelInfoBatch(updates, out message))
+                    if (!dt311_InvoiceBUS.Instance.UpdateFuelInfoBatch(TPConfigs.LoginUser?.Id, updates, out message))
                     {
                         XtraMessageBox.Show(message, "更新失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
                         return;
@@ -772,78 +746,23 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 invoice.InvoiceCode, invoice.InvoiceNumber, invoice.IssueDate).Trim();
         }
 
-        private static DialogResult ShowFpgFuelImportPreview(List<FpgFuelImportRow> rows)
+        private DialogResult ShowFpgFuelImportPreview(List<FpgFuelImportRow> rows)
         {
-            using (var form = new XtraForm())
-            using (var grid = new GridControl())
-            using (var view = new GridView())
-            using (var buttonPanel = new FlowLayoutPanel())
-            using (var confirmButton = new SimpleButton())
-            using (var cancelButton = new SimpleButton())
-            using (var summaryLabel = new LabelControl())
+            using (var form = new f311_FpgFuelImportPreview())
             {
                 int updateCount = rows.Count(row => row.CanUpdate);
-                int skippedCount = rows.Count - updateCount;
-                form.Text = "FPG 加油資料匯入預覽";
-                form.StartPosition = FormStartPosition.CenterParent;
-                form.Size = new Size(1250, 650);
-                form.MinimizeBox = false;
-
-                grid.Dock = DockStyle.Fill;
-                grid.MainView = view;
-                grid.ViewCollection.Add(view);
-                grid.DataSource = rows.Select(row => new
+                form.SetPreview(rows.Select(row => new
                 {
                     row.ExcelRow,
                     row.DocId,
-                    FuelDate = row.FuelDate.HasValue ? row.FuelDate.Value.ToString("yyyy/MM/dd HH:mm") : string.Empty,
+                    row.FuelDate,
                     row.LicensePlate,
                     row.FuelFilledBy,
                     row.OdometerReading,
                     row.InvoiceDisplay,
                     row.Status
-                }).ToList();
-
-                view.OptionsBehavior.Editable = false;
-                view.OptionsView.ShowGroupPanel = false;
-                view.OptionsView.ColumnAutoWidth = false;
-                view.Columns.AddVisible("ExcelRow", "Excel 列");
-                view.Columns.AddVisible("DocId", "DocId");
-                view.Columns.AddVisible("FuelDate", "加油日期");
-                view.Columns.AddVisible("LicensePlate", "車牌");
-                view.Columns.AddVisible("FuelFilledBy", "加油人員");
-                view.Columns.AddVisible("OdometerReading", "結束哩程");
-                view.Columns.AddVisible("InvoiceDisplay", "對應發票");
-                view.Columns.AddVisible("Status", "狀態");
-                view.BestFitColumns();
-
-                buttonPanel.Dock = DockStyle.Bottom;
-                buttonPanel.Height = 54;
-                buttonPanel.Padding = new Padding(10);
-                buttonPanel.FlowDirection = FlowDirection.RightToLeft;
-
-                confirmButton.Text = string.Format("更新可匹配資料 ({0})", updateCount);
-                confirmButton.Width = 180;
-                confirmButton.DialogResult = DialogResult.OK;
-                confirmButton.Enabled = updateCount > 0;
-                cancelButton.Text = "取消";
-                cancelButton.Width = 100;
-                cancelButton.DialogResult = DialogResult.Cancel;
-                summaryLabel.Text = string.Format("可更新：{0} 筆；略過：{1} 筆", updateCount, skippedCount);
-                summaryLabel.AutoSizeMode = LabelAutoSizeMode.None;
-                summaryLabel.Width = 300;
-                summaryLabel.Height = 30;
-                summaryLabel.Appearance.TextOptions.VAlignment = VertAlignment.Center;
-
-                buttonPanel.Controls.Add(confirmButton);
-                buttonPanel.Controls.Add(cancelButton);
-                buttonPanel.Controls.Add(summaryLabel);
-                form.Controls.Add(grid);
-                form.Controls.Add(buttonPanel);
-                form.AcceptButton = confirmButton;
-                form.CancelButton = cancelButton;
-
-                return form.ShowDialog();
+                }).ToList(), updateCount, rows.Count - updateCount);
+                return form.ShowDialog(this);
             }
         }
 
@@ -866,8 +785,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -883,8 +802,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (!isSameContractorGroup)
             {
                 XtraMessageBox.Show(
-                    "Không cùng nhà thầu!\n非同一承包商！",
-                    "Lỗi / 錯誤",
+                    "非同一承包商！",
+                    "錯誤",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -984,7 +903,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
             };
 
             var args = new XtraInputBoxArgs
@@ -1026,8 +945,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -1042,7 +961,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             if (!sameGroup)
             {
-                XtraMessageBox.Show("Không cùng nhà thầu hoặc phương tiện!", "Error",
+                XtraMessageBox.Show("所選資料的承包商或車輛不一致！", "錯誤",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -1053,12 +972,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             if (vehicle == null)
             {
-                XtraMessageBox.Show("Không có thông tin phương tiện!", "Error",
+                XtraMessageBox.Show("找不到車輛資料！", "錯誤",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            string desc = string.Format("冶金技術部{0}加{2}油費用報銷。Thanh toán phí đổ {3} {1} BP Luyện Kim",
+            string desc = string.Format("冶金技術部{0}加{2}油費用報銷。",
                 vehicle.VehicleType.Split('/')[1],
                 vehicle.VehicleType.Split('/')[0],
                 vehicle.FuelType.Split('/')[1],
@@ -1100,7 +1019,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                     invoice.InvoiceNumber ?? "",
                     quantity.ToString("0.###"),
                     invoice.TotalBeforeVAT?.ToString("0") ?? "0",
-                    invoice.VATAmount?.ToString("0") ?? ""
+                    /*invoice.VATAmount?.ToString("0") ??*/ ""
                 });
             });
 
@@ -1142,8 +1061,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -1181,17 +1100,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         private void MsgBoxAlert()
         {
             string msg =
-                "1️. Vui lòng không thao tác khi chương trình đang tự động。\n 請勿在程式自動輸入時操作鍵盤或滑鼠。";
+                "1. 請勿在程式自動輸入時操作鍵盤或滑鼠。";
 
             if (KeyboardHelper.IsUnikeyRunning())
             {
                 msg += "\n\n" +
-                       "2️. Phát hiện Unikey đang chạy, vui lòng tắt hoặc chuyển sang English (ENG)。\n 偵測到 UniKey 正在執行，請關閉或切換至英文輸入模式 (ENG)。";
+                       "2. 偵測到 UniKey 正在執行，請關閉或切換至英文輸入模式 (ENG)。";
             }
 
             XtraMessageBox.Show(
                 msg,
-                "⚠️ Cảnh báo / 警告",
+                "警告",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -1248,8 +1167,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                         var response = await client.PostAsync(URL, formData);
                         if (!response.IsSuccessStatusCode)
                         {
-                            XtraMessageBox.Show($"Không thể truy cập MISA API. Mã lỗi: {response.StatusCode}",
-                                "Lỗi truy cập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            XtraMessageBox.Show($"無法連線至 MISA API。錯誤碼：{response.StatusCode}",
+                                "連線錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
 
@@ -1263,7 +1182,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
                 if (string.IsNullOrEmpty(xmlString))
                 {
-                    XtraMessageBox.Show("Không có dữ liệu XML trong phản hồi!", "Lỗi dữ liệu",
+                    XtraMessageBox.Show("回應中沒有 XML 資料！", "資料錯誤",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
@@ -1274,7 +1193,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 string fmtName = DetectFormat(root, formats);
                 if (fmtName == null)
                 {
-                    XtraMessageBox.Show("Không nhận dạng được loại hóa đơn!", "Cảnh báo",
+                    XtraMessageBox.Show("無法識別發票類型！", "警告",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
@@ -1377,21 +1296,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 dt311_InvoiceItemBUS.Instance.AddRange(itemsList);
 
                 XtraMessageBox.Show(
-                    $"Đã thêm hóa đơn số {invoiceData.InvoiceNumber} ({invoiceData.InvoiceCode})\n" +
-                    $"Người bán: {seller.DisplayName}\nNgười mua: {buyer.DisplayName}",
-                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    $"已新增發票號碼 {invoiceData.InvoiceNumber} ({invoiceData.InvoiceCode})\n" +
+                    $"賣方：{seller.DisplayName}\n買方：{buyer.DisplayName}",
+                    "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 if (attId == -1 && !string.IsNullOrEmpty(transactionId))
                 {
-                    XtraMessageBox.Show("Lỗi không thể tải hóa đơn PDF!\nVui lòng đưa lên thủ công hoặc thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    XtraMessageBox.Show("無法下載發票 PDF！\n請手動上傳或重試。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show($"Lỗi khi xử lý hóa đơn:\n{ex.Message}",
-                    "Lỗi xử lý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show($"處理發票時發生錯誤：\n{ex.Message}",
+                    "處理錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -1611,7 +1530,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 Caption = TPConfigs.SoftNameTW,
                 Prompt = "請輸入交易代碼 (TransactionID)",
                 DefaultButtonIndex = 0,
-                Editor = new TextEdit { Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F) },
+                Editor = new TextEdit { Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F) },
                 DefaultResponse = ""
             };
 
@@ -1640,8 +1559,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Title = "Chọn file XML";
-                openFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                openFileDialog.Title = "選擇 XML 檔案";
+                openFileDialog.Filter = "XML 檔案 (*.xml)|*.xml|所有檔案 (*.*)|*.*";
 
                 if (openFileDialog.ShowDialog() != DialogResult.OK)
                     return;
@@ -1667,6 +1586,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void uc311_ExpenseMain_Load(object sender, EventArgs e)
         {
+            btnImportFpgFuel.Visibility = dt311_InvoiceBUS.Instance.CanImportFpgFuel(TPConfigs.LoginUser?.Id)
+                ? DevExpress.XtraBars.BarItemVisibility.Always : DevExpress.XtraBars.BarItemVisibility.Never;
             gvData.ReadOnlyGridView();
             gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             gvData.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
@@ -1692,7 +1613,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void gvData_MasterRowGetRelationName(object sender, DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventArgs e)
         {
-            e.RelationName = "Detail";
+            e.RelationName = "明細";
         }
 
         private void gvData_MasterRowGetRelationCount(object sender, DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventArgs e)
@@ -1724,8 +1645,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void gvData_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
+            if (e.Menu != null && e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
+                gvData.FocusedRowHandle = e.HitInfo.RowHandle;
+                itemERP01.BeginGroup = true;
                 e.Menu.Items.Add(itemERP01);
                 e.Menu.Items.Add(itemERP02);
                 e.Menu.Items.Add(itemERP03);
@@ -1753,13 +1676,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                     }
                 }
             }
+            if (e.Menu != null) TraditionalGridLocalizer.StyleMenu(e.Menu);
         }
 
         private void btnFillFuelTable_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.AddDays(-7):yyyy/MM/dd} - {DateTime.Today:yyyy/MM/dd}"
             };
 
@@ -1919,7 +1843,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             {
                 RestoreDirectory = true,
                 FileName = $"廠處使用燃料量統計表-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
-                Filter = "Excel| *.xlsx"
+                Filter = "Excel 檔案|*.xlsx"
             };
             if (saveFile.ShowDialog() != DialogResult.OK) return;
 
@@ -2030,7 +1954,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
-                    saveFileDialog.Filter = "PDF Files|*.pdf";
+                    saveFileDialog.Filter = "PDF 檔案|*.pdf";
                     saveFileDialog.RestoreDirectory = true;
                     saveFileDialog.FileName = $"公務車加油記錄表-{startDate:yyyyMMdd}-{endDate:yyyyMMdd}-{DateTime.Now:yyyyMMddHHmmss}.pdf";
 
@@ -2062,7 +1986,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 {
                     saveFile.RestoreDirectory = true;
                     saveFile.FileName = $"廠處使用燃料量統計表-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-                    saveFile.Filter = "Excel| *.xlsx";
+                    saveFile.Filter = "Excel 檔案|*.xlsx";
 
                     if (saveFile.ShowDialog() != DialogResult.OK)
                         return;
@@ -2088,7 +2012,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.AddDays(-7):yyyy/MM/dd} - {DateTime.Today:yyyy/MM/dd}"
             };
 
@@ -2140,7 +2064,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.Year - 1} - {DateTime.Today.Year}"
             };
 

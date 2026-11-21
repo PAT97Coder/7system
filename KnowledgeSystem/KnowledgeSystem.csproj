@@ -221,6 +221,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_FpgFuelImportPreview.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_FpgFuelImportPreview.Designer.cs"><DependentUpon>f311_FpgFuelImportPreview.cs</DependentUpon></Compile>
     <Compile Include="Components\CropPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -228,6 +230,7 @@
     <Compile Include="Helpers\AutoFilterNonUnicode.cs" />
     <Compile Include="Helpers\AppCopyRight.cs" />
     <Compile Include="Helpers\AppPermission.cs" />
+    <Compile Include="Helpers\TraditionalGridLocalizer.cs" />
     <Compile Include="Helpers\DateTimeHelper.cs" />
     <Compile Include="Helpers\DomainVNFPG.cs" />
     <Compile Include="Helpers\EncryptionHelper.cs" />
