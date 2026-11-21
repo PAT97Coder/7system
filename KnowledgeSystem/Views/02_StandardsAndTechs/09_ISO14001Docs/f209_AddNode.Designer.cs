@@ -470,9 +470,7 @@
             this.lcArticles.Name = "lcArticles";
             this.lcArticles.Size = new System.Drawing.Size(310, 36);
             this.lcArticles.Text = "對應條文";
-            this.lcArticles.TextAlignMode = DevExpress.XtraLayout.TextAlignModeItem.AutoSize;
-            this.lcArticles.TextSize = new System.Drawing.Size(38, 24);
-            this.lcArticles.TextToControlDistance = 5;
+            this.lcArticles.TextSize = new System.Drawing.Size(76, 24);
             // 
             // f209_AddNode
             // 
