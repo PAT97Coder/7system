@@ -263,8 +263,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             // 
             // gridColumn1
             // 
-            this.gridColumn1.Caption = "職務名稱";
-            this.gridColumn1.FieldName = "job.DisplayName";
+            this.gridColumn1.Caption = "職務代號／名稱";
+            this.gridColumn1.FieldName = "JobName";
             this.gridColumn1.Name = "gridColumn1";
             this.gridColumn1.Visible = true;
             this.gridColumn1.VisibleIndex = 4;

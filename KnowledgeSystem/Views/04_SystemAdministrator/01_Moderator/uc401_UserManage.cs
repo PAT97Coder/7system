@@ -53,8 +53,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             InitializeComponent();
             InitializeIcon();
             InitializeMenuItems();
+            OffboardingGridLocalizer.Activate();
 
-            helper = new RefreshHelper(gvData, "Id");
+            helper = new RefreshHelper(gvData, gColIdUser.FieldName);
             Font fontUI12 = new Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
             DevExpress.Utils.AppearanceObject.DefaultMenuFont = fontUI12;
         }
@@ -75,6 +76,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             "重大學工"
         };
 
+        DXMenuItem itemOffboardingHistory;
+        DXMenuItem itemOffboardingUpload;
+
         DXMenuItem itemEditRole;
         DXMenuItem itemEditSign;
         DXMenuItem itemEditGroup;
@@ -94,7 +98,12 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
         private void InitializeMenuItems()
         {
-            itemEditRole = CreateMenuItem("設定用色", ItemEditRole_Click, TPSvgimages.Num1);
+            itemOffboardingHistory = CreateMenuItem("離職紀錄", (sender, args) => OpenOffboardingDocuments(false), TPSvgimages.View);
+            itemOffboardingHistory.BeginGroup = true;
+            itemOffboardingHistory.Enabled = false;
+            itemOffboardingUpload = CreateMenuItem("上傳離職文件", (sender, args) => OpenOffboardingDocuments(true), TPSvgimages.Attach);
+            itemOffboardingUpload.Enabled = false;
+            itemEditRole = CreateMenuItem("設定角色", ItemEditRole_Click, TPSvgimages.Num1);
             itemEditSign = CreateMenuItem("設定簽名", ItemEditSign_Click, TPSvgimages.Num2);
             itemEditGroup = CreateMenuItem("設定群組", ItemEditGroup_Click, TPSvgimages.Num3);
         }
@@ -144,7 +153,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             btnRefresh.ImageOptions.SvgImage = TPSvgimages.Reload;
             btnExportExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
             btnExportReportExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
-            btnManageDeptHeadcount.ImageOptions.SvgImage = TPSvgimages.Dept;
         }
 
         private void InitializeControl()
@@ -201,15 +209,15 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                                 from g in dtg.DefaultIfEmpty()
                                 join actualJob in lsJobTitles on data.ActualJobCode equals actualJob.Id into atg
                                 from a in atg.DefaultIfEmpty()
-                                let displayName = $"{data.DisplayName}{(!string.IsNullOrEmpty(data.DisplayNameVN) ? $"\r\n{data.DisplayNameVN}" : "")}"
-                                let deptName = $"{data.IdDepartment}\r\n{depts.DisplayName}"
+                                let deptName = $"{data.IdDepartment} {depts.DisplayName}"
                                 let sexName = data.Sex == null ? "" : data.Sex.Value ? "男" : "女"
                                 let statusName = (data.ResignPlan != null && data.Status == 0) ? "預報離職" : (data.Status == null ? "" : TPConfigs.lsUserStatus[data.Status.Value])
                                 select new
                                 {
                                     Data = data,
                                     Depts = depts,
-                                    DisplayName = displayName,
+                                    DisplayNameTW = data.DisplayName,
+                                    DisplayNameVN = data.DisplayNameVN,
                                     DeptName = deptName,
                                     JobName = g != null ? g.DisplayName : "",
                                     ActualJobName = a != null ? a.DisplayName : "",
@@ -220,7 +228,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             sourceUsers.DataSource = lsUserManage;
 
             helper.LoadViewInfo();
-            gvData.BestFitColumns();
             gcData.RefreshDataSource();
         }
 
@@ -239,8 +246,17 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             LoadUser();
             CreateRuleGV();
 
-            string filterString = "[StatusName] In ('在職','留職停薪','預報離職')";
-            gvData.Columns["StatusName"].FilterInfo = new ColumnFilterInfo(filterString);
+            StatusFilter_EditValueChanged(this, EventArgs.Empty);
+        }
+
+        private void StatusFilter_EditValueChanged(object sender, EventArgs e)
+        {
+            var column = gvData.Columns["StatusName"];
+            if (column == null) return;
+            string selected = statusFilter.EditValue as string;
+            string filter = selected == "已離職人員" ? "[StatusName] = '離職'"
+                : selected == "全部人員" ? "" : "[StatusName] In ('在職','留職停薪','預報離職')";
+            column.FilterInfo = new ColumnFilterInfo(filter);
         }
 
         private void btnCreate_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
@@ -305,14 +321,6 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             }
 
             Process.Start(filePath);
-        }
-
-        private void btnManageDeptHeadcount_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
-        {
-            using (var form = new DepartmentHeadcountManageForm())
-            {
-                form.ShowDialog(this);
-            }
         }
 
         private bool TryPromptMonthRange(out DateTime startMonth, out DateTime endMonth)
@@ -387,17 +395,29 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 summaryDepartments = GetDepartmentsForExport(allDepts).Where(r => !string.IsNullOrWhiteSpace(r.Id)).OrderBy(r => r.Id).ToList();
             }
 
+            var activeSummaryDepartments = summaryDepartments
+                .Where(r => r.IsActive != false)
+                .ToList();
+            var activeDepartmentIds = new HashSet<string>(
+                GetDepartmentsForExport(allDepts)
+                    .Where(r => r.IsActive != false && !string.IsNullOrWhiteSpace(r.Id))
+                    .Select(r => r.Id),
+                StringComparer.OrdinalIgnoreCase);
+            var activeSummaryDepartmentPrefixes = activeSummaryDepartments.Select(r => r.Id).ToList();
+            var activeDepartmentUsers = scopedUsers
+                .Where(r => activeDepartmentIds.Contains(r.IdDepartment ?? "")
+                    && activeSummaryDepartmentPrefixes.Any(prefix => (r.IdDepartment ?? "").StartsWith(prefix, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
             string divisionPrefix = GetDivisionPrefix();
-            string divisionName = allDepts.FirstOrDefault(r => string.Equals(r.Id, divisionPrefix, StringComparison.OrdinalIgnoreCase))?.DisplayName
-                                  ?? TPConfigs.LoginUser.IdDepartment
-                                  ?? "公司";
+            string divisionName = "LG";
 
             ExcelPackage.LicenseContext = OfficeOpenXml.LicenseContext.NonCommercial;
             using (var package = new ExcelPackage())
             {
                 BuildSheet1(package.Workbook.Worksheets.Add("個人資料明細表"), divisionName, scopedUsers, allJobs, allDepts);
-                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, summaryDepartments, scopedUsers);
-                BuildSheet3(package.Workbook.Worksheets.Add("每月人數統計表"), divisionName, summaryDepartments, scopedUsers, startMonth, endMonth);
+                BuildSheet2(package.Workbook.Worksheets.Add("人數彙總表"), divisionName, activeSummaryDepartments, activeDepartmentUsers);
+                BuildSheet3(package.Workbook.Worksheets.Add("每月人數統計表"), divisionName, activeSummaryDepartments, activeDepartmentUsers, startMonth, endMonth);
 
                 package.SaveAs(new FileInfo(filePath));
             }
@@ -799,14 +819,31 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             }
         }
 
+        private void OpenOffboardingDocuments(bool upload)
+        {
+            string id = gvData.GetFocusedRowCellValue(gColIdUser)?.ToString();
+            if (string.IsNullOrEmpty(id)) return;
+            using (XtraForm dialog = upload ? (XtraForm)new f401_OffboardingUpload(id) : new f401_OffboardingDocuments(id)) dialog.ShowDialog(this);
+            LoadUser();
+        }
+
         private void gvData_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell && e.HitInfo.InDataRow && IsSysAdmin)
+            if (!e.HitInfo.InDataRow || e.Menu == null) return;
+            gvData.FocusedRowHandle = e.HitInfo.RowHandle;
+            if (IsSysAdmin)
             {
+                itemEditRole.BeginGroup = true;
                 e.Menu.Items.Add(itemEditRole);
                 e.Menu.Items.Add(itemEditSign);
                 e.Menu.Items.Add(itemEditGroup);
             }
+            string id = gvData.GetFocusedRowCellValue(gColIdUser)?.ToString();
+            var user = users.FirstOrDefault(x => x.Id == id);
+            if (user == null) return;
+            e.Menu.Items.Add(itemOffboardingHistory);
+            itemOffboardingUpload.Enabled = user.Status == 1 || user.ResignPlan.HasValue;
+            if (itemOffboardingUpload.Enabled) e.Menu.Items.Add(itemOffboardingUpload);
         }
 
         private class DepartmentHeadcountManageForm : XtraForm

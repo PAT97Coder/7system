@@ -1,7 +1,5 @@
 ﻿using BusinessLayer;
 using DataAccessLayer;
-using DevExpress.XtraBars.Docking2010.Customization;
-using DevExpress.XtraBars.Docking2010.Views.WindowsUI;
 using DevExpress.XtraEditors;
 using KnowledgeSystem.Helpers;
 using Newtonsoft.Json;
@@ -85,27 +83,6 @@ namespace KnowledgeSystem.Views._00_Generals
             elementIdDept.Text = idDept;
             elementGrade.Text = gradeName;
             elementClass.Text = gradeClass;
-        }
-
-        private void ChangePassword()
-        {
-            uc00_ChangePassword uc00_ChangePass = new uc00_ChangePassword();
-
-            var dlg = VBFlyoutDialog.ShowFormPopup(this, null, uc00_ChangePass);
-            if (dlg != DialogResult.OK)
-            {
-                return;
-            }
-
-            string newPassword = uc00_ChangePass.NewPassword;
-            if (string.IsNullOrEmpty(newPassword))
-            {
-                XtraMessageBox.Show("舊密碼不正確或兩個新密碼不匹配！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            dm_UserBUS.Instance.ChangePass(TPConfigs.LoginUser.Id, newPassword);
-            XtraMessageBox.Show("您的密碼已更新！", TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         private void fMain_Load(object sender, EventArgs e)
@@ -229,45 +206,38 @@ namespace KnowledgeSystem.Views._00_Generals
             ShowFromByFrame(AppPermission.WorkManagementMain, e);
         }
 
-        private void tileInfoUser_ItemClick(object sender, TileItemEventArgs e)
+        private bool logoutDialogOpen;
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            uc00_UserControl uc00_User = new uc00_UserControl();
-
-            var dlg = VBFlyoutDialog.ShowFormPopup(this, null, uc00_User);
-            if (dlg != DialogResult.OK)
+            if (keyData == Keys.Escape && TPConfigs.LoginUser != null)
             {
-                return;
+                ConfirmLogout();
+                return true;
             }
-
-            UserComtrolE eventControl = uc00_User.EventControl;
-            switch (eventControl)
-            {
-                case UserComtrolE.ChangePass:
-                    ChangePassword();
-                    break;
-                case UserComtrolE.LogOut:
-                    AppPermission.Instance.Dispose();
-                    GetUserLogin();
-                    break;
-                default:
-                    break;
-            }
+            return base.ProcessCmdKey(ref msg, keyData);
         }
 
-        public class VBFlyoutDialog : FlyoutDialog
+        private void tileInfoUser_ItemClick(object sender, TileItemEventArgs e)
         {
-            public VBFlyoutDialog(Form form, FlyoutAction action, Control userControl) : base(form, action)
-            {
-                Properties.HeaderOffset = 0;
-                Properties.Alignment = ContentAlignment.MiddleCenter;
-                Properties.Style = FlyoutStyle.Popup;
-                FlyoutControl = userControl;
-            }
+            ConfirmLogout();
+        }
 
-            public static DialogResult ShowFormPopup(Form form, FlyoutAction action, Control userControl)
+        private void ConfirmLogout()
+        {
+            if (logoutDialogOpen || TPConfigs.LoginUser == null) return;
+            logoutDialogOpen = true;
+            try
             {
-                var vbFlyout = new VBFlyoutDialog(form, action, userControl);
-                return vbFlyout.ShowDialog();
+                using (var dialog = new f00_ConfirmLogout(TPConfigs.LoginUser))
+                    if (dialog.ShowDialog(this) != DialogResult.OK) return;
+
+                AppPermission.Instance.Dispose();
+                GetUserLogin();
+            }
+            finally
+            {
+                logoutDialogOpen = false;
             }
         }
 

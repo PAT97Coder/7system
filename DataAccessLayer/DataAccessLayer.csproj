@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -52,6 +52,9 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="EmployeeOffboarding.cs" />
+    <Compile Include="EmployeeOffboardingFile.cs" />
+
     <Reference Include="DevExpress.Data.v22.1, Version=22.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
@@ -131,22 +134,40 @@
     <Compile Include="dt201_Base.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt209_Base.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt201_Forms.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt209_Forms.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="dt201_ProgInfo.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt209_ProgInfo.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt201_Progress.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt209_Progress.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt201_RecordCode.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt209_RecordCode.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="dt201_ReqUpdateDocs.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="dt201_Role.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt209_Role.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="dt201_UpdateUsrReq.cs">
@@ -299,6 +320,7 @@
     <Compile Include="dt307_Questions.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt308_ReportContact.cs" />
     <Compile Include="dt308_CheckDetail.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
@@ -401,6 +423,12 @@
     <Compile Include="dt312_ExamUser.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt312_ExternalParticipant.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt312_PracticeAttempt.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt312_Groups.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
@@ -470,6 +498,15 @@
     <Compile Include="dt315_InterviewScoreAudit.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
+    <Compile Include="dt316_Plan.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt316_PlanUser.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
+    <Compile Include="dt316_Report.cs">
+      <DependentUpon>ModelDocManager.tt</DependentUpon>
+    </Compile>
     <Compile Include="dt403_04_HardnessStandardLog.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
@@ -517,6 +554,8 @@
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
     <Compile Include="TPConfigsDAL.cs" />
+    <Compile Include="dt312_PracticeModels.cs" />
+    <Compile Include="dt312_QuestionImportItem.cs" />
     <Compile Include="vw310_EquipmentInfo.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>
@@ -558,4 +597,5 @@
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
+  <ItemGroup><Compile Include="dt208_DeviceEdit.cs" /></ItemGroup>
 </Project>

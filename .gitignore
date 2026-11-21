@@ -11,6 +11,8 @@
 *.sln.docstates
 
 # Advanced Install
+/Installer/Staging/
+/tmp/
 */SetupDocumentSystem-cache
 *.cab
 SetupDocumentSystem/
@@ -373,3 +375,7 @@ FodyWeavers.xsd
 # Local installer staging and temporary verification artifacts
 /Installer/Staging/
 /tmp/
+
+# Kết quả kiểm tra bố cục hồ sơ nghỉ việc
+tmp/offboarding-smoke/
+tmp/logout-dialog-build/

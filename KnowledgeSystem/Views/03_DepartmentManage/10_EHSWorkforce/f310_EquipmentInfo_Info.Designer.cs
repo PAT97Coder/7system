@@ -498,8 +498,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             this.Controls.Add(this.barDockControlBottom);
             this.Controls.Add(this.barDockControlTop);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            this.MaximizeBox = false;
+            this.MinimizeBox = false;
             this.Name = "f310_EquipmentInfo_Info";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "設備信息";
             this.Load += new System.EventHandler(this.f310_EquipmentInfo_Info_Load);
             ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).EndInit();

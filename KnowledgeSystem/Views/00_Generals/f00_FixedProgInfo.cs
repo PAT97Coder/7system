@@ -97,7 +97,11 @@ namespace KnowledgeSystem.Views._00_Generals
                     DisplayName = r.DisplayName
                 });
 
-            return role306.Concat(role201)
+            var role209 = dt209_RoleBUS.Instance.GetList()
+                .Where(r => r.Id != 0)
+                .Select(r => new RoleOption { Id = r.Id, DisplayName = r.DisplayName });
+
+            return role306.Concat(role201).Concat(role209)
                 .GroupBy(r => r.Id)
                 .Select(r => r.First())
                 .OrderBy(r => r.Id)

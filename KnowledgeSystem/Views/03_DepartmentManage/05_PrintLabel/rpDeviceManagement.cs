@@ -11,6 +11,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._05_PrintLabel
         public rpDeviceManagement()
         {
             InitializeComponent();
+            xrTable1.CanGrow = false;
+            foreach (XRTableCell cell in new[] { lbNameVN, lbNameTW, lbCode, lbDept, lbUserVN, lbUserTW })
+            {
+                cell.CanGrow = false;
+                cell.CanShrink = false;
+                cell.WordWrap = true;
+                cell.TextFitMode = TextFitMode.ShrinkOnly;
+            }
             BindData();
         }
 

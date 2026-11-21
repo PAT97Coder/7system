@@ -34,6 +34,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
         {
             InitializeComponent();
             InitializeIcon();
+            OffboardingGridLocalizer.Activate();
             cbbStatus.EditValueChanged += cbbStatus_EditValueChanged;
         }
 
@@ -145,7 +146,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             editor.Properties.Appearance.Options.UseForeColor = true;
             editor.Properties.AppearanceDropDown.Font = fontUI14;
             editor.Properties.AppearanceDropDown.Options.UseFont = true;
+            editor.Properties.Buttons.Clear();
             editor.Properties.Buttons.AddRange(new[] { new EditorButton(ButtonPredefines.Combo) });
+            editor.Properties.CalendarTimeProperties.Buttons.Clear();
             editor.Properties.CalendarTimeProperties.Buttons.AddRange(new[] { new EditorButton(ButtonPredefines.Combo) });
             editor.Properties.MaskSettings.Set("mask", "yyyy/MM/dd");
             editor.Properties.UseMaskAsDisplayFormat = true;
@@ -286,7 +289,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                     EnabledController(false);
                     break;
                 case EventFormInfo.View:
-                    Text = $"{formName}信息";
+                    Text = $"{formName}資訊";
 
                     btnConfirm.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
                     btnEdit.Visibility = DevExpress.XtraBars.BarItemVisibility.Always;
@@ -384,8 +387,21 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
             LockControl();
 
-            var lsDepts = dm_DeptBUS.Instance.GetList().Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id,-5}{r.DisplayName}" }).ToList();
-            cbbDept.Properties.DataSource = lsDepts;
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList();
+            if (userInfo != null && !string.IsNullOrWhiteSpace(userInfo.IdDepartment) && !lsDepts.Any(r => r.Id == userInfo.IdDepartment))
+            {
+                var currentDept = dm_DeptBUS.Instance.GetItemById(userInfo.IdDepartment);
+                if (currentDept != null)
+                {
+                    lsDepts.Add(currentDept);
+                }
+            }
+
+            var deptDataSource = lsDepts
+                .OrderBy(r => r.Id)
+                .Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id,-5}{r.DisplayName}{(r.IsActive ? "" : "（停用）")}" })
+                .ToList();
+            cbbDept.Properties.DataSource = deptDataSource;
             cbbDept.Properties.DisplayMember = "DisplayName";
             cbbDept.Properties.ValueMember = "Id";
 
@@ -501,53 +517,51 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             LockControl();
         }
 
-        private void Trigger310(string displayName)
+        private void Trigger310(string displayName, string sourceDeptId = null)
         {
-            // 1. Chuẩn bị dữ liệu Department ID an toàn
-            var deptId = userInfo.IdDepartment ?? "";
+            var deptId = sourceDeptId ?? userInfo.IdDepartment ?? "";
             var psmDeptId = deptId.Length >= 2 ? deptId.Substring(0, 2) : deptId;
-
-            // 2. Lấy ID các nhóm (Helper function hoặc Dictionary để code gọn hơn)
-            int GetGroupId(string name) => dm_GroupBUS.Instance.GetItemByName(name)?.Id ?? -1;
-
-            int ehsGroupId = GetGroupId($"安衛環{deptId}");      // Safety/EHS
-            int level2GroupId = GetGroupId($"二級{deptId}");      // Level 2 Manager
-            int psmGroupId = GetGroupId($"PSM專人{psmDeptId}");   // PSM Specialist
-            int level1GroupId = GetGroupId($"一級{deptId}");      // Level 1 Manager
-
-            // 3. Tạo bản ghi chính (Master data)
-            var updateLeaveUser = new dt310_UpdateLeaveUser
+            try
             {
-                IdUserLeave = userInfo.Id,
-                DisplayName = displayName,
-                IsProcess = true,
-                IsCancel = false,
-                IdGroupProcess = ehsGroupId,
-                CreateBy = TPConfigs.LoginUser.Id,
-                CreateAt = DateTime.Now
-            };
-
-            int idUpdateData = dt310_UpdateLeaveUserBUS.Instance.Add(updateLeaveUser);
-
-            // 4. Tạo các bước chi tiết (Detail steps) bằng danh sách
-            // Cấu trúc: (GroupId, StepIndex)
-            var steps = new[]
-            {
-                (GroupId: ehsGroupId, Index: 0),
-                (GroupId: level2GroupId, Index: 1),
-                (GroupId: psmGroupId, Index: 2),
-                (GroupId: level1GroupId, Index: 3)
-            };
-
-            foreach (var step in steps)
-            {
-                var detail = new dt310_UpdateLeaveUser_detail
+                using (var context = new DBDocumentManagementSystemEntities())
+                using (var transaction = context.Database.BeginTransaction(System.Data.IsolationLevel.Serializable))
                 {
-                    IdUpdateData = idUpdateData,
-                    IdGroup = step.GroupId,
-                    IndexStep = step.Index
-                };
-                dt310_UpdateLeaveUser_detailBUS.Instance.Add(detail);
+                    // Planned resignation and effective resignation share the same pending handover.
+                    if (context.dt310_UpdateLeaveUser.Any(r => r.IdUserLeave == userInfo.Id && r.IsProcess)) return;
+                    string[] names = { $"安衛環{deptId}", $"二級{deptId}", $"PSM專人{psmDeptId}", $"一級{deptId}" };
+                    var groups = context.dm_Group.Where(r => names.Contains(r.DisplayName)).ToList();
+                    var missing = names.Where(name => !groups.Any(r => r.DisplayName == name)).ToList();
+                    if (missing.Count > 0)
+                        throw new InvalidOperationException("缺少交接審核群組：" + string.Join("、", missing));
+                    var workflow = new dt310_UpdateLeaveUser
+                    {
+                        IdUserLeave = userInfo.Id,
+                        DisplayName = displayName,
+                        IsProcess = true,
+                        IsCancel = false,
+                        IdGroupProcess = groups.First(r => r.DisplayName == names[0]).Id,
+                        CreateBy = TPConfigs.LoginUser.Id,
+                        CreateAt = DateTime.Now
+                    };
+                    context.dt310_UpdateLeaveUser.Add(workflow);
+                    context.SaveChanges();
+                    for (int i = 0; i < names.Length; i++)
+                    {
+                        string groupName = names[i];
+                        context.dt310_UpdateLeaveUser_detail.Add(new dt310_UpdateLeaveUser_detail
+                        {
+                            IdUpdateData = workflow.Id,
+                            IdGroup = groups.First(r => r.DisplayName == groupName).Id,
+                            IndexStep = i
+                        });
+                    }
+                    context.SaveChanges();
+                    transaction.Commit();
+                }
+            }
+            catch (Exception ex)
+            {
+                MsgTP.MsgError("人員資料已儲存，但 310 交接申請建立失敗，請聯絡管理員確認：\n" + ex.Message);
             }
         }
 
@@ -575,7 +589,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
             if (!IsValidate)
             {
-                MsgTP.MsgError("請填寫所有信息<color=red>(*)</color>");
+                MsgTP.MsgError("請填寫所有必要資訊<color=red>(*)</color>");
                 return;
             }
 
@@ -782,6 +796,9 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                                 updateReq.Describe = $"調任從「{templateData.deptfrom}」到「{templateData.deptto}」";
                                 dt201_UpdateUsrReqBUS.Instance.Add(updateReq);
 
+                                if (dt310_EquipmentInfoBUS.Instance.GetListByManagerId(userInfo.Id).Count > 0)
+                                    Trigger310("部門調任設備交接", oldUserData.IdDepartment);
+
                                 break;
                             case UpdateEvent.Resign:
                                 // Nghi việc: chuyển tất cả chứng chỉ về trạng thái hết hạn
@@ -881,7 +898,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                         if (dialogResult != DialogResult.Yes) return;
 
                         result = dm_UserBUS.Instance.Remove(userInfo.Id);
-                        dm_UserRoleBUS.Instance.RemoveRangeByUID(userInfo.Id);
+                        if (result) dm_UserRoleBUS.Instance.RemoveRangeByUID(userInfo.Id);
                         break;
                     default:
                         break;
@@ -899,6 +916,19 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
                 //        logger.Warning(_eventInfo.ToString(), msg);
                 //        break;
                 //}
+                if (_eventUpdate == UpdateEvent.Resign && eventInfo == EventFormInfo.Update)
+                {
+                    // Hồ sơ nghỉ việc đã lưu; tài liệu có thể bổ sung từ danh sách nhân viên.
+                    try
+                    {
+                        using (var dialog = new f401_OffboardingUpload(userInfo.Id)) dialog.ShowDialog(this);
+                    }
+                    catch (Exception ex)
+                    {
+                        new Logger.TPLogger(typeof(f401_UserInfo).FullName).Error("離職文件", ex.ToString());
+                        XtraMessageBox.Show("離職資料已儲存。文件暫時無法開啟，請稍後從人員清單補上附件。", TPConfigs.SoftNameTW);
+                    }
+                }
                 Close();
             }
             else
@@ -909,7 +939,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
 
         private void txbUserId_ButtonClick(object sender, DevExpress.XtraEditors.Controls.ButtonPressedEventArgs e)
         {
-            XtraMessageBox.Show("Chức năng đang lỗi!", TPConfigs.SoftNameTW);
+            XtraMessageBox.Show("此功能暫時無法使用！", TPConfigs.SoftNameTW);
         }
 
         private void cbbDept_AutoSearch(object sender, DevExpress.XtraEditors.Controls.LookUpEditAutoSearchEventArgs e)
@@ -1066,7 +1096,7 @@ namespace KnowledgeSystem.Views._04_SystemAdministrator._01_Moderator
             GridColumn gcol1 = new GridColumn() { Caption = "部門代號", FieldName = "Id", Visible = true, VisibleIndex = 0 };
             GridColumn gcol2 = new GridColumn() { Caption = "部門名稱", FieldName = "DisplayName", Visible = true, VisibleIndex = 1 };
 
-            var lsDepts = dm_DeptBUS.Instance.GetList().Select(r => new dm_Departments
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList().Select(r => new dm_Departments
             {
                 Id = r.Id,
                 DisplayName = $"{r.Id,-5}{r.DisplayName}"

@@ -163,8 +163,27 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._02_NewPersonnel
 
             LockControl();
 
-            var lsDepts = dm_DeptBUS.Instance.GetList().Where(r => r.Id.Length == 4 && r.Id.StartsWith(idDept2word))
+            var lsDepts = dm_DeptBUS.Instance.GetActiveList().Where(r => r.Id.Length == 4 && r.Id.StartsWith(idDept2word))
                 .Select(r => new dm_Departments { Id = r.Id, DisplayName = $"{r.Id,-5}{r.DisplayName}" }).ToList();
+
+            if (eventInfo != EventFormInfo.Create)
+            {
+                var currentBase = dt302_BaseBUS.Instance.GetItemById(idBase302);
+                var currentUser = currentBase == null ? null : dm_UserBUS.Instance.GetItemById(currentBase.IdUser);
+                if (currentUser != null && !lsDepts.Any(r => r.Id == currentUser.IdDepartment))
+                {
+                    var currentDept = dm_DeptBUS.Instance.GetItemById(currentUser.IdDepartment);
+                    if (currentDept != null)
+                    {
+                        lsDepts.Add(new dm_Departments
+                        {
+                            Id = currentDept.Id,
+                            DisplayName = $"{currentDept.Id,-5}{currentDept.DisplayName}（停用）"
+                        });
+                    }
+                }
+            }
+
             cbbDept.Properties.DataSource = lsDepts;
             cbbDept.Properties.DisplayMember = "DisplayName";
             cbbDept.Properties.ValueMember = "Id";

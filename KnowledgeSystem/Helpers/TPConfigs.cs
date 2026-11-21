@@ -36,6 +36,7 @@ namespace KnowledgeSystem.Helpers
         public static string Folder202 { get; set; }
         public static string Folder402 { get; set; }
         public static string Folder201 { get; set; }
+        public static string Folder209 { get; set; }
         public static string Folder204 { get; set; }
         public static string Folder205 { get; set; }
         public static string Folder206 { get; set; }
@@ -50,12 +51,14 @@ namespace KnowledgeSystem.Helpers
         public static string Folder313 { get; set; }
         public static string Folder315 { get; set; }
         public static string Folder315InterviewReports { get; set; }
+        public static string Folder316 { get; set; }
         public static string Folder403 { get; set; }
         public static string Folder40304 { get; set; }
         public static string Folder40305 { get; set; }
         public static string FolderSign { get; set; }
         public static string FolderWatermark { get; set; }
         public static string DocTypes201 { get; set; }
+        public static string DocTypes209 { get; set; }
         public static string FolderCalibCert { get; set; }
         public static string FolderReportFormat { get; set; }
         public static string ExclusionDept310 { get; set; }
@@ -71,6 +74,7 @@ namespace KnowledgeSystem.Helpers
             UrlUpdate = lsStaticValue.FirstOrDefault(r => r.KeyT == "UrlUpdate").ValueT;
             FolderData = lsStaticValue.FirstOrDefault(r => r.KeyT == "FolderData").ValueT;
             DocTypes201 = lsStaticValue.FirstOrDefault(r => r.KeyT == "201DocTypes")?.ValueT ?? "";
+            DocTypes209 = lsStaticValue.FirstOrDefault(r => r.KeyT == "209DocTypes")?.ValueT ?? "";
             FolderCalibCert = lsStaticValue.FirstOrDefault(r => r.KeyT == "CalibCertFolder")?.ValueT ?? "";
 
             ExclusionDept310 = lsStaticValue.FirstOrDefault(r => r.KeyT == "310ExclusionDept")?.ValueT ?? "";
@@ -83,6 +87,7 @@ namespace KnowledgeSystem.Helpers
             Folder202 = Path.Combine(FolderData, "202");
             Folder402 = Path.Combine(FolderData, "402");
             Folder201 = Path.Combine(FolderData, "201");
+            Folder209 = Path.Combine(FolderData, "209");
             Folder204 = Path.Combine(FolderData, "204");
             Folder205 = Path.Combine(FolderData, "205");
             Folder206 = Path.Combine(FolderData, "206");
@@ -97,6 +102,7 @@ namespace KnowledgeSystem.Helpers
             Folder313 = Path.Combine(FolderData, "313");
             Folder315 = Path.Combine(FolderData, "315");
             Folder315InterviewReports = Path.Combine(Folder315, "InterviewReports");
+            Folder316 = Path.Combine(FolderData, "316");
             Folder403 = Path.Combine(FolderData, "403");
             Folder40304 = Path.Combine(FolderData, "40304");
             Folder40305 = Path.Combine(FolderData, "40305");
@@ -111,6 +117,7 @@ namespace KnowledgeSystem.Helpers
             AppPermission.WorkManagementMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleWorkManagementMain")?.ValueT ?? "-1");
             AppPermission.JFEnCSCMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleJFEnCSCMain")?.ValueT ?? "-1");
             AppPermission.ISOAuditDocsMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleISOAuditDocsMain")?.ValueT ?? "-1");
+            AppPermission.ISO14001DocsMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleISO14001DocsMain")?.ValueT ?? "-1");
             AppPermission.TechnicalPrjMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleTechnicalPrjMain")?.ValueT ?? "-1");
             AppPermission.SignatureDigital = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleSignatureDigitalMain")?.ValueT ?? "-1");
             AppPermission.QuizMain = Convert.ToInt16(lsStaticValue.FirstOrDefault(r => r.KeyT == "RoleQuizMain")?.ValueT ?? "-1");

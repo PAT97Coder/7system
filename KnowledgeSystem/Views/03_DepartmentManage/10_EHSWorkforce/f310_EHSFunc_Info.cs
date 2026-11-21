@@ -144,7 +144,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             cbbUsr.Properties.DisplayMember = "DisplayName";
             cbbUsr.Properties.ValueMember = "Id";
 
-            var depts = dm_DeptBUS.Instance.GetAllChildren(0).Where(r => r.IsGroup != true).ToList();
+            var depts = dm_DeptBUS.Instance.GetActiveAllChildren(0).Where(r => r.IsGroup != true).ToList();
 
             cbbDept.Properties.DataSource = depts;
             cbbDept.Properties.DisplayMember = "DisplayName";

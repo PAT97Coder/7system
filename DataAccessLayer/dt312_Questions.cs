@@ -19,5 +19,7 @@ namespace DataAccessLayer
         public string DisplayName { get; set; }
         public string ImageName { get; set; }
         public bool IsmultiAns { get; set; }
+        public bool IsEssay { get; set; }
+        public string ReferenceAnswer { get; set; }
     }
 }

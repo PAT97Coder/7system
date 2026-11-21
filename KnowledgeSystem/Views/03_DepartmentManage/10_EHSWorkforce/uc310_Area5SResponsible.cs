@@ -100,10 +100,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             btnAdd.ImageOptions.SvgImage = TPSvgimages.Add;
             btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
             btnSummaryTable.ImageOptions.SvgImage = TPSvgimages.Print;
-            btnSummaryTable.Caption = "導出PDF報告";
-            btnSummaryTable.Visibility = BarItemVisibility.Always;
-            btnSummaryTable.ItemClick -= btnSummaryTable_ItemClick;
-            btnSummaryTable.ItemClick += btnSummaryTable_ItemClick;
         }
 
         private void InitializeMenuItems()
@@ -143,7 +139,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
         {
             area5S = dt310_Area5SBUS.Instance.GetList();
             areaResps = dt310_Area5SResponsibleBUS.Instance.GetList();
-            depts = dm_DeptBUS.Instance.GetList();
+            depts = dm_DeptBUS.Instance.GetActiveList();
             users = dm_UserBUS.Instance.GetList();
 
             source5sArea.DataSource = area5S;
@@ -213,6 +209,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             userGroups = dm_GroupUserBUS.Instance.GetListByUID(TPConfigs.LoginUser.Id);
             int groupId = dm_GroupBUS.Instance.GetItemByName($"安衛環7")?.Id ?? -1;
             isEHSAdmin = userGroups.Any(r => r.IdGroup == groupId);
+            btnExportAll.Visibility = dt310_Area5SResponsibleBUS.Instance.CanExportAll(TPConfigs.LoginUser.Id)
+                ? BarItemVisibility.Always : BarItemVisibility.Never;
 
             if (!isEHSAdmin)
             {
@@ -309,25 +307,42 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
 
         private void btnSummaryTable_ItemClick(object sender, ItemClickEventArgs e)
         {
+            ExportReport(false);
+        }
+
+        private void btnExportAll_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ExportReport(true);
+        }
+
+        private void ExportReport(bool exportAll)
+        {
+            if (exportAll && !dt310_Area5SResponsibleBUS.Instance.CanExportAll(TPConfigs.LoginUser?.Id))
+            {
+                btnExportAll.Visibility = BarItemVisibility.Never;
+                XtraMessageBox.Show("您沒有匯出全部部門資料的權限。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            LoadData();
             List<dt310_Area5S> reportAreas = (area5S ?? new List<dt310_Area5S>())
                 .Where(r => r.DeletedAt == null)
                 .OrderBy(r => r.DisplayName)
                 .ToList();
 
             reportAreas = reportAreas
-                .Where(r => BuildAreaReportRows(r.Id).Count > 0)
+                .Where(r => BuildAreaReportRows(r.Id, exportAll).Count > 0)
                 .ToList();
 
             if (reportAreas.Count == 0)
             {
-                XtraMessageBox.Show("目前登入部門沒有可導出的 5S 區域資料。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                XtraMessageBox.Show("沒有可匯出的 5S 區域資料。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
             using (SaveFileDialog saveFileDialog = new SaveFileDialog())
             {
-                saveFileDialog.Filter = "PDF Files|*.pdf";
-                saveFileDialog.FileName = BuildAreaReportFileName();
+                saveFileDialog.Filter = "PDF 檔案|*.pdf";
+                saveFileDialog.FileName = $"5S責任區域報告_{(exportAll ? "全部部門" : "本部門")}_{DateTime.Now:yyyyMMdd_HHmm}.pdf";
                 saveFileDialog.RestoreDirectory = true;
 
                 if (saveFileDialog.ShowDialog() != DialogResult.OK)
@@ -339,7 +354,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 {
                     using (var handle = SplashScreenManager.ShowOverlayForm(this))
                     {
-                        ExportAreaReportPdf(reportAreas, saveFileDialog.FileName);
+                        ExportAreaReportPdf(reportAreas, saveFileDialog.FileName, exportAll);
                     }
                     Process.Start(saveFileDialog.FileName);
                 }
@@ -350,30 +365,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private string BuildAreaReportFileName()
+        private void ExportAreaReportPdf(List<dt310_Area5S> areas, string outputPath, bool exportAll = false)
         {
-            return $"[310] 5S Area Responsibility Report {DateTime.Now:yyyyMMdd_HHmm}.pdf";
-        }
-
-        private static string SanitizeFileName(string fileName)
-        {
-            foreach (char invalidChar in Path.GetInvalidFileNameChars())
-            {
-                fileName = fileName.Replace(invalidChar, '_');
-            }
-
-            return fileName;
-        }
-
-        private void ExportAreaReportPdf(List<dt310_Area5S> areas, string outputPath)
-        {
+            if (exportAll)
+                areaResps = dt310_Area5SResponsibleBUS.Instance.GetListForFullExport(TPConfigs.LoginUser?.Id);
             Spire.License.LicenseProvider.SetLicenseKey(TPConfigs.KeySpirePPT);
 
             var exportAreas = areas
                 .Select(area => new
                 {
                     Area = area,
-                    ReportRows = BuildAreaReportRows(area.Id)
+                    ReportRows = BuildAreaReportRows(area.Id, exportAll)
                 })
                 .Where(item => item.ReportRows.Count > 0)
                 .ToList();
@@ -409,7 +411,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 document.DocumentInformation.Author = TPConfigs.LoginUser?.DisplayName ?? TPConfigs.LoginUser?.Id ?? "KnowledgeSystem";
 
                 PdfNewPage coverPage = (PdfNewPage)document.Pages.Add();
-                DrawCoverPage(coverPage, ResolveCoverDepartmentName(), ResolveCoverSignatures(), coverCompanyFont, coverTitleFont, coverSignLabelFont, coverSignHintFont, coverSignDateFont);
+                DrawCoverPage(coverPage, exportAll ? "全部部門" : ResolveCoverDepartmentName(),
+                    exportAll ? BuildDefaultCoverSignatures() : ResolveCoverSignatures(),
+                    coverCompanyFont, coverTitleFont, coverSignLabelFont, coverSignHintFont, coverSignDateFont);
 
                 for (int i = 0; i < exportAreas.Count; i++)
                 {
@@ -420,13 +424,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                     float pageHeight = page.Canvas.ClientSize.Height;
                     float contentWidth = pageWidth - (PdfPageMargin * 2);
                     float y = PdfPageMargin;
-                    float gridHeight = CalculateTableGridHeight(reportRows.Count);
+                    PdfGrid grid = BuildResponsibilityGrid(reportRows, contentFont, contentWidth);
+                    float gridHeight = CalculateTableGridHeight(grid);
 
                     y = DrawHeader(page, area, titleFont, contentFont, pageWidth, y);
                     float imageHeight = CalculateImageHeight(pageHeight, y, gridHeight);
                     y = DrawAreaImageSection(page, area, sectionFont, smallFont, contentWidth, y, imageHeight);
                     y += PdfSectionSpacing;
-                    DrawTableSection(page, reportRows, sectionFont, contentFont, contentWidth, y, gridHeight);
+                    DrawTableSection(page, grid, sectionFont, contentWidth, y);
                 }
 
                 DrawContentPageNumbers(document, smallFont);
@@ -569,12 +574,56 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private void DrawTableSection(PdfNewPage page, List<object[]> reportRows, PdfTrueTypeFont sectionFont, PdfTrueTypeFont contentFont, float contentWidth, float y, float gridHeight)
+        private void DrawTableSection(PdfNewPage page, PdfGrid grid, PdfTrueTypeFont sectionFont, float contentWidth, float y)
         {
-            page.Canvas.DrawString("責任區劃分", sectionFont, PdfBrushes.Black, PdfPageMargin, y);
-            y += PdfSectionTitleHeight;
-            PdfGrid grid = BuildResponsibilityGrid(reportRows, contentFont, contentWidth);
-            grid.Draw(page, new RectangleF(PdfPageMargin, y, contentWidth, gridHeight));
+            float bottom = page.Canvas.ClientSize.Height - PdfPageMargin;
+            int rowIndex = 0;
+            while (rowIndex < grid.Rows.Count)
+            {
+                page.Canvas.DrawString("責任區劃分", sectionFont, PdfBrushes.Black, PdfPageMargin, y);
+                y += PdfSectionTitleHeight;
+                float height = PdfHeaderRowHeight;
+                var pageRows = new List<object[]>();
+                while (rowIndex < grid.Rows.Count)
+                {
+                    PdfGridRow sourceRow = grid.Rows[rowIndex];
+                    float rowHeight = sourceRow.Height + grid.Style.CellSpacing;
+                    if (height + rowHeight > bottom - y && pageRows.Count > 0)
+                    {
+                        break;
+                    }
+
+                    if (height + rowHeight > bottom - y && y > PdfPageMargin + PdfSectionTitleHeight)
+                    {
+                        break;
+                    }
+
+                    pageRows.Add(Enumerable.Range(0, grid.Columns.Count)
+                        .Select(column => sourceRow.Cells[column].Value).ToArray());
+                    height += rowHeight;
+                    rowIndex++;
+                }
+
+                if (pageRows.Count > 0)
+                {
+                    PdfGrid pageGrid = BuildResponsibilityGrid(pageRows, (PdfTrueTypeFont)grid.Style.Font, contentWidth);
+                    // Explicit page batches keep each normal row intact and repeat the title and headers.
+                    pageGrid.AllowCrossPages = height > bottom - y;
+                    PdfGridLayoutResult result = pageGrid.Draw(page,
+                        new RectangleF(PdfPageMargin, y, contentWidth, bottom - y), new PdfGridLayoutFormat
+                        {
+                            Layout = PdfLayoutType.Paginate,
+                            PaginateBounds = new RectangleF(PdfPageMargin, PdfPageMargin, contentWidth, bottom - PdfPageMargin)
+                        });
+                    page = (PdfNewPage)result.Page;
+                }
+
+                if (rowIndex < grid.Rows.Count)
+                {
+                    page = (PdfNewPage)page.Document.Pages.Add();
+                    y = PdfPageMargin;
+                }
+            }
         }
 
         private PdfGrid BuildResponsibilityGrid(List<object[]> reportRows, PdfTrueTypeFont contentFont, float contentWidth)
@@ -590,7 +639,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             grid.Style.Font = contentFont;
 
             grid.Columns.Add(6);
-            float[] widths = { 0.11f, 0.13f, 0.14f, 0.21f, 0.21f, 0.20f };
+            float[] widths = { 0.07f, 0.29f, 0.13f, 0.17f, 0.17f, 0.17f };
             for (int i = 0; i < widths.Length; i++)
             {
                 grid.Columns[i].Width = contentWidth * widths[i];
@@ -621,6 +670,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 for (int i = 0; i < 6; i++)
                 {
                     emptyRow.Cells[i].Style = CreateGridCellStyle(contentFont, PdfBrushes.White, i == 0 ? PdfTextAlignment.Center : PdfTextAlignment.Left);
+                    emptyRow.Cells[i].StringFormat = emptyRow.Cells[i].Style.StringFormat;
                 }
 
                 return grid;
@@ -629,21 +679,33 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             foreach (object[] rowData in reportRows)
             {
                 PdfGridRow row = grid.Rows.Add();
-                row.Height = PdfDataRowHeight;
+                float rowHeight = PdfDataRowHeight;
                 for (int i = 0; i < rowData.Length; i++)
                 {
-                    row.Cells[i].Value = rowData[i] ?? "";
-                    row.Cells[i].Style = CreateGridCellStyle(contentFont, PdfBrushes.White, i <= 2 ? PdfTextAlignment.Center : PdfTextAlignment.Left);
+                    string text = Convert.ToString(rowData[i]) ?? "";
+                    row.Cells[i].Value = text;
+                    row.Cells[i].Style = CreateGridCellStyle(contentFont, PdfBrushes.White,
+                        i == 0 || i == 2 ? PdfTextAlignment.Center : PdfTextAlignment.Left);
+                    row.Cells[i].StringFormat = row.Cells[i].Style.StringFormat;
+                    // Use the same wrapping and usable width for measurement and rendering.
+                    float textWidth = Math.Max(1f, grid.Columns[i].Width - 8f);
+                    float textHeight = contentFont.MeasureString(text, textWidth, row.Cells[i].Style.StringFormat).Height;
+                    rowHeight = Math.Max(rowHeight, textHeight + 8f);
                 }
+                row.Height = rowHeight;
             }
 
             return grid;
         }
 
-        private float CalculateTableGridHeight(int rowCount)
+        private float CalculateTableGridHeight(PdfGrid grid)
         {
-            int safeRowCount = Math.Max(rowCount, 1);
-            return PdfHeaderRowHeight + (safeRowCount * PdfDataRowHeight);
+            float height = PdfHeaderRowHeight;
+            for (int i = 0; i < grid.Rows.Count; i++)
+            {
+                height += grid.Rows[i].Height + grid.Style.CellSpacing;
+            }
+            return height;
         }
 
         private float CalculateImageHeight(float pageHeight, float initialY, float gridHeight)
@@ -670,7 +732,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
                 StringFormat = new PdfStringFormat
                 {
                     Alignment = alignment,
-                    LineAlignment = PdfVerticalAlignment.Middle
+                    LineAlignment = PdfVerticalAlignment.Middle,
+                    WordWrap = PdfWordWrapType.Word
                 }
             };
 
@@ -892,9 +955,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._10_EHSWorkforce
             }
         }
 
-        private List<object[]> BuildAreaReportRows(int areaId)
+        private List<object[]> BuildAreaReportRows(int areaId, bool exportAll = false)
         {
-            string exportDeptPrefix = GetExportDeptPrefix();
+            string exportDeptPrefix = exportAll ? "" : GetExportDeptPrefix();
 
             return areaResps
                 .Where(r => r.AreaId == areaId && r.DeletedAt == null)

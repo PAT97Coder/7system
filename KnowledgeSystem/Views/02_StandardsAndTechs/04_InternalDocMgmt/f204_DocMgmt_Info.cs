@@ -193,7 +193,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._04_InternalDocMgmt
             txbIdFounder.Properties.ValueMember = "Id";
             txbIdFounder.Properties.BestFitWidth = 110;
 
-            txbDept.EditValue = TPConfigs.LoginUser.IdDepartment;
             txbDept.ReadOnly = true;
 
             gcForm.DataSource = sourceFormAtts;
@@ -207,7 +206,11 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._04_InternalDocMgmt
 
                     txbDocVersion.Enabled = true;
 
-                    dt204Base = new dt204_InternalDocMgmt();
+                    dt204Base = new dt204_InternalDocMgmt
+                    {
+                        IdDept = TPConfigs.LoginUser.IdDepartment
+                    };
+                    txbDept.EditValue = dt204Base.IdDept;
 
                     break;
                 case EventFormInfo.View:
@@ -224,7 +227,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._04_InternalDocMgmt
                     txbDeployDate.EditValue = dt204Base.DeployDate;
                     txbPeriodNotify.EditValue = dt204Base.PeriodNotify;
                     txbIdFounder.EditValue = dt204Base.IdFounder;
-                    txbDept.EditValue = TPConfigs.LoginUser.IdDepartment;
+                    txbDept.EditValue = dt204Base.IdDept;
                     cbbMainCatorary.EditValue = dt204Base.MainCatorary;
                     cbbSubDept.EditValue = dt204Base.SubDept;
                     txbFilePath.EditValue = "...";
@@ -306,7 +309,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._04_InternalDocMgmt
             var result = false;
             using (var handle = SplashScreenManager.ShowOverlayForm(this))
             {
-                dt204Base.IdDept = TPConfigs.LoginUser.IdDepartment;
                 dt204Base.IdDocCatorary = idDocCatorary;
                 dt204Base.IdFuncCatorary = idFuncCatorary;
                 dt204Base.DocLevel = docLevel;
@@ -617,7 +619,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._04_InternalDocMgmt
                 case "其他":
                     cbbSubDept.Enabled = true;
 
-                    var subDepts = dm_DeptBUS.Instance.GetListByParent(TPConfigs.LoginUser.IdDepartment);
+                    var subDepts = dm_DeptBUS.Instance.GetListByParent(txbDept.Text);
                     cbbSubDept.Properties.DataSource = subDepts;
                     cbbSubDept.Properties.DisplayMember = "DisplayName";
                     cbbSubDept.Properties.ValueMember = "Id";

@@ -672,8 +672,43 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._08_HealthCheck
             Process.Start(filePath);
         }
 
+        private static void FillReportContact(ExcelWorksheet worksheet, dt308_ReportContact contact)
+        {
+            worksheet.Cells["A4"].Value = $"Tên cơ sở lao động: {contact.CompanyVN}";
+            worksheet.Cells["A5"].Value = $"Ngành chủ quản: {contact.IndustryVN}";
+            worksheet.Cells["A6"].Value = $"Địa chỉ: {contact.AddressVN}";
+            worksheet.Cells["A8"].Value = $"E-mail: {contact.Email}";
+            worksheet.Cells["A9"].Value = $"Người liên hệ: {contact.ContactVN}";
+            worksheet.Cells["A18"].Value = $"勞動單位名稱：{contact.CompanyTW}";
+            worksheet.Cells["A19"].Value = $"產業: {contact.IndustryTW}";
+            worksheet.Cells["A20"].Value = $"地點: {contact.AddressTW}";
+            worksheet.Cells["A22"].Value = $"信箱: {contact.Email}";
+            worksheet.Cells["A23"].Value = $"聯絡人員: {contact.ContactTW}";
+        }
+
         private void btnSummaryTable_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            string exporterDepartment = TPConfigs.LoginUser?.IdDepartment?.Trim() ?? "";
+            dt308_ReportContact reportContact;
+            try
+            {
+                reportContact = dt308_ReportContactBUS.Instance.GetByDepartment(exporterDepartment);
+            }
+            catch (System.Data.SqlClient.SqlException ex) when (ex.Number == 208)
+            {
+                XtraMessageBox.Show(
+                    "Chưa có bảng cấu hình trang đầu báo cáo. Vui lòng chạy SQL 20261012_add_308_report_contact.sql.\r\n尚未建立報告首頁設定資料表，請先執行 SQL 腳本。",
+                    TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            if (reportContact == null)
+            {
+                XtraMessageBox.Show(
+                    $"Chưa cấu hình thông tin trang đầu báo cáo cho bộ phận {exporterDepartment}.\r\n尚未設定此部門的報告首頁資料。",
+                    TPConfigs.SoftNameTW, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             uc308_ExportReport ucInfo = new uc308_ExportReport();
             if (XtraDialog.Show(ucInfo, "輸入年份、請假明細表", MessageBoxButtons.OKCancel) != DialogResult.OK)
                 return;
@@ -991,7 +1026,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._08_HealthCheck
                     luuchuc = users.Count(r => r.IdDepartment.StartsWith(idDept2word) && r.Status == 2),
                     nghiviec = users.Count(r => r.IdDepartment.StartsWith(idDept2word) && r.Status == 1),
                     kskthuongnien = kskThongThuong.Count(r => r.detail.HealthRating != -1),
-                    kskdacbiet = kskDacBiet.Count(r => r.detail.HealthRating != -1),
+                    kskdacbiet = kskDacBiet
+                        .Where(r => r.detail.HealthRating != -1)
+                        .Select(r => r.detail.EmpId)
+                        .Distinct()
+                        .Count(),
                     kskxingiayphepld = kskXinGiayPhepLD.Count(r => r.detail.HealthRating != -1),
                     ksknhanvienmoi = kskNhanVienMoi.Count(r => r.detail.HealthRating != -1),
                     ksktruocvietlam = kskTruocViecLam.Count(r => r.detail.HealthRating != -1),
@@ -1017,6 +1056,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._08_HealthCheck
                     var wsTongHop = pck.Workbook.Worksheets["Tổng hợp"];
 
                     wsBieuMau6.DefaultRowHeight = 20;
+
+                    FillReportContact(wsPhuLuc2, reportContact);
 
                     wsPhuLuc2.Cells["A2"].Value = $"(Năm {yearStatistic})";
                     wsPhuLuc2.Cells["A10"].Value = $"Năm : {yearStatistic}";

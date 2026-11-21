@@ -42,6 +42,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         dt201_Base baseData;
         bool IsDisable = false;
         bool isCanEdit;
+        bool isCanDelete;
 
         private void InitializeIcon()
         {
@@ -82,7 +83,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
 
         private void ItemDelDoc_Click(object sender, EventArgs e)
         {
-            if (!Iso201Permission.EnsureCanEditCurrentUser()) return;
+            if (!Iso201Permission.EnsureCanDeleteCurrentUser()) return;
 
             var result = XtraInputBox.Show(new XtraInputBoxArgs
             {
@@ -139,6 +140,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         {
             idBase = currentData.Id;
             isCanEdit = Iso201Permission.CanEditCurrentUser();
+            isCanDelete = Iso201Permission.CanDeleteCurrentUser();
 
             gvData.ReadOnlyGridView();
             gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
@@ -162,7 +164,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
                 {
                     itemEditDoc.BeginGroup = true;
                     e.Menu.Items.Add(itemEditDoc);
-                    e.Menu.Items.Add(itemDelDoc);
+                    if (isCanDelete) e.Menu.Items.Add(itemDelDoc);
                 }
             }
         }
@@ -170,6 +172,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._01_ISOAuditDocs
         private void btnReload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             isCanEdit = Iso201Permission.CanEditCurrentUser();
+            isCanDelete = Iso201Permission.CanDeleteCurrentUser();
             LoadData();
         }
 

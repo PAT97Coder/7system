@@ -25,6 +25,8 @@ namespace DataAccessLayer
             throw new UnintentionalCodeFirstException();
         }
     
+        public virtual DbSet<EmployeeOffboarding> EmployeeOffboardings { get; set; }
+        public virtual DbSet<EmployeeOffboardingFile> EmployeeOffboardingFiles { get; set; }
         public virtual DbSet<dm_Function> dm_Function { get; set; }
         public virtual DbSet<dm_FunctionRole> dm_FunctionRole { get; set; }
         public virtual DbSet<dm_GroupUser> dm_GroupUser { get; set; }
@@ -62,6 +64,7 @@ namespace DataAccessLayer
         public virtual DbSet<dm_DeptGroups> dm_DeptGroups { get; set; }
         public virtual DbSet<dm_DrivingLic> dm_DrivingLic { get; set; }
         public virtual DbSet<dt201_Role> dt201_Role { get; set; }
+        public virtual DbSet<dt209_Role> dt209_Role { get; set; }
         public virtual DbSet<dm_SignUsers> dm_SignUsers { get; set; }
         public virtual DbSet<dt306_BaseAtts> dt306_BaseAtts { get; set; }
         public virtual DbSet<dt306_ProgInfo> dt306_ProgInfo { get; set; }
@@ -75,14 +78,19 @@ namespace DataAccessLayer
         public virtual DbSet<dt306_Base> dt306_Base { get; set; }
         public virtual DbSet<dt403_SoftwareManual> dt403_SoftwareManual { get; set; }
         public virtual DbSet<dt201_ProgInfo> dt201_ProgInfo { get; set; }
+        public virtual DbSet<dt209_ProgInfo> dt209_ProgInfo { get; set; }
         public virtual DbSet<dt201_Progress> dt201_Progress { get; set; }
+        public virtual DbSet<dt209_Progress> dt209_Progress { get; set; }
         public virtual DbSet<dt201_Forms> dt201_Forms { get; set; }
+        public virtual DbSet<dt209_Forms> dt209_Forms { get; set; }
         public virtual DbSet<dt204_DocCatorary> dt204_DocCatorary { get; set; }
         public virtual DbSet<dt204_Form> dt204_Form { get; set; }
         public virtual DbSet<dt204_FuncCatorary> dt204_FuncCatorary { get; set; }
         public virtual DbSet<dt204_RelatedDoc> dt204_RelatedDoc { get; set; }
         public virtual DbSet<dt201_Base> dt201_Base { get; set; }
+        public virtual DbSet<dt209_Base> dt209_Base { get; set; }
         public virtual DbSet<dt201_RecordCode> dt201_RecordCode { get; set; }
+        public virtual DbSet<dt209_RecordCode> dt209_RecordCode { get; set; }
         public virtual DbSet<dt201_ReqUpdateDocs> dt201_ReqUpdateDocs { get; set; }
         public virtual DbSet<dt201_UpdateUsrReq_Detail> dt201_UpdateUsrReq_Detail { get; set; }
         public virtual DbSet<dm_Sign> dm_Sign { get; set; }
@@ -166,5 +174,10 @@ namespace DataAccessLayer
         public virtual DbSet<dt315_InterviewReport> dt315_InterviewReport { get; set; }
         public virtual DbSet<dt315_InterviewScore> dt315_InterviewScore { get; set; }
         public virtual DbSet<dt315_InterviewScoreAudit> dt315_InterviewScoreAudit { get; set; }
+        public virtual DbSet<dt316_Plan> dt316_Plan { get; set; }
+        public virtual DbSet<dt316_PlanUser> dt316_PlanUser { get; set; }
+        public virtual DbSet<dt316_Report> dt316_Report { get; set; }
+        public virtual DbSet<dt312_ExternalParticipant> dt312_ExternalParticipant { get; set; }
+        public virtual DbSet<dt312_PracticeAttempt> dt312_PracticeAttempt { get; set; }
     }
 }

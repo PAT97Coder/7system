@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
@@ -52,6 +52,12 @@
     <ErrorReport>prompt</ErrorReport>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="dm\EmployeeOffboardingService.cs" />
+    <Compile Include="dm\OffboardingFileStorage.cs" />
+
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.5.1\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -87,14 +93,20 @@
     <Compile Include="dm\dm_FixedProgressBUS.cs" />
     <Compile Include="dm\dm_WatermarkBUS.cs" />
     <Compile Include="dt201\dt201_BaseBUS.cs" />
+    <Compile Include="dt209\dt209_BaseBUS.cs" />
     <Compile Include="dt201\dt201_FormsBUS.cs" />
+    <Compile Include="dt209\dt209_FormsBUS.cs" />
     <Compile Include="dt201\dt201_RoleBUS.cs" />
+    <Compile Include="dt209\dt209_RoleBUS.cs" />
     <Compile Include="dt201\dt201_ProgressBUS.cs" />
+    <Compile Include="dt209\dt209_ProgressBUS.cs" />
     <Compile Include="dt201\dt201_ProgInfoBUS.cs" />
+    <Compile Include="dt209\dt209_ProgInfoBUS.cs" />
     <Compile Include="dt201\dt201_ReqUpdateDocsBUS.cs" />
     <Compile Include="dt201\dt201_UpdateUsrReqBUS.cs" />
     <Compile Include="dt201\dt201_UpdateUsrReq_DetailBUS.cs" />
     <Compile Include="dt201\dt201_RecordCodeBUS.cs" />
+    <Compile Include="dt209\dt209_RecordCodeBUS.cs" />
     <Compile Include="dt202\dt202_BaseBUS.cs" />
     <Compile Include="dt202\dt202_AttachBUS.cs" />
     <Compile Include="dt202\dt202_TypeBUS.cs" />
@@ -144,8 +156,12 @@
     <Compile Include="dt307\dt307_ExamMgmtBUS.cs" />
     <Compile Include="dt307\dt307_ExamUserBUS.cs" />
     <Compile Include="dt315\dt315_InterviewAssessmentBUS.cs" />
+    <Compile Include="dt316\dt316_PlanBUS.cs" />
+    <Compile Include="dt316\dt316_PlanUserBUS.cs" />
+    <Compile Include="dt316\dt316_ReportBUS.cs" />
     <Compile Include="dt317\dt317_ExamStatisticsBUS.cs" />
     <Compile Include="dt308\dt308_CheckDetailBUS.cs" />
+    <Compile Include="dt308\dt308_ReportContactBUS.cs" />
     <Compile Include="dt308\dt308_CheckSessionBUS.cs" />
     <Compile Include="dt308\dt308_DiseaseBUS.cs" />
     <Compile Include="dt308\dt308_SpecialUsrCheckBUS.cs" />
@@ -178,9 +194,12 @@
     <Compile Include="dt312\dt312_AnswersBUS.cs" />
     <Compile Include="dt312\dt312_ExamMgmtBUS.cs" />
     <Compile Include="dt312\dt312_ExamUserBUS.cs" />
+    <Compile Include="dt312\dt312_ExamAnalysisBUS.cs" />
     <Compile Include="dt312\dt312_GroupsBUS.cs" />
     <Compile Include="dt312\dt312_QuestionsBUS.cs" />
+    <Compile Include="dt312\dt312_ExamScoring.cs" />
     <Compile Include="dt312\dt312_SettingBUS.cs" />
+    <Compile Include="dt312\dt312_PracticeBUS.cs" />
     <Compile Include="dt313\dt313_AbnormalCatalogBUS.cs" />
     <Compile Include="dt313\dt313_DepartmentSettingBUS.cs" />
     <Compile Include="dt313\dt313_FixedAssetBUS.cs" />
@@ -227,5 +246,6 @@
     <Error Condition="!Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\EntityFramework.6.5.1\build\EntityFramework.targets'))" />
   </Target>
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.targets" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.targets')" />
+  <ItemGroup><Compile Include="dt208\dt208_EnvironmentBUS.cs" /><Compile Include="dt208\dt208_EnvironmentRules.cs" /></ItemGroup>
 </Project>
 

@@ -4,6 +4,7 @@ using DevExpress.Utils.Menu;
 using DevExpress.Utils.Svg;
 using DevExpress.XtraEditors;
 using DevExpress.XtraGrid.Views.Grid;
+using DevExpress.XtraGrid.Views.Grid.ViewInfo;
 using DevExpress.XtraSplashScreen;
 using KnowledgeSystem.Helpers;
 using System;
@@ -23,12 +24,19 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             public bool HasPdf { get; set; }
             public string Status { get; set; }
             public decimal? Total { get; set; }
+            public int? ProfessionalSkill { get; set; }
+            public int? Responsiveness { get; set; }
+            public int? Communication { get; set; }
+            public int? ReportQuality { get; set; }
             public long? ScoreId { get; set; }
+            public bool IsSubmitted { get; set; }
             public bool CanReopen { get; set; }
         }
 
         private readonly BindingSource sourceReports = new BindingSource();
         private readonly List<dm_User> users = new List<dm_User>();
+        private readonly Dictionary<string, List<AssignmentListRow>> assignmentRowsByReport =
+            new Dictionary<string, List<AssignmentListRow>>();
         private DXMenuItem itemView;
         private DXMenuItem itemOpen;
         private DXMenuItem itemClose;
@@ -79,16 +87,23 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             view.GroupCount = 0;
             view.SortInfo.Clear();
             view.Columns.Clear();
-            view.Columns.AddVisible(nameof(AssignmentListRow.CandidateName), "受評人員");
+            var candidateColumn = view.Columns.AddVisible(nameof(AssignmentListRow.CandidateName), "受評人員");
+            candidateColumn.GroupIndex = 0;
             view.Columns.AddVisible(nameof(AssignmentListRow.InterviewerName), "委員");
-            view.Columns.AddVisible(nameof(AssignmentListRow.HasPdf), "PDF");
             view.Columns.AddVisible(nameof(AssignmentListRow.Status), "評分狀態");
             view.Columns.AddVisible(nameof(AssignmentListRow.Total), "總分");
+            view.Columns.AddVisible(nameof(AssignmentListRow.ProfessionalSkill), "專業能力(40%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.Responsiveness), "臨場及應對能力(30%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.Communication), "表達能力(20%)");
+            view.Columns.AddVisible(nameof(AssignmentListRow.ReportQuality), "報告文書品質(10%)");
             view.KeyDown -= GridControlHelper.GridViewCopyCellData_KeyDown;
             view.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             view.PopupMenuShowing -= ScorePopupMenuShowing;
             view.PopupMenuShowing += ScorePopupMenuShowing;
+            view.CustomDrawGroupRow -= gvInfo_CustomDrawGroupRow;
+            view.CustomDrawGroupRow += gvInfo_CustomDrawGroupRow;
             view.BestFitColumns();
+            view.ExpandAllGroups();
         }
 
         private void InitializeMenuItems()
@@ -119,7 +134,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             try
             {
                 using (SplashScreenManager.ShowOverlayForm(gcData))
-                    sourceReports.DataSource = dt315_InterviewAssessmentBUS.Instance.GetReportRows();
+                {
+                    var reports = dt315_InterviewAssessmentBUS.Instance.GetReportRows();
+                    var overviewRows = dt315_InterviewAssessmentBUS.Instance
+                        .GetAssignmentOverviewRows(reports.Select(item => item.Id));
+                    assignmentRowsByReport.Clear();
+                    foreach (var reportRows in overviewRows.GroupBy(item => item.ReportId))
+                    {
+                        assignmentRowsByReport[reportRows.Key] = reportRows.Select(CreateAssignmentListRow).ToList();
+                    }
+                    sourceReports.DataSource = reports;
+                }
                 gvData.BestFitColumns();
             }
             catch (Exception ex)
@@ -218,24 +243,34 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
         {
             var report = gvData.GetRow(e.RowHandle) as Interview315ReportRow;
             if (report == null) return;
-            var detail = dt315_InterviewAssessmentBUS.Instance.GetReportDetail(report.Id);
-            e.ChildList = detail.Candidates.SelectMany(candidate =>
+            e.ChildList = assignmentRowsByReport.TryGetValue(report.Id, out var rows)
+                ? rows
+                : new List<AssignmentListRow>();
+        }
+
+        private AssignmentListRow CreateAssignmentListRow(Interview315AssignmentOverviewRow row)
+        {
+            var candidateName = $"{row.CandidateId} {users.FirstOrDefault(user => user.Id == row.CandidateId)?.DisplayName}".Trim();
+            var interviewerName = string.IsNullOrWhiteSpace(row.InterviewerId)
+                ? ""
+                : $"{row.InterviewerId} {users.FirstOrDefault(user => user.Id == row.InterviewerId)?.DisplayName}".Trim();
+            return new AssignmentListRow
             {
-                var candidateName = $"{candidate.CandidateId} {users.FirstOrDefault(user => user.Id == candidate.CandidateId)?.DisplayName}".Trim();
-                var hasPdf = !string.IsNullOrWhiteSpace(candidate.RelativePath);
-                if (!candidate.Assignments.Any())
-                    return new[] { new AssignmentListRow { CandidateName = candidateName, HasPdf = hasPdf, Status = "未分配委員" } };
-                return candidate.Assignments.Select(assignment => new AssignmentListRow
-                {
-                    CandidateName = candidateName,
-                    InterviewerName = $"{assignment.InterviewerId} {users.FirstOrDefault(user => user.Id == assignment.InterviewerId)?.DisplayName}".Trim(),
-                    HasPdf = hasPdf,
-                    Status = assignment.IsSubmitted ? "已提交" : (assignment.ScoreId.HasValue ? "已解除鎖定" : "待評分"),
-                    Total = assignment.Total,
-                    ScoreId = assignment.ScoreId,
-                    CanReopen = assignment.IsSubmitted
-                });
-            }).ToList();
+                CandidateName = candidateName,
+                InterviewerName = interviewerName,
+                HasPdf = !string.IsNullOrWhiteSpace(row.RelativePath),
+                Status = string.IsNullOrWhiteSpace(row.InterviewerId)
+                    ? "未分配委員"
+                    : (row.IsSubmitted ? "已提交" : (row.ScoreId.HasValue ? "已解除鎖定" : "待評分")),
+                Total = row.Total,
+                ProfessionalSkill = row.ProfessionalSkill,
+                Responsiveness = row.Responsiveness,
+                Communication = row.Communication,
+                ReportQuality = row.ReportQuality,
+                ScoreId = row.ScoreId,
+                IsSubmitted = row.IsSubmitted,
+                CanReopen = row.IsSubmitted
+            };
         }
 
         private void ScorePopupMenuShowing(object sender, PopupMenuShowingEventArgs e)
@@ -269,6 +304,23 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._15_InterviewAssessment
             }
         }
 
-        private void gvInfo_CustomDrawGroupRow(object sender, DevExpress.XtraGrid.Views.Base.RowObjectCustomDrawEventArgs e) { }
+        private void gvInfo_CustomDrawGroupRow(object sender, DevExpress.XtraGrid.Views.Base.RowObjectCustomDrawEventArgs e)
+        {
+            var view = sender as GridView;
+            var info = e.Info as GridGroupRowInfo;
+            if (view == null || info?.Column?.FieldName != nameof(AssignmentListRow.CandidateName)) return;
+
+            var candidateName = Convert.ToString(view.GetGroupRowValue(e.RowHandle, info.Column));
+            var assignmentRows = Enumerable.Range(0, view.GetChildRowCount(e.RowHandle))
+                .Select(index => view.GetRow(view.GetChildRowHandle(e.RowHandle, index)) as AssignmentListRow)
+                .Where(row => row != null && !string.IsNullOrWhiteSpace(row.InterviewerName))
+                .ToList();
+            var interviewerCount = assignmentRows.Count;
+            var pendingCount = assignmentRows.Count(row => !row.IsSubmitted);
+            var pendingText = pendingCount > 0
+                ? $"，<color=Red>{pendingCount} 位未評分</color>"
+                : "";
+            info.GroupText = $"受評人員: <color=Blue><b>{candidateName}</b></color>《{interviewerCount} 位委員{pendingText}》";
+        }
     }
 }

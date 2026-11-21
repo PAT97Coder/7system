@@ -5,6 +5,29 @@
     <!-- SSDL content -->
     <edmx:StorageModels>
     <Schema Namespace="DBDocumentManagementSystemModel.Store" Provider="System.Data.SqlClient" ProviderManifestToken="2012" Alias="Self" xmlns:store="http://schemas.microsoft.com/ado/2007/12/edm/EntityStoreSchemaGenerator" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm/ssdl">
+        <EntityType Name="EmployeeOffboarding">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="Reason" Type="nvarchar" Nullable="false" MaxLength="2000" />
+          <Property Name="ResignDate" Type="date" Nullable="true" />
+          <Property Name="DepartmentId" Type="varchar" Nullable="true" MaxLength="4" />
+          <Property Name="JobCode" Type="varchar" Nullable="true" MaxLength="32" />
+          <Property Name="DisplayNameTW" Type="nvarchar" Nullable="true" MaxLength="256" />
+          <Property Name="DisplayNameVN" Type="nvarchar" Nullable="true" MaxLength="256" />
+          <Property Name="CreatedByUserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="CreatedAt" Type="datetime2" Nullable="false" Precision="7" />
+        </EntityType>
+        <EntityType Name="EmployeeOffboardingFile">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="int" Nullable="false" StoreGeneratedPattern="Identity" />
+          <Property Name="OffboardingId" Type="int" Nullable="false" />
+          <Property Name="OriginalName" Type="nvarchar" Nullable="false" MaxLength="256" />
+          <Property Name="StoredPath" Type="nvarchar" Nullable="false" MaxLength="512" />
+          <Property Name="FileSize" Type="bigint" Nullable="false" />
+          <Property Name="CreatedByUserId" Type="varchar" Nullable="false" MaxLength="10" />
+          <Property Name="CreatedAt" Type="datetime2" Nullable="false" Precision="7" />
+        </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
             <PropertyRef Name="Id" />
@@ -222,7 +245,46 @@
           <Property Name="DocType" Type="nvarchar" MaxLength="8" />
           <Property Name="IdRecordCode" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt209_Base">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdParent" Type="int" Nullable="false" />
+          <Property Name="DocCode" Type="nvarchar" MaxLength="32" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="256" Nullable="false" />
+          <Property Name="IdDept" Type="varchar" MaxLength="4" />
+          <Property Name="IsFinalNode" Type="bit" />
+          <Property Name="IsDel" Type="bit" />
+          <Property Name="DelTime" Type="datetime" />
+          <Property Name="IsPaperType" Type="bit" />
+          <Property Name="NotifyCycle" Type="int" />
+          <Property Name="IsDisable" Type="bit" />
+          <Property Name="DisplayNameVN" Type="nvarchar" MaxLength="512" />
+          <Property Name="DocType" Type="nvarchar" MaxLength="8" />
+          <Property Name="IdRecordCode" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt201_Forms">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdBase" Type="int" Nullable="false" />
+          <Property Name="Code" Type="nvarchar" MaxLength="32" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="512" Nullable="false" />
+          <Property Name="UploadTime" Type="datetime" Nullable="false" />
+          <Property Name="UploadUser" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="AttId" Type="int" />
+          <Property Name="IsProcessing" Type="bit" />
+          <Property Name="DigitalSign" Type="bit" />
+          <Property Name="DisplayNameVN" Type="nvarchar" MaxLength="512" />
+          <Property Name="IsCancel" Type="bit" />
+          <Property Name="NextStepProg" Type="varchar" MaxLength="10" />
+          <Property Name="Descript" Type="nvarchar" MaxLength="256" />
+          <Property Name="IsDel" Type="bit" />
+          <Property Name="DelTime" Type="datetime" />
+        </EntityType>
+        <EntityType Name="dt209_Forms">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -253,6 +315,17 @@
           <Property Name="RespTime" Type="datetime" Nullable="false" />
           <Property Name="SendNoteTime" Type="datetime" />
         </EntityType>
+        <EntityType Name="dt209_ProgInfo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdForm" Type="int" Nullable="false" />
+          <Property Name="IdUsr" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="Desc" Type="nvarchar" MaxLength="255" Nullable="false" />
+          <Property Name="RespTime" Type="datetime" Nullable="false" />
+          <Property Name="SendNoteTime" Type="datetime" />
+        </EntityType>
         <EntityType Name="dt201_Progress">
           <Key>
             <PropertyRef Name="Id" />
@@ -262,7 +335,25 @@
           <Property Name="IdUsr" Type="nvarchar" MaxLength="10" Nullable="false" />
           <Property Name="IdRole" Type="int" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt209_Progress">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdForm" Type="int" Nullable="false" />
+          <Property Name="IdUsr" Type="nvarchar" MaxLength="10" Nullable="false" />
+          <Property Name="IdRole" Type="int" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt201_RecordCode">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="Code" Type="varchar" MaxLength="16" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="1024" Nullable="false" />
+          <Property Name="Articles" Type="varchar" MaxLength="64" />
+        </EntityType>
+        <EntityType Name="dt209_RecordCode">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -284,6 +375,13 @@
           <Property Name="IdRecordCode" Type="int" Nullable="false" />
         </EntityType>
         <EntityType Name="dt201_Role">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="64" Nullable="false" />
+        </EntityType>
+        <EntityType Name="dt209_Role">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -1281,6 +1379,16 @@
           <Property Name="IsPass" Type="bit" />
           <Property Name="ExamData" Type="nvarchar(max)" />
         </EntityType>
+        <EntityType Name="dt312_ExternalParticipant">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="EmployeeCode" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="EmployeeName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Department" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="UpdatedAt" Type="datetime" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt312_Groups">
           <Key>
             <PropertyRef Name="Id" />
@@ -1292,6 +1400,23 @@
           <Property Name="RemoveAt" Type="date" />
           <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
         </EntityType>
+        <EntityType Name="dt312_PracticeAttempt">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="PracticeKind" Type="varchar" MaxLength="8" Nullable="false" />
+          <Property Name="InternalUserId" Type="varchar" MaxLength="10" />
+          <Property Name="ExternalParticipantId" Type="int" />
+          <Property Name="EmployeeCode" Type="nvarchar" MaxLength="64" Nullable="false" />
+          <Property Name="EmployeeName" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="Department" Type="nvarchar" MaxLength="128" Nullable="false" />
+          <Property Name="StartedBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="StartedAt" Type="datetime" Nullable="false" />
+          <Property Name="SubmitAt" Type="datetime" />
+          <Property Name="Score" Type="int" />
+          <Property Name="ExamData" Type="nvarchar(max)" />
+        </EntityType>
         <EntityType Name="dt312_Questions">
           <Key>
             <PropertyRef Name="Id" />
@@ -1301,6 +1426,8 @@
           <Property Name="DisplayName" Type="nvarchar" MaxLength="2048" Nullable="false" />
           <Property Name="ImageName" Type="varchar" MaxLength="128" />
           <Property Name="IsmultiAns" Type="bit" Nullable="false" />
+          <Property Name="IsEssay" Type="bit" Nullable="false" />
+          <Property Name="ReferenceAnswer" Type="nvarchar(max)" />
         </EntityType>
         <EntityType Name="dt312_Setting">
           <Key>
@@ -1654,6 +1781,39 @@
           <Property Name="Total" Type="numeric" Precision="5" Scale="1" Nullable="false" />
           <Property Name="SubmittedAt" Type="datetime2" Precision="0" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt316_Plan">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="DisplayName" Type="nvarchar" MaxLength="64" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveAt" Type="datetime" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+        </EntityType>
+        <EntityType Name="dt316_PlanUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdPlan" Type="int" Nullable="false" />
+          <Property Name="IdUser" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="IdDept" Type="varchar" MaxLength="10" Nullable="false" />
+        </EntityType>
+        <EntityType Name="dt316_Report">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="int" StoreGeneratedPattern="Identity" Nullable="false" />
+          <Property Name="IdPlan" Type="int" Nullable="false" />
+          <Property Name="IdDept" Type="varchar" MaxLength="4" Nullable="false" />
+          <Property Name="IdAdt" Type="int" />
+          <Property Name="CreateAt" Type="datetime" Nullable="false" />
+          <Property Name="CreateBy" Type="varchar" MaxLength="10" Nullable="false" />
+          <Property Name="RemoveBy" Type="varchar" MaxLength="10" />
+          <Property Name="RemoveAt" Type="datetime" />
+        </EntityType>
         <EntityType Name="dt403_04_HardnessStandardLog">
           <Key>
             <PropertyRef Name="Id" />
@@ -1749,6 +1909,7 @@
           <Property Name="CCUsers" Type="varchar(max)" />
           <Property Name="Attachments" Type="varchar(max)" />
           <Property Name="TimeNotify" Type="datetime" />
+          <Property Name="EventKey" Type="varchar" MaxLength="180" />
         </EntityType>
         <EntityType Name="sys_StaticValue">
           <Key>
@@ -1913,6 +2074,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           </ReferentialConstraint>
         </Association>
         <EntityContainer Name="DBDocumentManagementSystemModelStoreContainer">
+          <EntitySet Name="EmployeeOffboarding" EntityType="Self.EmployeeOffboarding" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="EmployeeOffboardingFile" EntityType="Self.EmployeeOffboardingFile" Schema="dbo" store:Type="Tables" />
+
           <EntitySet Name="dm_Attachment" EntityType="Self.dm_Attachment" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dm_Departments" EntityType="Self.dm_Departments" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dm_DeptGroups" EntityType="Self.dm_DeptGroups" Schema="dbo" store:Type="Tables" />
@@ -1932,12 +2096,18 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dm_UserRole" EntityType="Self.dm_UserRole" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dm_Watermark" EntityType="Self.dm_Watermark" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_Base" EntityType="Self.dt201_Base" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_Base" EntityType="Self.dt209_Base" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_Forms" EntityType="Self.dt201_Forms" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_Forms" EntityType="Self.dt209_Forms" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_ProgInfo" EntityType="Self.dt201_ProgInfo" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_ProgInfo" EntityType="Self.dt209_ProgInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_Progress" EntityType="Self.dt201_Progress" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_Progress" EntityType="Self.dt209_Progress" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_RecordCode" EntityType="Self.dt201_RecordCode" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_RecordCode" EntityType="Self.dt209_RecordCode" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_ReqUpdateDocs" EntityType="Self.dt201_ReqUpdateDocs" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_Role" EntityType="Self.dt201_Role" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt209_Role" EntityType="Self.dt209_Role" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_UpdateUsrReq" EntityType="Self.dt201_UpdateUsrReq" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt201_UpdateUsrReq_Detail" EntityType="Self.dt201_UpdateUsrReq_Detail" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt202_Attach" EntityType="Self.dt202_Attach" Schema="dbo" store:Type="Tables" />
@@ -2022,7 +2192,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt312_Answers" EntityType="Self.dt312_Answers" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_ExamMgmt" EntityType="Self.dt312_ExamMgmt" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_ExamUser" EntityType="Self.dt312_ExamUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt312_ExternalParticipant" EntityType="Self.dt312_ExternalParticipant" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Groups" EntityType="Self.dt312_Groups" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt312_PracticeAttempt" EntityType="Self.dt312_PracticeAttempt" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Questions" EntityType="Self.dt312_Questions" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt312_Setting" EntityType="Self.dt312_Setting" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt313_AbnormalCatalog" EntityType="Self.dt313_AbnormalCatalog" Schema="dbo" store:Type="Tables" />
@@ -2045,6 +2217,9 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt315_InterviewReport" EntityType="Self.dt315_InterviewReport" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScore" EntityType="Self.dt315_InterviewScore" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt315_InterviewScoreAudit" EntityType="Self.dt315_InterviewScoreAudit" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt316_Plan" EntityType="Self.dt316_Plan" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt316_PlanUser" EntityType="Self.dt316_PlanUser" Schema="dbo" store:Type="Tables" />
+          <EntitySet Name="dt316_Report" EntityType="Self.dt316_Report" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_HardnessStandardLog" EntityType="Self.dt403_04_HardnessStandardLog" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_04_StandardInfo" EntityType="Self.dt403_04_StandardInfo" Schema="dbo" store:Type="Tables" />
           <EntitySet Name="dt403_05_Standard" EntityType="Self.dt403_05_Standard" Schema="dbo" store:Type="Tables" />
@@ -2119,7 +2294,33 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
     <!-- CSDL content -->
     <edmx:ConceptualModels>
       <Schema Namespace="DBDocumentManagementSystemModel" Alias="Self" annotation:UseStrongSpatialTypes="false" xmlns:annotation="http://schemas.microsoft.com/ado/2009/02/edm/annotation" xmlns:customannotation="http://schemas.microsoft.com/ado/2013/11/edm/customannotation" xmlns="http://schemas.microsoft.com/ado/2009/11/edm">
+                <EntityType Name="EmployeeOffboarding">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="UserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="Reason" Type="String" Nullable="false" MaxLength="2000" Unicode="true" FixedLength="false" />
+          <Property Name="ResignDate" Type="DateTime" Nullable="true" />
+          <Property Name="DepartmentId" Type="String" Nullable="true" MaxLength="4" Unicode="false" FixedLength="false" />
+          <Property Name="JobCode" Type="String" Nullable="true" MaxLength="32" Unicode="false" FixedLength="false" />
+          <Property Name="DisplayNameTW" Type="String" Nullable="true" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="DisplayNameVN" Type="String" Nullable="true" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="CreatedByUserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+        </EntityType>
+        <EntityType Name="EmployeeOffboardingFile">
+          <Key><PropertyRef Name="Id" /></Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="OffboardingId" Type="Int32" Nullable="false" />
+          <Property Name="OriginalName" Type="String" Nullable="false" MaxLength="256" Unicode="true" FixedLength="false" />
+          <Property Name="StoredPath" Type="String" Nullable="false" MaxLength="512" Unicode="true" FixedLength="false" />
+          <Property Name="FileSize" Type="Int64" Nullable="false" />
+          <Property Name="CreatedByUserId" Type="String" Nullable="false" MaxLength="10" Unicode="false" FixedLength="false" />
+          <Property Name="CreatedAt" Type="DateTime" Nullable="false" Precision="7" />
+        </EntityType>
         <EntityContainer Name="DBDocumentManagementSystemEntities" annotation:LazyLoadingEnabled="true">
+          <EntitySet Name="EmployeeOffboardings" EntityType="Self.EmployeeOffboarding" />
+          <EntitySet Name="EmployeeOffboardingFiles" EntityType="Self.EmployeeOffboardingFile" />
+
           <EntitySet Name="dm_Function" EntityType="DBDocumentManagementSystemModel.dm_Function" />
           <EntitySet Name="dm_FunctionRole" EntityType="DBDocumentManagementSystemModel.dm_FunctionRole" />
           <EntitySet Name="dm_GroupUser" EntityType="DBDocumentManagementSystemModel.dm_GroupUser" />
@@ -2157,6 +2358,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dm_DeptGroups" EntityType="DBDocumentManagementSystemModel.dm_DeptGroups" />
           <EntitySet Name="dm_DrivingLic" EntityType="DBDocumentManagementSystemModel.dm_DrivingLic" />
           <EntitySet Name="dt201_Role" EntityType="DBDocumentManagementSystemModel.dt201_Role" />
+          <EntitySet Name="dt209_Role" EntityType="DBDocumentManagementSystemModel.dt209_Role" />
           <EntitySet Name="dm_SignUsers" EntityType="DBDocumentManagementSystemModel.dm_SignUsers" />
           <EntitySet Name="dt306_BaseAtts" EntityType="DBDocumentManagementSystemModel.dt306_BaseAtts" />
           <EntitySet Name="dt306_ProgInfo" EntityType="DBDocumentManagementSystemModel.dt306_ProgInfo" />
@@ -2170,14 +2372,19 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt306_Base" EntityType="DBDocumentManagementSystemModel.dt306_Base" />
           <EntitySet Name="dt403_SoftwareManual" EntityType="DBDocumentManagementSystemModel.dt403_SoftwareManual" />
           <EntitySet Name="dt201_ProgInfo" EntityType="DBDocumentManagementSystemModel.dt201_ProgInfo" />
+          <EntitySet Name="dt209_ProgInfo" EntityType="DBDocumentManagementSystemModel.dt209_ProgInfo" />
           <EntitySet Name="dt201_Progress" EntityType="DBDocumentManagementSystemModel.dt201_Progress" />
+          <EntitySet Name="dt209_Progress" EntityType="DBDocumentManagementSystemModel.dt209_Progress" />
           <EntitySet Name="dt201_Forms" EntityType="DBDocumentManagementSystemModel.dt201_Forms" />
+          <EntitySet Name="dt209_Forms" EntityType="DBDocumentManagementSystemModel.dt209_Forms" />
           <EntitySet Name="dt204_DocCatorary" EntityType="DBDocumentManagementSystemModel.dt204_DocCatorary" />
           <EntitySet Name="dt204_Form" EntityType="DBDocumentManagementSystemModel.dt204_Form" />
           <EntitySet Name="dt204_FuncCatorary" EntityType="DBDocumentManagementSystemModel.dt204_FuncCatorary" />
           <EntitySet Name="dt204_RelatedDoc" EntityType="DBDocumentManagementSystemModel.dt204_RelatedDoc" />
           <EntitySet Name="dt201_Base" EntityType="DBDocumentManagementSystemModel.dt201_Base" />
+          <EntitySet Name="dt209_Base" EntityType="DBDocumentManagementSystemModel.dt209_Base" />
           <EntitySet Name="dt201_RecordCode" EntityType="DBDocumentManagementSystemModel.dt201_RecordCode" />
+          <EntitySet Name="dt209_RecordCode" EntityType="DBDocumentManagementSystemModel.dt209_RecordCode" />
           <EntitySet Name="dt201_ReqUpdateDocs" EntityType="DBDocumentManagementSystemModel.dt201_ReqUpdateDocs" />
           <EntitySet Name="dt201_UpdateUsrReq_Detail" EntityType="DBDocumentManagementSystemModel.dt201_UpdateUsrReq_Detail" />
           <EntitySet Name="dm_Sign" EntityType="DBDocumentManagementSystemModel.dm_Sign" />
@@ -2305,6 +2512,11 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             <End Role="dt315_InterviewScore" EntitySet="dt315_InterviewScore" />
             <End Role="dt315_InterviewScoreAudit" EntitySet="dt315_InterviewScoreAudit" />
           </AssociationSet>
+          <EntitySet Name="dt316_Plan" EntityType="DBDocumentManagementSystemModel.dt316_Plan" />
+          <EntitySet Name="dt316_PlanUser" EntityType="DBDocumentManagementSystemModel.dt316_PlanUser" />
+          <EntitySet Name="dt316_Report" EntityType="DBDocumentManagementSystemModel.dt316_Report" />
+          <EntitySet Name="dt312_ExternalParticipant" EntityType="DBDocumentManagementSystemModel.dt312_ExternalParticipant" />
+          <EntitySet Name="dt312_PracticeAttempt" EntityType="DBDocumentManagementSystemModel.dt312_PracticeAttempt" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -2578,6 +2790,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="CCUsers" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="Attachments" Type="String" MaxLength="Max" FixedLength="false" Unicode="false" />
           <Property Name="TimeNotify" Type="DateTime" Precision="3" />
+          <Property Name="EventKey" Type="String" MaxLength="180" FixedLength="false" Unicode="false" />
         </EntityType>
         <EntityType Name="dm_Attachment">
           <Key>
@@ -2676,6 +2889,13 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="Exprires" Type="DateTime" Nullable="false" Precision="0" />
         </EntityType>
         <EntityType Name="dt201_Role">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="dt209_Role">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -2809,6 +3029,17 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="RespTime" Type="DateTime" Nullable="false" Precision="3" />
           <Property Name="SendNoteTime" Type="DateTime" Precision="3" />
         </EntityType>
+        <EntityType Name="dt209_ProgInfo">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdForm" Type="Int32" Nullable="false" />
+          <Property Name="IdUsr" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="Desc" Type="String" Nullable="false" MaxLength="255" FixedLength="false" Unicode="true" />
+          <Property Name="RespTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="SendNoteTime" Type="DateTime" Precision="3" />
+        </EntityType>
         <EntityType Name="dt201_Progress">
           <Key>
             <PropertyRef Name="Id" />
@@ -2818,7 +3049,36 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="IdUsr" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
           <Property Name="IdRole" Type="Int32" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt209_Progress">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdForm" Type="Int32" Nullable="false" />
+          <Property Name="IdUsr" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="true" />
+          <Property Name="IdRole" Type="Int32" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt201_Forms">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdBase" Type="Int32" Nullable="false" />
+          <Property Name="Code" Type="String" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="UploadTime" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="UploadUser" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="AttId" Type="Int32" />
+          <Property Name="IsProcessing" Type="Boolean" />
+          <Property Name="DigitalSign" Type="Boolean" />
+          <Property Name="DisplayNameVN" Type="String" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="IsCancel" Type="Boolean" />
+          <Property Name="NextStepProg" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="Descript" Type="String" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="IsDel" Type="Boolean" />
+          <Property Name="DelTime" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="dt209_Forms">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -2888,7 +3148,35 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="DocType" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
           <Property Name="IdRecordCode" Type="Int32" Nullable="false" />
         </EntityType>
+        <EntityType Name="dt209_Base">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdParent" Type="Int32" Nullable="false" />
+          <Property Name="DocCode" Type="String" Nullable="false" MaxLength="32" FixedLength="false" Unicode="true" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="256" FixedLength="false" Unicode="true" />
+          <Property Name="IdDept" Type="String" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="IsFinalNode" Type="Boolean" />
+          <Property Name="IsDel" Type="Boolean" />
+          <Property Name="DelTime" Type="DateTime" Precision="3" />
+          <Property Name="IsPaperType" Type="Boolean" />
+          <Property Name="NotifyCycle" Type="Int32" />
+          <Property Name="IsDisable" Type="Boolean" />
+          <Property Name="DisplayNameVN" Type="String" MaxLength="512" FixedLength="false" Unicode="true" />
+          <Property Name="DocType" Type="String" MaxLength="8" FixedLength="false" Unicode="true" />
+          <Property Name="IdRecordCode" Type="Int32" Nullable="false" />
+        </EntityType>
         <EntityType Name="dt201_RecordCode">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" />
+          <Property Name="Code" Type="String" Nullable="false" MaxLength="16" FixedLength="false" Unicode="false" />
+          <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="1024" FixedLength="false" Unicode="true" />
+          <Property Name="Articles" Type="String" MaxLength="64" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt209_RecordCode">
           <Key>
             <PropertyRef Name="Id" />
           </Key>
@@ -3489,6 +3777,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="DisplayName" Type="String" Nullable="false" MaxLength="2048" FixedLength="false" Unicode="true" />
           <Property Name="ImageName" Type="String" MaxLength="128" FixedLength="false" Unicode="false" />
           <Property Name="IsmultiAns" Type="Boolean" Nullable="false" />
+          <Property Name="IsEssay" Type="Boolean" Nullable="false" />
+          <Property Name="ReferenceAnswer" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
         <EntityType Name="dt312_Setting">
           <Key>
@@ -4233,12 +4523,94 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
             </Dependent>
           </ReferentialConstraint>
         </Association>
+        <EntityType Name="dt316_Plan">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="DisplayName" Type="String" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt316_PlanUser">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdPlan" Type="Int32" Nullable="false" />
+          <Property Name="IdUser" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="IdDept" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+        </EntityType>
+        <EntityType Name="dt316_Report">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="IdPlan" Type="Int32" Nullable="false" />
+          <Property Name="IdDept" Type="String" Nullable="false" MaxLength="4" FixedLength="false" Unicode="false" />
+          <Property Name="IdAdt" Type="Int32" />
+          <Property Name="CreateAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="CreateBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveBy" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="RemoveAt" Type="DateTime" Precision="3" />
+        </EntityType>
+        <EntityType Name="dt312_ExternalParticipant">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="EmployeeCode" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="EmployeeName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="Department" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="UpdatedAt" Type="DateTime" Nullable="false" Precision="3" />
+        </EntityType>
+        <EntityType Name="dt312_PracticeAttempt">
+          <Key>
+            <PropertyRef Name="Id" />
+          </Key>
+          <Property Name="Id" Type="Int32" Nullable="false" annotation:StoreGeneratedPattern="Identity" />
+          <Property Name="PracticeKind" Type="String" Nullable="false" MaxLength="8" FixedLength="false" Unicode="false" />
+          <Property Name="InternalUserId" Type="String" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="ExternalParticipantId" Type="Int32" />
+          <Property Name="EmployeeCode" Type="String" Nullable="false" MaxLength="64" FixedLength="false" Unicode="true" />
+          <Property Name="EmployeeName" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="Department" Type="String" Nullable="false" MaxLength="128" FixedLength="false" Unicode="true" />
+          <Property Name="StartedBy" Type="String" Nullable="false" MaxLength="10" FixedLength="false" Unicode="false" />
+          <Property Name="StartedAt" Type="DateTime" Nullable="false" Precision="3" />
+          <Property Name="SubmitAt" Type="DateTime" Precision="3" />
+          <Property Name="Score" Type="Int32" />
+          <Property Name="ExamData" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
         </Schema>
     </edmx:ConceptualModels>
     <!-- C-S mapping content -->
     <edmx:Mappings>
       <Mapping Space="C-S" xmlns="http://schemas.microsoft.com/ado/2009/11/mapping/cs">
         <EntityContainerMapping StorageEntityContainer="DBDocumentManagementSystemModelStoreContainer" CdmEntityContainer="DBDocumentManagementSystemEntities">
+          <EntitySetMapping Name="EmployeeOffboardings"><EntityTypeMapping TypeName="DBDocumentManagementSystemModel.EmployeeOffboarding"><MappingFragment StoreEntitySet="EmployeeOffboarding">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="UserId" ColumnName="UserId" />
+            <ScalarProperty Name="Reason" ColumnName="Reason" />
+            <ScalarProperty Name="ResignDate" ColumnName="ResignDate" />
+            <ScalarProperty Name="DepartmentId" ColumnName="DepartmentId" />
+            <ScalarProperty Name="JobCode" ColumnName="JobCode" />
+            <ScalarProperty Name="DisplayNameTW" ColumnName="DisplayNameTW" />
+            <ScalarProperty Name="DisplayNameVN" ColumnName="DisplayNameVN" />
+            <ScalarProperty Name="CreatedByUserId" ColumnName="CreatedByUserId" />
+            <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+          <EntitySetMapping Name="EmployeeOffboardingFiles"><EntityTypeMapping TypeName="DBDocumentManagementSystemModel.EmployeeOffboardingFile"><MappingFragment StoreEntitySet="EmployeeOffboardingFile">
+            <ScalarProperty Name="Id" ColumnName="Id" />
+            <ScalarProperty Name="OffboardingId" ColumnName="OffboardingId" />
+            <ScalarProperty Name="OriginalName" ColumnName="OriginalName" />
+            <ScalarProperty Name="StoredPath" ColumnName="StoredPath" />
+            <ScalarProperty Name="FileSize" ColumnName="FileSize" />
+            <ScalarProperty Name="CreatedByUserId" ColumnName="CreatedByUserId" />
+            <ScalarProperty Name="CreatedAt" ColumnName="CreatedAt" />
+          </MappingFragment></EntityTypeMapping></EntitySetMapping>
+
           <EntitySetMapping Name="dm_Function">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dm_Function">
               <MappingFragment StoreEntitySet="dm_Function">
@@ -4527,6 +4899,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="sys_NotesMail">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.sys_NotesMail">
               <MappingFragment StoreEntitySet="sys_NotesMail">
+                <ScalarProperty Name="EventKey" ColumnName="EventKey" />
                 <ScalarProperty Name="TimeNotify" ColumnName="TimeNotify" />
                 <ScalarProperty Name="Attachments" ColumnName="Attachments" />
                 <ScalarProperty Name="CCUsers" ColumnName="CCUsers" />
@@ -4647,6 +5020,14 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="dt201_Role">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt201_Role">
               <MappingFragment StoreEntitySet="dt201_Role">
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt209_Role">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_Role">
+              <MappingFragment StoreEntitySet="dt209_Role">
                 <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
@@ -4792,6 +5173,18 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="dt209_ProgInfo">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_ProgInfo">
+              <MappingFragment StoreEntitySet="dt209_ProgInfo">
+                <ScalarProperty Name="SendNoteTime" ColumnName="SendNoteTime" />
+                <ScalarProperty Name="RespTime" ColumnName="RespTime" />
+                <ScalarProperty Name="Desc" ColumnName="Desc" />
+                <ScalarProperty Name="IdUsr" ColumnName="IdUsr" />
+                <ScalarProperty Name="IdForm" ColumnName="IdForm" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="dt201_Progress">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt201_Progress">
               <MappingFragment StoreEntitySet="dt201_Progress">
@@ -4802,9 +5195,40 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="dt209_Progress">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_Progress">
+              <MappingFragment StoreEntitySet="dt209_Progress">
+                <ScalarProperty Name="IdRole" ColumnName="IdRole" />
+                <ScalarProperty Name="IdUsr" ColumnName="IdUsr" />
+                <ScalarProperty Name="IdForm" ColumnName="IdForm" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="dt201_Forms">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt201_Forms">
               <MappingFragment StoreEntitySet="dt201_Forms">
+                <ScalarProperty Name="DelTime" ColumnName="DelTime" />
+                <ScalarProperty Name="IsDel" ColumnName="IsDel" />
+                <ScalarProperty Name="Descript" ColumnName="Descript" />
+                <ScalarProperty Name="NextStepProg" ColumnName="NextStepProg" />
+                <ScalarProperty Name="IsCancel" ColumnName="IsCancel" />
+                <ScalarProperty Name="DisplayNameVN" ColumnName="DisplayNameVN" />
+                <ScalarProperty Name="DigitalSign" ColumnName="DigitalSign" />
+                <ScalarProperty Name="IsProcessing" ColumnName="IsProcessing" />
+                <ScalarProperty Name="AttId" ColumnName="AttId" />
+                <ScalarProperty Name="UploadUser" ColumnName="UploadUser" />
+                <ScalarProperty Name="UploadTime" ColumnName="UploadTime" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="IdBase" ColumnName="IdBase" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt209_Forms">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_Forms">
+              <MappingFragment StoreEntitySet="dt209_Forms">
                 <ScalarProperty Name="DelTime" ColumnName="DelTime" />
                 <ScalarProperty Name="IsDel" ColumnName="IsDel" />
                 <ScalarProperty Name="Descript" ColumnName="Descript" />
@@ -4878,9 +5302,39 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
+          <EntitySetMapping Name="dt209_Base">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_Base">
+              <MappingFragment StoreEntitySet="dt209_Base">
+                <ScalarProperty Name="IdRecordCode" ColumnName="IdRecordCode" />
+                <ScalarProperty Name="DocType" ColumnName="DocType" />
+                <ScalarProperty Name="DisplayNameVN" ColumnName="DisplayNameVN" />
+                <ScalarProperty Name="IsDisable" ColumnName="IsDisable" />
+                <ScalarProperty Name="NotifyCycle" ColumnName="NotifyCycle" />
+                <ScalarProperty Name="IsPaperType" ColumnName="IsPaperType" />
+                <ScalarProperty Name="DelTime" ColumnName="DelTime" />
+                <ScalarProperty Name="IsDel" ColumnName="IsDel" />
+                <ScalarProperty Name="IsFinalNode" ColumnName="IsFinalNode" />
+                <ScalarProperty Name="IdDept" ColumnName="IdDept" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="DocCode" ColumnName="DocCode" />
+                <ScalarProperty Name="IdParent" ColumnName="IdParent" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
           <EntitySetMapping Name="dt201_RecordCode">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt201_RecordCode">
               <MappingFragment StoreEntitySet="dt201_RecordCode">
+                <ScalarProperty Name="Articles" ColumnName="Articles" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="Code" ColumnName="Code" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt209_RecordCode">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt209_RecordCode">
+              <MappingFragment StoreEntitySet="dt209_RecordCode">
                 <ScalarProperty Name="Articles" ColumnName="Articles" />
                 <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
                 <ScalarProperty Name="Code" ColumnName="Code" />
@@ -5517,6 +5971,8 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySetMapping Name="dt312_Questions">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_Questions">
               <MappingFragment StoreEntitySet="dt312_Questions">
+                <ScalarProperty Name="IsEssay" ColumnName="IsEssay" />
+                <ScalarProperty Name="ReferenceAnswer" ColumnName="ReferenceAnswer" />
                 <ScalarProperty Name="IsmultiAns" ColumnName="IsmultiAns" />
                 <ScalarProperty Name="ImageName" ColumnName="ImageName" />
                 <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
@@ -6145,6 +6601,71 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="ActorId" ColumnName="ActorId" />
                 <ScalarProperty Name="Action" ColumnName="Action" />
                 <ScalarProperty Name="ScoreId" ColumnName="ScoreId" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt316_Plan">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt316_Plan">
+              <MappingFragment StoreEntitySet="dt316_Plan">
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="DisplayName" ColumnName="DisplayName" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt316_PlanUser">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt316_PlanUser">
+              <MappingFragment StoreEntitySet="dt316_PlanUser">
+                <ScalarProperty Name="IdDept" ColumnName="IdDept" />
+                <ScalarProperty Name="IdUser" ColumnName="IdUser" />
+                <ScalarProperty Name="IdPlan" ColumnName="IdPlan" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt316_Report">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt316_Report">
+              <MappingFragment StoreEntitySet="dt316_Report">
+                <ScalarProperty Name="RemoveAt" ColumnName="RemoveAt" />
+                <ScalarProperty Name="RemoveBy" ColumnName="RemoveBy" />
+                <ScalarProperty Name="CreateBy" ColumnName="CreateBy" />
+                <ScalarProperty Name="CreateAt" ColumnName="CreateAt" />
+                <ScalarProperty Name="IdAdt" ColumnName="IdAdt" />
+                <ScalarProperty Name="IdDept" ColumnName="IdDept" />
+                <ScalarProperty Name="IdPlan" ColumnName="IdPlan" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt312_ExternalParticipant">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_ExternalParticipant">
+              <MappingFragment StoreEntitySet="dt312_ExternalParticipant">
+                <ScalarProperty Name="UpdatedAt" ColumnName="UpdatedAt" />
+                <ScalarProperty Name="Department" ColumnName="Department" />
+                <ScalarProperty Name="EmployeeName" ColumnName="EmployeeName" />
+                <ScalarProperty Name="EmployeeCode" ColumnName="EmployeeCode" />
+                <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt312_PracticeAttempt">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_PracticeAttempt">
+              <MappingFragment StoreEntitySet="dt312_PracticeAttempt">
+                <ScalarProperty Name="ExamData" ColumnName="ExamData" />
+                <ScalarProperty Name="Score" ColumnName="Score" />
+                <ScalarProperty Name="SubmitAt" ColumnName="SubmitAt" />
+                <ScalarProperty Name="StartedAt" ColumnName="StartedAt" />
+                <ScalarProperty Name="StartedBy" ColumnName="StartedBy" />
+                <ScalarProperty Name="Department" ColumnName="Department" />
+                <ScalarProperty Name="EmployeeName" ColumnName="EmployeeName" />
+                <ScalarProperty Name="EmployeeCode" ColumnName="EmployeeCode" />
+                <ScalarProperty Name="ExternalParticipantId" ColumnName="ExternalParticipantId" />
+                <ScalarProperty Name="InternalUserId" ColumnName="InternalUserId" />
+                <ScalarProperty Name="PracticeKind" ColumnName="PracticeKind" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
               </MappingFragment>
             </EntityTypeMapping>
