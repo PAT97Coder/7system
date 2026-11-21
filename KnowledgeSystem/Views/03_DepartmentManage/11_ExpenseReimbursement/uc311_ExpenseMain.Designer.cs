@@ -71,6 +71,7 @@
             this.gridColumn9 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.barManagerTP = new DevExpress.XtraBars.BarManager(this.components);
             this.bar2 = new DevExpress.XtraBars.Bar();
+            this.btnImportFpgFuel = new DevExpress.XtraBars.BarButtonItem();
             this.btnAdd = new DevExpress.XtraBars.BarButtonItem();
             this.btnAddXmlFile = new DevExpress.XtraBars.BarButtonItem();
             this.btnReload = new DevExpress.XtraBars.BarButtonItem();
@@ -132,6 +133,7 @@
             this.gvDetail.OptionsView.ColumnAutoWidth = false;
             this.gvDetail.OptionsView.EnableAppearanceOddRow = true;
             this.gvDetail.OptionsView.ShowGroupPanel = false;
+            this.gvDetail.OptionsView.ShowAutoFilterRow = true;
             // 
             // gridColumn10
             // 
@@ -539,13 +541,20 @@
             this.btnFillFuelTable,
             this.btnFuelUsageStatistics,
             this.btnFillFuelTablePdf,
-            this.btnFuelUsageStatisticsChart});
+            this.btnFuelUsageStatisticsChart,
+            this.btnImportFpgFuel});
             this.barManagerTP.MainMenu = this.bar2;
-            this.barManagerTP.MaxItemId = 23;
+            this.barManagerTP.MaxItemId = 24;
+            this.btnReload.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Reload;
+            this.barSubExcel.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Excel;
+            this.btnFillFuelTable.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Num1;
+            this.btnFuelUsageStatistics.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Num2;
+            this.btnFillFuelTablePdf.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Num3;
+            this.btnFuelUsageStatisticsChart.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.Num4;
             // 
             // bar2
             // 
-            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Segoe UI", 12F);
+            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
             this.bar2.BarAppearance.Disabled.Options.UseFont = true;
             this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
             this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
@@ -568,20 +577,29 @@
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnAdd, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnAddXmlFile, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.barSubExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.barSubExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
+            new DevExpress.XtraBars.LinkPersistInfo(this.btnImportFpgFuel, true)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.bar2.OptionsBar.MultiLine = true;
             this.bar2.OptionsBar.UseWholeRow = true;
-            this.bar2.Text = "Main menu";
+            this.bar2.Text = "主要工具列";
             // 
             // btnAdd
             // 
+            this.btnImportFpgFuel.Caption = "匯入 FPG 加油資料";
+            this.btnImportFpgFuel.Id = 23;
+            this.btnImportFpgFuel.Name = "btnImportFpgFuel";
+            this.btnImportFpgFuel.ImageOptions.SvgImage = KnowledgeSystem.Helpers.TPSvgimages.UploadFile;
+            this.btnImportFpgFuel.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
+            this.btnImportFpgFuel.PaintStyle = DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph;
+            this.btnImportFpgFuel.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            this.btnImportFpgFuel.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnImportFpgFuel_ItemClick);
             this.btnAdd.Caption = "新增【線上】";
             this.btnAdd.Id = 0;
             this.btnAdd.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnAdd.ImageOptions.SvgImage")));
             this.btnAdd.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnAdd.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnAdd.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnAdd.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnAdd.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAdd.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -596,7 +614,7 @@
             this.btnAddXmlFile.Id = 17;
             this.btnAddXmlFile.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnAddXmlFile.ImageOptions.SvgImage")));
             this.btnAddXmlFile.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnAddXmlFile.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnAddXmlFile.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnAddXmlFile.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnAddXmlFile.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnAddXmlFile.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -610,7 +628,7 @@
             this.btnReload.Caption = "刷新";
             this.btnReload.Id = 1;
             this.btnReload.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnReload.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnReload.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnReload.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnReload.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnReload.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -624,7 +642,7 @@
             this.barSubExcel.Caption = "出表";
             this.barSubExcel.Id = 18;
             this.barSubExcel.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.barSubExcel.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.barSubExcel.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.barSubExcel.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.barSubExcel.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.barSubExcel.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -642,7 +660,7 @@
             this.btnFillFuelTable.Caption = "公務車加油記錄表";
             this.btnFillFuelTable.Id = 19;
             this.btnFillFuelTable.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnFillFuelTable.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnFillFuelTable.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnFillFuelTable.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnFillFuelTable.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFillFuelTable.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -656,7 +674,7 @@
             this.btnFuelUsageStatistics.Caption = "廠處使用燃料量統計表";
             this.btnFuelUsageStatistics.Id = 20;
             this.btnFuelUsageStatistics.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnFuelUsageStatistics.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnFuelUsageStatistics.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnFuelUsageStatistics.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnFuelUsageStatistics.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFuelUsageStatistics.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -670,7 +688,7 @@
             this.btnFillFuelTablePdf.Caption = "公務車加油照片PDF";
             this.btnFillFuelTablePdf.Id = 21;
             this.btnFillFuelTablePdf.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnFillFuelTablePdf.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnFillFuelTablePdf.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnFillFuelTablePdf.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnFillFuelTablePdf.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFillFuelTablePdf.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -684,7 +702,7 @@
             this.btnFuelUsageStatisticsChart.Caption = "廠處使用燃料量圖表";
             this.btnFuelUsageStatisticsChart.Id = 22;
             this.btnFuelUsageStatisticsChart.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnFuelUsageStatisticsChart.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Blue;
+            this.btnFuelUsageStatisticsChart.ItemAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
             this.btnFuelUsageStatisticsChart.ItemAppearance.Hovered.Options.UseForeColor = true;
             this.btnFuelUsageStatisticsChart.ItemAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.btnFuelUsageStatisticsChart.ItemAppearance.Normal.ForeColor = System.Drawing.Color.Black;
@@ -804,6 +822,7 @@
 
         private DevExpress.XtraBars.BarManager barManagerTP;
         private DevExpress.XtraBars.Bar bar2;
+        private DevExpress.XtraBars.BarButtonItem btnImportFpgFuel;
         private DevExpress.XtraBars.BarButtonItem btnAdd;
         private DevExpress.XtraBars.BarButtonItem btnReload;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;

@@ -372,6 +372,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Local installer staging and temporary verification artifacts
+/Installer/Staging/
+/tmp/
 
 # Kết quả kiểm tra bố cục hồ sơ nghỉ việc
 tmp/offboarding-smoke/

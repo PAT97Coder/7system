@@ -1,4 +1,4 @@
-<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+﻿<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\EntityFramework.6.5.1\build\EntityFramework.props" Condition="Exists('..\packages\EntityFramework.6.5.1\build\EntityFramework.props')" />
   <Import Project="..\packages\Scriban.5.9.0\build\Scriban.props" Condition="Exists('..\packages\Scriban.5.9.0\build\Scriban.props')" />
   <PropertyGroup>
@@ -239,6 +239,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_FpgFuelImportPreview.cs"><SubType>Form</SubType></Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\f311_FpgFuelImportPreview.Designer.cs"><DependentUpon>f311_FpgFuelImportPreview.cs</DependentUpon></Compile>
     <Compile Include="Components\CropPictureBox.cs">
       <SubType>Component</SubType>
     </Compile>

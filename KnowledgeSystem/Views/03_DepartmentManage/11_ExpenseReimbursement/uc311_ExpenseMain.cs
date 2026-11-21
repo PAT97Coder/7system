@@ -19,6 +19,7 @@ using DevExpress.XtraTreeList.Columns;
 using DevExpress.XtraTreeList.Data;
 using DevExpress.XtraTreeList.Nodes;
 using DevExpress.XtraTreeList.StyleFormatConditions;
+using ExcelDataReader;
 using KAutoHelper;
 using KnowledgeSystem.Helpers;
 using KnowledgeSystem.Views._00_Generals;
@@ -33,6 +34,7 @@ using Spire.Pdf.Graphics;
 using Spire.Presentation;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
@@ -86,11 +88,26 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             public decimal Quantity { get; set; }
         }
 
+        private sealed class FpgFuelImportRow
+        {
+            public int ExcelRow { get; set; }
+            public string DocId { get; set; }
+            public DateTime? FuelDate { get; set; }
+            public string LicensePlate { get; set; }
+            public string FuelFilledBy { get; set; }
+            public int? OdometerReading { get; set; }
+            public string InvoiceDisplay { get; set; }
+            public string Status { get; set; }
+            public bool CanUpdate { get; set; }
+            public dt311_Invoice MatchedInvoice { get; set; }
+        }
+
         public uc311_ExpenseMain()
         {
             InitializeComponent();
+            TraditionalGridLocalizer.Install();
             InitializeMenuItems();
-            InitializeIcon();
+
 
             helper = new RefreshHelper(gvData, "Id");
             DevExpress.Utils.AppearanceObject.DefaultMenuFont = new System.Drawing.Font("Microsoft JhengHei UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
@@ -125,16 +142,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             menuItem.ImageOptions.SvgImageSize = new Size(24, 24);
             menuItem.AppearanceHovered.ForeColor = System.Drawing.Color.Blue;
-        }
-
-        private void InitializeIcon()
-        {
-            btnReload.ImageOptions.SvgImage = TPSvgimages.Reload;
-            barSubExcel.ImageOptions.SvgImage = TPSvgimages.Excel;
-            btnFillFuelTable.ImageOptions.SvgImage = TPSvgimages.Num1;
-            btnFuelUsageStatistics.ImageOptions.SvgImage = TPSvgimages.Num2;
-            btnFillFuelTablePdf.ImageOptions.SvgImage = TPSvgimages.Num3;
-            btnFuelUsageStatisticsChart.ImageOptions.SvgImage = TPSvgimages.Num4;
         }
 
         private void InitializeMenuItems()
@@ -356,6 +363,409 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             LoadData();
         }
 
+        private void btnImportFpgFuel_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (!dt311_InvoiceBUS.Instance.CanImportFpgFuel(TPConfigs.LoginUser?.Id))
+            {
+                btnImportFpgFuel.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+                XtraMessageBox.Show("您沒有匯入加油資料的權限。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            using (var dialog = new OpenFileDialog())
+            {
+                dialog.Title = "選擇 FPG 加油資料檔案";
+                dialog.Filter = "Excel 檔案 (*.xls;*.xlsx)|*.xls;*.xlsx";
+                dialog.Multiselect = false;
+
+                if (dialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                try
+                {
+                    List<FpgFuelImportRow> rows;
+                    using (var handle = SplashScreenManager.ShowOverlayForm(this))
+                    {
+                        rows = BuildFpgFuelImportRows(dialog.FileName);
+                    }
+
+                    if (rows.Count == 0)
+                    {
+                        XtraMessageBox.Show(
+                            "檔案中沒有「加油」資料。",
+                            "FPG 加油資料",
+                            MessageBoxButtons.OK,
+                            MessageBoxIcon.Information);
+                        return;
+                    }
+
+                    if (ShowFpgFuelImportPreview(rows) != DialogResult.OK)
+                        return;
+
+                    var updates = rows
+                        .Where(row => row.CanUpdate && row.MatchedInvoice != null)
+                        .Select(row => new dt311_Invoice
+                        {
+                            TransactionID = row.MatchedInvoice.TransactionID,
+                            LicensePlate = row.LicensePlate,
+                            OdometerReading = row.OdometerReading,
+                            FuelFilledBy = row.FuelFilledBy
+                        })
+                        .ToList();
+
+                    string message;
+                    if (!dt311_InvoiceBUS.Instance.UpdateFuelInfoBatch(TPConfigs.LoginUser?.Id, updates, out message))
+                    {
+                        XtraMessageBox.Show(message, "更新失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
+
+                    LoadData();
+                    XtraMessageBox.Show(
+                        string.Format("已更新 {0} 筆；略過 {1} 筆。", updates.Count, rows.Count - updates.Count),
+                        "完成",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+                catch (Exception ex)
+                {
+                    XtraMessageBox.Show(
+                        "無法匯入 FPG 檔案：\n" + ex.Message,
+                        "匯入失敗",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        private List<FpgFuelImportRow> BuildFpgFuelImportRows(string filePath)
+        {
+            DataTable table = ReadFpgWorksheet(filePath);
+            DataColumn vehicleColumn = FindFpgColumn(table, "車輛", "車牌");
+            DataColumn borrowerColumn = FindFpgColumn(table, "借用人", "使用人");
+            DataColumn departmentColumn = FindFpgColumn(table, "部門", "部門代碼");
+            DataColumn purposeColumn = FindFpgColumn(table, "借用目的", "目的");
+            DataColumn odometerColumn = FindFpgColumn(table, "結束哩程", "結束里程");
+            DataColumn dateColumn = FindFpgColumn(table, "結束時間", "起始時間");
+            DataColumn docIdColumn = FindFpgColumn(table, false, "DocId", "DocID");
+
+            var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
+            var activeUsers = dm_UserBUS.Instance.GetList()
+                .Where(user => user.Status == 0)
+                .ToDictionary(user => user.Id, StringComparer.OrdinalIgnoreCase);
+            var fuelSellerTaxes = new HashSet<string>(
+                dt311_SellerBuyerBUS.Instance.GetList()
+                    .Where(item => string.Equals(item.Type, "xang_dau", StringComparison.OrdinalIgnoreCase))
+                    .Select(item => item.Tax)
+                    .Where(tax => !string.IsNullOrWhiteSpace(tax)),
+                StringComparer.OrdinalIgnoreCase);
+            var scopedInvoices = dt311_InvoiceBUS.Instance.GetListByStartDeptId(idDept2Word)
+                .Where(invoice => !string.IsNullOrWhiteSpace(invoice.SellerTax)
+                    && fuelSellerTaxes.Contains(invoice.SellerTax))
+                .ToList();
+
+            var vehicleGroups = vehicles
+                .Where(vehicle => !string.IsNullOrWhiteSpace(vehicle.LicensePlate))
+                .GroupBy(vehicle => NormalizeLicensePlate(vehicle.LicensePlate), StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(group => group.Key, group => group.ToList(), StringComparer.OrdinalIgnoreCase);
+
+            var result = new List<FpgFuelImportRow>();
+            for (int index = 0; index < table.Rows.Count; index++)
+            {
+                DataRow dataRow = table.Rows[index];
+                string purpose = GetFpgCellText(dataRow, purposeColumn);
+                if (purpose.IndexOf("加油", StringComparison.OrdinalIgnoreCase) < 0)
+                    continue;
+
+                var row = new FpgFuelImportRow
+                {
+                    ExcelRow = index + 2,
+                    DocId = GetFpgCellText(dataRow, docIdColumn),
+                    FuelDate = ParseFpgDate(dataRow[dateColumn]),
+                    OdometerReading = ParseFpgOdometer(dataRow[odometerColumn]),
+                    FuelFilledBy = ExtractFpgUserId(GetFpgCellText(dataRow, borrowerColumn)),
+                    LicensePlate = GetFpgCellText(dataRow, vehicleColumn)
+                };
+
+                string normalizedPlate = NormalizeLicensePlate(row.LicensePlate);
+                List<dt311_VehicleManagement> matchedVehicles = null;
+                if (string.IsNullOrEmpty(normalizedPlate)
+                    || !vehicleGroups.TryGetValue(normalizedPlate, out matchedVehicles)
+                    || matchedVehicles.Count != 1)
+                {
+                    row.Status = matchedVehicles != null && matchedVehicles.Count > 1
+                        ? "車牌在車輛主檔中重複"
+                        : "車牌未登記";
+                    result.Add(row);
+                    continue;
+                }
+
+                dt311_VehicleManagement vehicle = matchedVehicles[0];
+                row.LicensePlate = vehicle.LicensePlate;
+
+                if (string.IsNullOrWhiteSpace(row.FuelFilledBy) || !activeUsers.ContainsKey(row.FuelFilledBy))
+                {
+                    row.Status = "加油人員不存在或已停用";
+                    result.Add(row);
+                    continue;
+                }
+
+                if (!row.FuelDate.HasValue)
+                {
+                    row.Status = "日期格式不正確";
+                    result.Add(row);
+                    continue;
+                }
+
+                if (!row.OdometerReading.HasValue)
+                {
+                    row.Status = "結束哩程格式不正確";
+                    result.Add(row);
+                    continue;
+                }
+
+                string fpgDepartment = NormalizeDepartment(GetFpgCellText(dataRow, departmentColumn));
+                var candidates = scopedInvoices
+                    .Where(invoice => invoice.IssueDate.HasValue
+                        && invoice.IssueDate.Value.Date == row.FuelDate.Value.Date
+                        && DepartmentsMatch(invoice.IdDept, fpgDepartment))
+                    .ToList();
+
+                dt311_Invoice matchedInvoice = SelectFpgInvoice(candidates, normalizedPlate);
+                if (matchedInvoice == null)
+                {
+                    row.Status = candidates.Count == 0 ? "未找到對應的加油發票" : "找到多筆可能的加油發票";
+                    result.Add(row);
+                    continue;
+                }
+
+                row.MatchedInvoice = matchedInvoice;
+                row.InvoiceDisplay = FormatInvoiceDisplay(matchedInvoice);
+                string conflict = GetFpgConflict(matchedInvoice, row);
+                if (!string.IsNullOrEmpty(conflict))
+                {
+                    row.Status = "資料衝突：" + conflict;
+                    result.Add(row);
+                    continue;
+                }
+
+                bool alreadyUpdated = string.Equals(
+                        NormalizeLicensePlate(matchedInvoice.LicensePlate),
+                        NormalizeLicensePlate(row.LicensePlate),
+                        StringComparison.OrdinalIgnoreCase)
+                    && matchedInvoice.OdometerReading == row.OdometerReading
+                    && string.Equals(matchedInvoice.FuelFilledBy, row.FuelFilledBy, StringComparison.OrdinalIgnoreCase);
+
+                row.CanUpdate = !alreadyUpdated;
+                row.Status = alreadyUpdated ? "已是最新資料" : "待更新";
+                result.Add(row);
+            }
+
+            foreach (var duplicateGroup in result
+                .Where(row => row.CanUpdate && row.MatchedInvoice != null)
+                .GroupBy(row => row.MatchedInvoice.TransactionID)
+                .Where(group => group.Count() > 1))
+            {
+                foreach (FpgFuelImportRow duplicate in duplicateGroup)
+                {
+                    duplicate.CanUpdate = false;
+                    duplicate.Status = "同一發票被多筆 FPG 資料匹配";
+                }
+            }
+
+            return result;
+        }
+
+        private static DataTable ReadFpgWorksheet(string filePath)
+        {
+            using (var stream = File.Open(filePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+            using (IExcelDataReader reader = ExcelReaderFactory.CreateReader(stream))
+            {
+                var dataSet = reader.AsDataSet(new ExcelDataSetConfiguration
+                {
+                    ConfigureDataTable = tableReader => new ExcelDataTableConfiguration
+                    {
+                        UseHeaderRow = true
+                    }
+                });
+
+                DataTable table = dataSet.Tables.Cast<DataTable>()
+                    .FirstOrDefault(item => item.Columns.Cast<DataColumn>()
+                        .Any(column => NormalizeFpgHeader(column.ColumnName) == NormalizeFpgHeader("借用目的")));
+                if (table == null)
+                    throw new InvalidDataException("找不到包含「借用目的」欄位的工作表。");
+
+                return table;
+            }
+        }
+
+        private static DataColumn FindFpgColumn(DataTable table, params string[] aliases)
+        {
+            return FindFpgColumn(table, true, aliases);
+        }
+
+        private static DataColumn FindFpgColumn(DataTable table, bool required, params string[] aliases)
+        {
+            var normalizedAliases = new HashSet<string>(aliases.Select(NormalizeFpgHeader), StringComparer.OrdinalIgnoreCase);
+            DataColumn column = table.Columns.Cast<DataColumn>()
+                .FirstOrDefault(item => normalizedAliases.Contains(NormalizeFpgHeader(item.ColumnName)));
+
+            if (column == null && required)
+                throw new InvalidDataException("缺少必要欄位：「" + string.Join(" / ", aliases) + "」。");
+
+            return column;
+        }
+
+        private static string NormalizeFpgHeader(string value)
+        {
+            return Regex.Replace(value ?? string.Empty, @"[\s\uFEFF]+", string.Empty).Trim();
+        }
+
+        private static string GetFpgCellText(DataRow row, DataColumn column)
+        {
+            if (column == null || row[column] == null || row[column] == DBNull.Value)
+                return string.Empty;
+
+            return Convert.ToString(row[column], CultureInfo.InvariantCulture).Trim();
+        }
+
+        private static DateTime? ParseFpgDate(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return null;
+            if (value is DateTime)
+                return (DateTime)value;
+
+            double serialDate;
+            if (!(value is string)
+                && double.TryParse(Convert.ToString(value, CultureInfo.InvariantCulture), NumberStyles.Any,
+                    CultureInfo.InvariantCulture, out serialDate)
+                && serialDate > 0 && serialDate < 2958466)
+            {
+                return DateTime.FromOADate(serialDate);
+            }
+
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture).Trim();
+            string[] formats =
+            {
+                "yyyyMMddHHmmss", "yyyyMMddHHmm", "yyyyMMdd",
+                "yyyy/MM/dd HH:mm:ss", "yyyy/MM/dd HH:mm", "yyyy/MM/dd",
+                "yyyy-MM-dd HH:mm:ss", "yyyy-MM-dd HH:mm", "yyyy-MM-dd"
+            };
+            DateTime parsed;
+            if (DateTime.TryParseExact(text, formats, CultureInfo.InvariantCulture,
+                DateTimeStyles.AllowWhiteSpaces, out parsed))
+                return parsed;
+            if (DateTime.TryParse(text, CultureInfo.CurrentCulture, DateTimeStyles.AllowWhiteSpaces, out parsed))
+                return parsed;
+
+            return null;
+        }
+
+        private static int? ParseFpgOdometer(object value)
+        {
+            if (value == null || value == DBNull.Value)
+                return null;
+
+            decimal parsed;
+            string text = Convert.ToString(value, CultureInfo.InvariantCulture).Trim();
+            if (!decimal.TryParse(text, NumberStyles.Any, CultureInfo.InvariantCulture, out parsed)
+                || parsed < 0 || parsed > int.MaxValue || decimal.Truncate(parsed) != parsed)
+                return null;
+
+            return decimal.ToInt32(parsed);
+        }
+
+        private static string ExtractFpgUserId(string value)
+        {
+            Match match = Regex.Match(value ?? string.Empty, @"VNW\d{7}", RegexOptions.IgnoreCase);
+            return match.Success ? match.Value.ToUpperInvariant() : string.Empty;
+        }
+
+        private static string NormalizeLicensePlate(string value)
+        {
+            return Regex.Replace((value ?? string.Empty).ToUpperInvariant(), @"[^A-Z0-9]", string.Empty);
+        }
+
+        private static string NormalizeDepartment(string value)
+        {
+            return string.Concat(Regex.Matches(value ?? string.Empty, @"\d")
+                .Cast<Match>()
+                .Select(match => match.Value));
+        }
+
+        private static bool DepartmentsMatch(string invoiceDepartment, string fpgDepartment)
+        {
+            string invoice = NormalizeDepartment(invoiceDepartment);
+            if (string.IsNullOrEmpty(invoice) || string.IsNullOrEmpty(fpgDepartment))
+                return false;
+
+            return invoice.StartsWith(fpgDepartment, StringComparison.OrdinalIgnoreCase)
+                || fpgDepartment.StartsWith(invoice, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static dt311_Invoice SelectFpgInvoice(List<dt311_Invoice> candidates, string normalizedPlate)
+        {
+            var samePlate = candidates
+                .Where(invoice => string.Equals(NormalizeLicensePlate(invoice.LicensePlate), normalizedPlate,
+                    StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            if (samePlate.Count == 1)
+                return samePlate[0];
+            if (samePlate.Count > 1)
+                return null;
+
+            var withoutPlate = candidates.Where(invoice => string.IsNullOrWhiteSpace(invoice.LicensePlate)).ToList();
+            if (withoutPlate.Count == 1)
+                return withoutPlate[0];
+
+            return candidates.Count == 1 ? candidates[0] : null;
+        }
+
+        private static string GetFpgConflict(dt311_Invoice invoice, FpgFuelImportRow row)
+        {
+            var conflicts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(invoice.LicensePlate)
+                && !string.Equals(NormalizeLicensePlate(invoice.LicensePlate), NormalizeLicensePlate(row.LicensePlate),
+                    StringComparison.OrdinalIgnoreCase))
+                conflicts.Add("車牌");
+            if (invoice.OdometerReading.HasValue && invoice.OdometerReading != row.OdometerReading)
+                conflicts.Add("哩程");
+            if (!string.IsNullOrWhiteSpace(invoice.FuelFilledBy)
+                && !string.Equals(invoice.FuelFilledBy, row.FuelFilledBy, StringComparison.OrdinalIgnoreCase))
+                conflicts.Add("加油人員");
+
+            return string.Join("、", conflicts);
+        }
+
+        private static string FormatInvoiceDisplay(dt311_Invoice invoice)
+        {
+            if (invoice == null)
+                return string.Empty;
+
+            return string.Format("{0} {1} ({2:yyyy/MM/dd})",
+                invoice.InvoiceCode, invoice.InvoiceNumber, invoice.IssueDate).Trim();
+        }
+
+        private DialogResult ShowFpgFuelImportPreview(List<FpgFuelImportRow> rows)
+        {
+            using (var form = new f311_FpgFuelImportPreview())
+            {
+                int updateCount = rows.Count(row => row.CanUpdate);
+                form.SetPreview(rows.Select(row => new
+                {
+                    row.ExcelRow,
+                    row.DocId,
+                    row.FuelDate,
+                    row.LicensePlate,
+                    row.FuelFilledBy,
+                    row.OdometerReading,
+                    row.InvoiceDisplay,
+                    row.Status
+                }).ToList(), updateCount, rows.Count - updateCount);
+                return form.ShowDialog(this);
+            }
+        }
+
         private void ItemERP03_Click(object sender, EventArgs e)
         {
             GridView view = gvData;
@@ -375,8 +785,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -392,8 +802,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (!isSameContractorGroup)
             {
                 XtraMessageBox.Show(
-                    "Không cùng nhà thầu!\n非同一承包商！",
-                    "Lỗi / 錯誤",
+                    "非同一承包商！",
+                    "錯誤",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Error
                 );
@@ -493,7 +903,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
             };
 
             var args = new XtraInputBoxArgs
@@ -535,8 +945,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -551,7 +961,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             if (!sameGroup)
             {
-                XtraMessageBox.Show("Không cùng nhà thầu hoặc phương tiện!", "Error",
+                XtraMessageBox.Show("所選資料的承包商或車輛不一致！", "錯誤",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -562,12 +972,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             if (vehicle == null)
             {
-                XtraMessageBox.Show("Không có thông tin phương tiện!", "Error",
+                XtraMessageBox.Show("找不到車輛資料！", "錯誤",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
-            string desc = string.Format("冶金技術部{0}加{2}油費用報銷。Thanh toán phí đổ {3} {1} BP Luyện Kim",
+            string desc = string.Format("冶金技術部{0}加{2}油費用報銷。",
                 vehicle.VehicleType.Split('/')[1],
                 vehicle.VehicleType.Split('/')[0],
                 vehicle.FuelType.Split('/')[1],
@@ -592,10 +1002,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             // 🔹 Ghép chuỗi dữ liệu hóa đơn
             var invoiceStrings = selectedInvoices.Select(invoice =>
             {
-                // Lấy dòng đầu tiên trong InvoiceItem (nếu có)
-                var quantity = dt311_InvoiceItemBUS.Instance
-                    .GetListByInvoiceId(invoice.TransactionID)
-                    .FirstOrDefault()?.Quantity ?? 0;
+                // Cộng các dòng hàng; nếu hóa đơn cũ thiếu số lượng thì suy ra từ thành tiền / đơn giá.
+                var quantity = CalculateInvoiceFuelQuantity(
+                    dt311_InvoiceItemBUS.Instance.GetListByInvoiceId(invoice.TransactionID)) ?? 0m;
 
                 string vehicleTypeCode = (vehicle?.FuelType == "xăng/汽") ? "O" : "B";
 
@@ -610,7 +1019,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                     invoice.InvoiceNumber ?? "",
                     quantity.ToString("0.###"),
                     invoice.TotalBeforeVAT?.ToString("0") ?? "0",
-                    invoice.VATAmount?.ToString("0") ?? ""
+                    /*invoice.VATAmount?.ToString("0") ??*/ ""
                 });
             });
 
@@ -652,8 +1061,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             if (selectedInvoices.Count == 0)
             {
                 XtraMessageBox.Show(
-                    "Vui lòng tích chọn các dòng cần điền。\n請選取要輸入的資料列。",
-                    "Thông báo / 提示",
+                    "請選取要輸入的資料列。",
+                    "提示",
                     MessageBoxButtons.OK,
                     MessageBoxIcon.Warning
                 );
@@ -691,17 +1100,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         private void MsgBoxAlert()
         {
             string msg =
-                "1️. Vui lòng không thao tác khi chương trình đang tự động。\n 請勿在程式自動輸入時操作鍵盤或滑鼠。";
+                "1. 請勿在程式自動輸入時操作鍵盤或滑鼠。";
 
             if (KeyboardHelper.IsUnikeyRunning())
             {
                 msg += "\n\n" +
-                       "2️. Phát hiện Unikey đang chạy, vui lòng tắt hoặc chuyển sang English (ENG)。\n 偵測到 UniKey 正在執行，請關閉或切換至英文輸入模式 (ENG)。";
+                       "2. 偵測到 UniKey 正在執行，請關閉或切換至英文輸入模式 (ENG)。";
             }
 
             XtraMessageBox.Show(
                 msg,
-                "⚠️ Cảnh báo / 警告",
+                "警告",
                 MessageBoxButtons.OK,
                 MessageBoxIcon.Warning
             );
@@ -758,8 +1167,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                         var response = await client.PostAsync(URL, formData);
                         if (!response.IsSuccessStatusCode)
                         {
-                            XtraMessageBox.Show($"Không thể truy cập MISA API. Mã lỗi: {response.StatusCode}",
-                                "Lỗi truy cập", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            XtraMessageBox.Show($"無法連線至 MISA API。錯誤碼：{response.StatusCode}",
+                                "連線錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return false;
                         }
 
@@ -773,7 +1182,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
                 if (string.IsNullOrEmpty(xmlString))
                 {
-                    XtraMessageBox.Show("Không có dữ liệu XML trong phản hồi!", "Lỗi dữ liệu",
+                    XtraMessageBox.Show("回應中沒有 XML 資料！", "資料錯誤",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
@@ -784,7 +1193,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 string fmtName = DetectFormat(root, formats);
                 if (fmtName == null)
                 {
-                    XtraMessageBox.Show("Không nhận dạng được loại hóa đơn!", "Cảnh báo",
+                    XtraMessageBox.Show("無法識別發票類型！", "警告",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return false;
                 }
@@ -877,6 +1286,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                         }
                     }
 
+                    FillMissingInvoiceItemValues(el, item);
+
                     itemsList.Add(item);
                 }
 
@@ -885,21 +1296,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 dt311_InvoiceItemBUS.Instance.AddRange(itemsList);
 
                 XtraMessageBox.Show(
-                    $"Đã thêm hóa đơn số {invoiceData.InvoiceNumber} ({invoiceData.InvoiceCode})\n" +
-                    $"Người bán: {seller.DisplayName}\nNgười mua: {buyer.DisplayName}",
-                    "Thành công", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    $"已新增發票號碼 {invoiceData.InvoiceNumber} ({invoiceData.InvoiceCode})\n" +
+                    $"賣方：{seller.DisplayName}\n買方：{buyer.DisplayName}",
+                    "完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                 if (attId == -1 && !string.IsNullOrEmpty(transactionId))
                 {
-                    XtraMessageBox.Show("Lỗi không thể tải hóa đơn PDF!\nVui lòng đưa lên thủ công hoặc thử lại.", "Lỗi", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    XtraMessageBox.Show("無法下載發票 PDF！\n請手動上傳或重試。", "錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
                 return true;
             }
             catch (Exception ex)
             {
-                XtraMessageBox.Show($"Lỗi khi xử lý hóa đơn:\n{ex.Message}",
-                    "Lỗi xử lý", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                XtraMessageBox.Show($"處理發票時發生錯誤：\n{ex.Message}",
+                    "處理錯誤", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return false;
             }
         }
@@ -1071,6 +1482,47 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             return null;
         }
 
+        private static void FillMissingInvoiceItemValues(XElement element, dt311_InvoiceItem item)
+        {
+            if (!item.Quantity.HasValue)
+                item.Quantity = ParseDecimal(ExtractFirstLocalValue(element, "SLuong", "SoLuong", "Quantity"));
+            if (!item.UnitPrice.HasValue)
+                item.UnitPrice = ParseDecimal(ExtractFirstLocalValue(element, "DGia", "DonGia", "UnitPrice"));
+            if (!item.Amount.HasValue)
+                item.Amount = ParseDecimal(ExtractFirstLocalValue(element, "ThTien", "ThanhTien", "Amount"));
+
+            if (!item.Quantity.HasValue && item.Amount.HasValue && item.UnitPrice.HasValue && item.UnitPrice.Value > 0m)
+                item.Quantity = decimal.Round(item.Amount.Value / item.UnitPrice.Value, 3, MidpointRounding.AwayFromZero);
+        }
+
+        private static string ExtractFirstLocalValue(XElement element, params string[] localNames)
+        {
+            var names = new HashSet<string>(localNames, StringComparer.OrdinalIgnoreCase);
+            XElement matchedElement = element.DescendantsAndSelf()
+                .FirstOrDefault(item => names.Contains(item.Name.LocalName) && !string.IsNullOrWhiteSpace(item.Value));
+            return matchedElement?.Value?.Trim() ?? string.Empty;
+        }
+
+        private static decimal? CalculateInvoiceFuelQuantity(IEnumerable<dt311_InvoiceItem> invoiceItems)
+        {
+            var items = (invoiceItems ?? Enumerable.Empty<dt311_InvoiceItem>()).ToList();
+            var declaredQuantities = items
+                .Where(item => item.Quantity.HasValue)
+                .Select(item => item.Quantity.Value)
+                .ToList();
+            if (declaredQuantities.Count > 0)
+                return declaredQuantities.Sum();
+
+            var calculatedQuantities = items
+                .Where(item => item.Amount.HasValue && item.UnitPrice.HasValue && item.UnitPrice.Value > 0m)
+                .Select(item => item.Amount.Value / item.UnitPrice.Value)
+                .ToList();
+            if (calculatedQuantities.Count == 0)
+                return null;
+
+            return decimal.Round(calculatedQuantities.Sum(), 3, MidpointRounding.AwayFromZero);
+        }
+
         private async void btnAdd_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             var inputArgs = new XtraInputBoxArgs
@@ -1078,7 +1530,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 Caption = TPConfigs.SoftNameTW,
                 Prompt = "請輸入交易代碼 (TransactionID)",
                 DefaultButtonIndex = 0,
-                Editor = new TextEdit { Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F) },
+                Editor = new TextEdit { Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F) },
                 DefaultResponse = ""
             };
 
@@ -1107,8 +1559,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         {
             using (OpenFileDialog openFileDialog = new OpenFileDialog())
             {
-                openFileDialog.Title = "Chọn file XML";
-                openFileDialog.Filter = "XML files (*.xml)|*.xml|All files (*.*)|*.*";
+                openFileDialog.Title = "選擇 XML 檔案";
+                openFileDialog.Filter = "XML 檔案 (*.xml)|*.xml|所有檔案 (*.*)|*.*";
 
                 if (openFileDialog.ShowDialog() != DialogResult.OK)
                     return;
@@ -1134,6 +1586,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void uc311_ExpenseMain_Load(object sender, EventArgs e)
         {
+            btnImportFpgFuel.Visibility = dt311_InvoiceBUS.Instance.CanImportFpgFuel(TPConfigs.LoginUser?.Id)
+                ? DevExpress.XtraBars.BarItemVisibility.Always : DevExpress.XtraBars.BarItemVisibility.Never;
             gvData.ReadOnlyGridView();
             gvData.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             gvData.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
@@ -1159,7 +1613,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void gvData_MasterRowGetRelationName(object sender, DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationNameEventArgs e)
         {
-            e.RelationName = "Detail";
+            e.RelationName = "明細";
         }
 
         private void gvData_MasterRowGetRelationCount(object sender, DevExpress.XtraGrid.Views.Grid.MasterRowGetRelationCountEventArgs e)
@@ -1191,8 +1645,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void gvData_PopupMenuShowing(object sender, DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs e)
         {
-            if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
+            if (e.Menu != null && e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
+                gvData.FocusedRowHandle = e.HitInfo.RowHandle;
+                itemERP01.BeginGroup = true;
                 e.Menu.Items.Add(itemERP01);
                 e.Menu.Items.Add(itemERP02);
                 e.Menu.Items.Add(itemERP03);
@@ -1220,13 +1676,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                     }
                 }
             }
+            if (e.Menu != null) TraditionalGridLocalizer.StyleMenu(e.Menu);
         }
 
         private void btnFillFuelTable_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.AddDays(-7):yyyy/MM/dd} - {DateTime.Today:yyyy/MM/dd}"
             };
 
@@ -1267,7 +1724,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 var invoiceDataExcel = dt311_InvoiceBUS.Instance.GetFuelLogWithPrevious(idDept2Word, start, end);
                 var invoiceItems = dt311_InvoiceItemBUS.Instance.GetList()
                     .GroupBy(r => r.IdInvoice)
-                    .Select(g => g.First())
+                    .Select(g => new
+                    {
+                        IdInvoice = g.Key,
+                        Quantity = CalculateInvoiceFuelQuantity(g)
+                    })
                     .ToList();
                 var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
 
@@ -1345,7 +1806,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
             var invoiceItems = dt311_InvoiceItemBUS.Instance.GetList()
                     .GroupBy(r => r.IdInvoice)
-                    .Select(g => g.First())
+                    .Select(g => new
+                    {
+                        IdInvoice = g.Key,
+                        Quantity = CalculateInvoiceFuelQuantity(g),
+                        FuelName = g.Select(item => item.DisplayName)
+                            .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name))
+                    })
                     .ToList();
 
             var data = (from fuel in fuelDatas
@@ -1362,10 +1829,13 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                               select new
                               {
                                   Month = dt.fuel.IssueDate?.Month,
-                                  Date = dt.fuel.IssueDate?.ToString("yyyy/MM/dd"),
+                                  Date = dt.fuel.IssueDate,
                                   Invoice = dt.fuel.InvoiceCode + dt.fuel.InvoiceNumber,
                                   Plate = dt.fuel.LicensePlate,
                                   Amount = dt.item.Quantity,
+                                  FuelName = !string.IsNullOrWhiteSpace(dt.item.FuelName)
+                                      ? dt.item.FuelName
+                                      : dt.vehicle.FuelType?.Split('/').FirstOrDefault(),
                                   VehicleType = dt.vehicle.VehicleType.Split('/')[1]
                               }).OrderBy(r => r.Date).ToList();
 
@@ -1373,7 +1843,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             {
                 RestoreDirectory = true,
                 FileName = $"廠處使用燃料量統計表-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
-                Filter = "Excel| *.xlsx"
+                Filter = "Excel 檔案|*.xlsx"
             };
             if (saveFile.ShowDialog() != DialogResult.OK) return;
 
@@ -1389,9 +1859,59 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 {
                     var ws = pck.Workbook.Worksheets[vehicleType];
                     var excelBySheet = dataExcels.Where(r => r.VehicleType == vehicleType).ToList();
-                    ws.Cells["D3"].LoadFromCollection(excelBySheet, false);
-
                     int startRow = 3, endRow = excelBySheet.Count + 2;
+
+                    if (excelBySheet.Count == 0)
+                        continue;
+
+                    for (int row = startRow; row <= endRow; row++)
+                    {
+                        if (row > startRow)
+                        {
+                            ws.Cells[startRow, 1, startRow, 11].Copy(ws.Cells[row, 1, row, 11]);
+                            ws.Row(row).Height = ws.Row(startRow).Height;
+                        }
+
+                        var item = excelBySheet[row - startRow];
+                        ws.Cells[row, 1].Value = TPConfigs.LoginUser.IdDepartment;
+                        ws.Cells[row, 2].Value = row - startRow + 1;
+                        ws.Cells[row, 4].Value = item.Month;
+                        ws.Cells[row, 5].Value = item.Date;
+                        ws.Cells[row, 6].Value = item.Invoice;
+                        ws.Cells[row, 7].Value = item.Plate;
+                        ws.Cells[row, 10].Value = item.FuelName;
+                        ws.Cells[row, 11].Value = item.Amount;
+                    }
+
+                    var reportRange = ws.Cells[startRow, 1, endRow, 11];
+                    reportRange.Style.Font.Name = "Microsoft JhengHei UI";
+                    reportRange.Style.Font.Size = 11;
+                    reportRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
+                    reportRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+                    reportRange.Style.WrapText = true;
+                    reportRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
+                    reportRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
+                    ws.Cells[startRow, 5, endRow, 5].Style.Numberformat.Format = "yyyy/mm/dd";
+                    ws.Cells[startRow, 11, endRow, 11].Style.Numberformat.Format = "0.###";
+
+                    ws.Column(1).Width = 12;
+                    ws.Column(2).Width = 8;
+                    ws.Column(4).Width = 10;
+                    ws.Column(5).Width = 14;
+                    ws.Column(6).Width = 22;
+                    ws.Column(7).Width = 16;
+                    ws.Column(10).Width = 24;
+                    ws.Column(11).Width = 16;
+                    ws.View.ShowGridLines = false;
+                    ws.View.ZoomScale = 90;
+                    ws.View.FreezePanes(startRow, 1);
+                    ws.PrinterSettings.Orientation = eOrientation.Landscape;
+                    ws.PrinterSettings.FitToPage = true;
+                    ws.PrinterSettings.FitToWidth = 1;
+                    ws.PrinterSettings.FitToHeight = 0;
+                    ws.PrinterSettings.PrintArea = ws.Cells[1, 1, endRow, 11];
 
                     List<int> cols = new List<int>() { 1, 4 };
                     foreach (int col in cols)
@@ -1434,7 +1954,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
                 using (SaveFileDialog saveFileDialog = new SaveFileDialog())
                 {
-                    saveFileDialog.Filter = "PDF Files|*.pdf";
+                    saveFileDialog.Filter = "PDF 檔案|*.pdf";
                     saveFileDialog.RestoreDirectory = true;
                     saveFileDialog.FileName = $"公務車加油記錄表-{startDate:yyyyMMdd}-{endDate:yyyyMMdd}-{DateTime.Now:yyyyMMddHHmmss}.pdf";
 
@@ -1466,7 +1986,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                 {
                     saveFile.RestoreDirectory = true;
                     saveFile.FileName = $"廠處使用燃料量統計表-{DateTime.Now:yyyyMMddHHmmss}.xlsx";
-                    saveFile.Filter = "Excel| *.xlsx";
+                    saveFile.Filter = "Excel 檔案|*.xlsx";
 
                     if (saveFile.ShowDialog() != DialogResult.OK)
                         return;
@@ -1492,7 +2012,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.AddDays(-7):yyyy/MM/dd} - {DateTime.Today:yyyy/MM/dd}"
             };
 
@@ -1544,7 +2064,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
             var editor = new TextEdit
             {
-                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14F),
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
                 EditValue = $"{DateTime.Today.Year - 1} - {DateTime.Today.Year}"
             };
 
@@ -1620,7 +2140,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var quantityByInvoice = fuelInvoices.ToDictionary(
                 r => r.TransactionID,
                 r => invoiceItemsByInvoice.TryGetValue(r.TransactionID, out List<dt311_InvoiceItem> items)
-                    ? items.Sum(item => item.Quantity ?? 0m)
+                    ? CalculateInvoiceFuelQuantity(items) ?? 0m
                     : 0m);
 
             var firstItemNameByInvoice = fuelInvoices.ToDictionary(
@@ -1915,7 +2435,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
             var quantityByInvoice = fuelInvoices.ToDictionary(
                 r => r.TransactionID,
                 r => invoiceItemsByInvoice.TryGetValue(r.TransactionID, out List<dt311_InvoiceItem> items)
-                    ? items.Sum(item => item.Quantity ?? 0m)
+                    ? CalculateInvoiceFuelQuantity(items) ?? 0m
                     : 0m);
 
             var firstItemNameByInvoice = fuelInvoices.ToDictionary(
