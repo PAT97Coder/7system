@@ -27,6 +27,8 @@ namespace DataAccessLayer
         public Nullable<bool> IsDisable { get; set; }
         public string DisplayNameVN { get; set; }
         public string DocType { get; set; }
+        public string Articles { get; set; }
+        public string DocumentCategory { get; set; }
         public int IdRecordCode { get; set; }
     }
 }

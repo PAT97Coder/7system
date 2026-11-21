@@ -176,6 +176,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
                 DisplayNameVN = child.DisplayNameVN,
                 DocType = child.DocType,
                 IdRecordCode = child.IdRecordCode,
+                Articles = child.Articles,
+                DocumentCategory = child.DocumentCategory,
             }).ToList();
 
             var cloneParent = cloneDatas.First(r => r.IsFinalNode != true);
@@ -406,13 +408,16 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         public static void SetIdRecordCodeForFinalNodes(List<dt209_Base> documents)
         {
             // Create a dictionary to map Id to IdRecordCode for quick lookup
-            Dictionary<int, int> idToRecordCodeMap = documents.ToDictionary(d => d.Id, d => d.IdRecordCode);
+            var parents = documents.ToDictionary(d => d.Id);
 
             foreach (var doc in documents)
             {
-                if (doc.IsFinalNode == true && idToRecordCodeMap.ContainsKey(doc.IdParent))
+                if (doc.IsFinalNode == true && parents.ContainsKey(doc.IdParent))
                 {
-                    doc.IdRecordCode = idToRecordCodeMap[doc.IdParent];
+                    var parent = parents[doc.IdParent];
+                    doc.IdRecordCode = parent.IdRecordCode;
+                    doc.Articles = parent.Articles;
+                    doc.DocumentCategory = parent.DocumentCategory;
                 }
             }
         }

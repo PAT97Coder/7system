@@ -1,4 +1,4 @@
-param([string]$BuildFolder = 'KnowledgeSystem/bin/Iso209Debug')
+﻿param([string]$BuildFolder = 'KnowledgeSystem/bin/Iso209Debug')
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $bin = (Resolve-Path (Join-Path $repo $BuildFolder)).Path
@@ -41,7 +41,7 @@ try {
         }
     }
     Run-Script (Join-Path $PSScriptRoot 'fixture.sql')
-    $scripts = @('20261028_add_209_iso14001_documents.sql','20261028_add_209_iso14001_triggers.sql','20261028_seed_209_iso14001_navigation.sql','20261028_remove_209_personnel.sql')
+    $scripts = @('20261028_add_209_iso14001_documents.sql','20261028_add_209_iso14001_triggers.sql','20261028_seed_209_iso14001_navigation.sql','20261028_remove_209_personnel.sql','20261121_add_209_document_classification.sql')
     foreach ($pass in 1..2) {
         foreach ($script in $scripts) { Run-Script (Join-Path $repo "Database/$script") }
     }
@@ -50,7 +50,7 @@ try {
     $env:ISO209_TEST_ARTIFACTS = Join-Path $env:TEMP '7system-Iso209-TestArtifacts'
     New-Item -ItemType Directory -Path $env:ISO209_TEST_ARTIFACTS -Force | Out-Null
     $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-    $references = @('DataAccessLayer.dll','BusinessLayer.dll','EntityFramework.dll','KnowledgeSystem.exe','DevExpress.Utils.v22.1.dll','DevExpress.XtraEditors.v22.1.dll','DevExpress.XtraGrid.v22.1.dll','DevExpress.Data.v22.1.dll','DevExpress.Drawing.v22.1.dll','DevExpress.Data.Desktop.v22.1.dll','DevExpress.Printing.v22.1.Core.dll') | ForEach-Object { '/r:'+(Join-Path $bin $_) }
+    $references = @('DataAccessLayer.dll','BusinessLayer.dll','EntityFramework.dll','KnowledgeSystem.exe','DevExpress.Utils.v22.1.dll','DevExpress.XtraEditors.v22.1.dll','DevExpress.XtraLayout.v22.1.dll','DevExpress.XtraGrid.v22.1.dll','DevExpress.Data.v22.1.dll','DevExpress.Drawing.v22.1.dll','DevExpress.Data.Desktop.v22.1.dll','DevExpress.Printing.v22.1.Core.dll') | ForEach-Object { '/r:'+(Join-Path $bin $_) }
     & $csc /nologo /codepage:65001 /debug /target:exe /platform:anycpu "/out:$bin/Iso209Tests.exe" /r:System.Data.dll /r:System.Data.Entity.dll /r:System.Drawing.dll /r:System.Windows.Forms.dll @references (Join-Path $PSScriptRoot 'Iso209Tests.cs')
     if ($LASTEXITCODE -ne 0) { throw 'Test compilation failed.' }
     Copy-Item -LiteralPath (Join-Path $bin 'KnowledgeSystem.exe.config') -Destination (Join-Path $bin 'Iso209Tests.exe.config')

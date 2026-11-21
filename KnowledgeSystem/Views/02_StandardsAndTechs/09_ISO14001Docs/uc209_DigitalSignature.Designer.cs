@@ -225,7 +225,7 @@
             // 
             // gridColumn10
             // 
-            this.gridColumn10.Caption = "條文";
+            this.gridColumn10.Caption = "對應條文";
             this.gridColumn10.FieldName = "category.Articles";
             this.gridColumn10.Name = "gridColumn10";
             this.gridColumn10.Visible = true;
@@ -233,7 +233,7 @@
             // 
             // gridColumn11
             // 
-            this.gridColumn11.Caption = "實驗室";
+            this.gridColumn11.Caption = "責任單位";
             this.gridColumn11.FieldName = "category.IdDept";
             this.gridColumn11.Name = "gridColumn11";
             this.gridColumn11.Visible = true;

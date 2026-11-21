@@ -33,7 +33,6 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
         public dt209_Base parentData = null;
         string idDept2word = TPConfigs.LoginUser.IdDepartment.Substring(0, 2);
 
-        List<dt209_RecordCode> records;
 
         List<LayoutControlItem> lcControls;
         List<LayoutControlItem> lcImpControls;
@@ -103,8 +102,8 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
                 return;
             }
 
-            lcControls = new List<LayoutControlItem>() { lcDept, lcDocCode, lcDisplayName, lcDisplayNameVN, lcArticles, lcDocType, lcNotifyCycle, lcIdRecord };
-            lcImpControls = new List<LayoutControlItem>() { lcDocCode, lcDisplayName, lcDisplayNameVN, lcNotifyCycle, lcIdRecord, lcArticles, lcDocType };
+            lcControls = new List<LayoutControlItem>() { lcDept, lcDocCode, lcDisplayName, lcDisplayNameVN, lcDocumentCategory, lcArticles, lcDocType, lcNotifyCycle };
+            lcImpControls = new List<LayoutControlItem>() { lcDocCode, lcDisplayName, lcDisplayNameVN, lcNotifyCycle, lcDocumentCategory, lcDocType };
             foreach (var item in lcControls)
             {
                 item.AllowHtmlStringInCaption = true;
@@ -122,29 +121,7 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             cbbDept.Properties.Items.AddRange(cbbDepts);
             cbbDept.SelectedIndex = 0;
 
-            records = dt209_RecordCodeBUS.Instance.GetList();
-
-            var districsRecords = records.Select(r =>
-            {
-                var displayNameParts = (r.DisplayName ?? "").Replace("\r", "").Split('\n');
-                string nameVN = displayNameParts.Length > 1 ? displayNameParts[0].Trim() : "";
-                string nameTW = displayNameParts.Length > 1 ? displayNameParts[1].Trim() : displayNameParts[0].Trim();
-                if (string.IsNullOrEmpty(nameTW)) nameTW = nameVN;
-                if (string.IsNullOrEmpty(nameTW)) nameTW = r.Code;
-                return new
-                {
-                    Code = r.Code,
-                    DisplayName = $"{r.Code} {nameTW}",
-                    DisplayNameVN = nameVN,
-                    DisplayNameTW = nameTW
-                };
-            }).Distinct().ToList();
-
-            txbIdRecord.Properties.DataSource = districsRecords;
-            txbIdRecord.Properties.DisplayMember = "DisplayName";
-            txbIdRecord.Properties.ValueMember = "Code";
-
-            cbbDocType.Properties.Items.AddRange((TPConfigs.DocTypes209 ?? "").Split(';').Where(t => !string.IsNullOrWhiteSpace(t)).ToList());
+            cbbDocType.Properties.Items.AddRange((TPConfigs.DocTypes209 ?? "一階;二階;三階").Split(';').Concat(new[] { "四階" }).Where(t => !string.IsNullOrWhiteSpace(t)).Distinct().ToList());
 
             IniControl();
 
@@ -155,13 +132,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
                     break;
                 case EventFormInfo.Update:
 
-                    var recordView = records.FirstOrDefault(r => r.Id == currentData.IdRecordCode);
 
                     txbDocCode.EditValue = currentData.DocCode;
                     txbDisplayName.EditValue = currentData.DisplayName;
                     txbDisplayNameVN.EditValue = currentData.DisplayNameVN;
-                    txbIdRecord.EditValue = recordView?.Code ?? "";
-                    txbArticles.EditValue = recordView?.Articles ?? "";
+                    txbArticles.EditValue = currentData.Articles ?? "";
+                    cbbDocumentCategory.EditValue = currentData.DocumentCategory;
                     cbbDept.EditValue = currentData.IdDept;
                     ckPaperType.Checked = currentData.IsPaperType == true;
                     txbNotifyCycle.EditValue = currentData.NotifyCycle;
@@ -202,12 +178,12 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             string msg = "";
             using (var handle = SplashScreenManager.ShowOverlayForm(this))
             {
-                int idRecord = records.First(r => r.Code == txbIdRecord.EditValue.ToString() && r.Articles == txbArticles.Text).Id;
+                currentData.Articles = txbArticles.Text.Trim();
+                currentData.DocumentCategory = cbbDocumentCategory.Text;
 
                 currentData.DocCode = txbDocCode.Text;
                 currentData.DisplayName = txbDisplayName.Text.Trim();
                 currentData.DisplayNameVN = displayNameVN;
-                currentData.IdRecordCode = idRecord;
                 currentData.IdDept = cbbDept.EditValue.ToString();
                 currentData.IsPaperType = ckPaperType.Checked;
                 currentData.NotifyCycle = Convert.ToInt16(txbNotifyCycle.EditValue?.ToString() ?? "0");
@@ -239,14 +215,5 @@ namespace KnowledgeSystem.Views._02_StandardsAndTechs._09_ISO14001Docs
             }
         }
 
-        private void txbIdRecord_EditValueChanged(object sender, EventArgs e)
-        {
-            txbArticles.Text = "";
-            txbArticles.Properties.Items.Clear();
-            if (txbIdRecord.EditValue == null)
-                return;
-
-            txbArticles.Properties.Items.AddRange(records.Where(r => r.Code == txbIdRecord.EditValue.ToString()).Select(r => r.Articles).ToList());
-        }
     }
 }
