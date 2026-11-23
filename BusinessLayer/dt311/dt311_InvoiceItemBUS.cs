@@ -56,6 +56,17 @@ namespace BusinessLayer
             }
         }
 
+        public List<dt311_InvoiceItem> GetListByStartDeptId(string deptId)
+        {
+            using (var context = new DBDocumentManagementSystemEntities())
+            {
+                return context.dt311_InvoiceItem.AsNoTracking()
+                    .Where(item => context.dt311_Invoice.Any(invoice => invoice.TransactionID == item.IdInvoice
+                        && invoice.IdDept.StartsWith(deptId)))
+                    .ToList();
+            }
+        }
+
         public dt311_InvoiceItem GetItemById(int id)
         {
             try

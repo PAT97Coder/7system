@@ -56,13 +56,18 @@ namespace BusinessLayer
             }
         }
 
-        public List<dt311_Invoice> GetListFuleByStartDeptId(string deptId)
+        public List<dt311_Invoice> GetListFuleByStartDeptId(string deptId, int year)
         {
+            if (year < 1 || year > 9998) throw new ArgumentOutOfRangeException(nameof(year));
+            var startDate = new DateTime(year, 1, 1);
+            var endDate = startDate.AddYears(1);
             try
             {
                 using (var _context = new DBDocumentManagementSystemEntities())
                 {
-                    return _context.dt311_Invoice.Where(r => r.IdDept.StartsWith(deptId) && !string.IsNullOrEmpty(r.LicensePlate)).ToList();
+                    return _context.dt311_Invoice.Where(r => r.IdDept.StartsWith(deptId)
+                        && !string.IsNullOrEmpty(r.LicensePlate)
+                        && r.IssueDate >= startDate && r.IssueDate < endDate).ToList();
                 }
             }
             catch (Exception ex)
@@ -123,6 +128,7 @@ namespace BusinessLayer
                         return new dt311_Invoice
                         {
                             LicensePlate = f.LicensePlate,
+                              IssueDate = f.IssueDate,
                             // BuyerTax dùng để hiển thị ngày trước và sau (tuỳ bạn đặt tên cột)
                             BuyerTax = $"{prev?.IssueDate:yyyy/MM/dd} - {f.IssueDate:yyyy/MM/dd}",
                             // SellerTax hiển thị km trước và sau

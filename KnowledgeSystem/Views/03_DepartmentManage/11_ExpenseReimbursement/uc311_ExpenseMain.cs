@@ -1124,6 +1124,10 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
                 invoiceDatas = dt311_InvoiceBUS.Instance.GetListByStartDeptId(idDept2Word);
                 sellerBuyers = dt311_SellerBuyerBUS.Instance.GetList();
+                var itemsByInvoice = dt311_InvoiceItemBUS.Instance.GetListByStartDeptId(idDept2Word)
+                    .GroupBy(item => item.IdInvoice).ToDictionary(group => group.Key, group => group.ToList());
+                var sellerTypeByTax = sellerBuyers.Where(seller => !string.IsNullOrWhiteSpace(seller.Tax))
+                    .GroupBy(seller => seller.Tax).ToDictionary(group => group.Key, group => group.First().Type);
 
                 var displayDatas = (from data in invoiceDatas
                                     join seller in sellerBuyers on data.SellerTax equals seller.Tax
@@ -1132,6 +1136,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                                         data,
                                         seller,
                                         SellerName = seller.DisplayName,
+                                        FuelQuantity = IsFuelInvoiceForPdf(data, sellerTypeByTax, itemsByInvoice)
+                                            && itemsByInvoice.TryGetValue(data.TransactionID, out List<dt311_InvoiceItem> items)
+                                            ? CalculateInvoiceFuelQuantity(items) : null,
                                     }).ToList();
 
                 sourceData.DataSource = displayDatas;
@@ -1738,7 +1745,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                                   select new
                                   {
                                       LicensePlate = data.LicensePlate,
-                                      Date = DateTime.Today.ToString("yyyy/MM/dd"),
+                                      Date = data.IssueDate?.ToString("yyyy/MM/dd") ?? string.Empty,
                                       DateFill = data.BuyerTax,
                                       Odomerter = data.SellerTax,
                                       UserMeter = data.OdometerReading,
@@ -1790,6 +1797,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
                     };
 
                     MiniWord.SaveAsByTemplate(pathExport, pathTemplate, valueData);
+                    WordHelper.Instance.MergeFuelLogCells(pathExport, datas.Count);
                 }
 
                 Process.Start(documentsPath);
@@ -1802,140 +1810,98 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
 
         private void btnFuelUsageStatistics_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
-            var fuelDatas = dt311_InvoiceBUS.Instance.GetListFuleByStartDeptId(idDept2Word);
-            var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
-            var invoiceItems = dt311_InvoiceItemBUS.Instance.GetList()
-                    .GroupBy(r => r.IdInvoice)
-                    .Select(g => new
-                    {
-                        IdInvoice = g.Key,
-                        Quantity = CalculateInvoiceFuelQuantity(g),
-                        FuelName = g.Select(item => item.DisplayName)
-                            .FirstOrDefault(name => !string.IsNullOrWhiteSpace(name))
-                    })
-                    .ToList();
-
-            var data = (from fuel in fuelDatas
-                        join vehicle in vehicles on fuel.LicensePlate equals vehicle.LicensePlate
-                        join item in invoiceItems on fuel.TransactionID equals item.IdInvoice
-                        select new
-                        {
-                            fuel,
-                            vehicle,
-                            item
-                        }).ToList();
-
-            var dataExcels = (from dt in data
-                              select new
-                              {
-                                  Month = dt.fuel.IssueDate?.Month,
-                                  Date = dt.fuel.IssueDate,
-                                  Invoice = dt.fuel.InvoiceCode + dt.fuel.InvoiceNumber,
-                                  Plate = dt.fuel.LicensePlate,
-                                  Amount = dt.item.Quantity,
-                                  FuelName = !string.IsNullOrWhiteSpace(dt.item.FuelName)
-                                      ? dt.item.FuelName
-                                      : dt.vehicle.FuelType?.Split('/').FirstOrDefault(),
-                                  VehicleType = dt.vehicle.VehicleType.Split('/')[1]
-                              }).OrderBy(r => r.Date).ToList();
-
-            SaveFileDialog saveFile = new SaveFileDialog()
+            int year;
+            using (var editor = new TextEdit
+            {
+                Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F),
+                EditValue = DateTime.Today.Year.ToString(CultureInfo.InvariantCulture)
+            })
+            {
+                editor.Properties.MaskSettings.Set("MaskManagerType", typeof(DevExpress.Data.Mask.RegExpMaskManager));
+                editor.Properties.MaskSettings.Set("mask", @"\d{4}");
+                editor.Properties.MaskSettings.Set("isAutoComplete", true);
+                editor.Properties.Mask.UseMaskAsDisplayFormat = true;
+                var args = new XtraInputBoxArgs
+                {
+                    Caption = "\u9078\u64c7\u5e74\u5ea6",
+                    Prompt = "\u8acb\u8f38\u5165\u5e74\u5ea6 (\u683c\u5f0f yyyy)",
+                    Editor = editor,
+                    DefaultButtonIndex = 0,
+                    DefaultResponse = editor.EditValue.ToString()
+                };
+                object result = XtraInputBox.Show(args);
+                if (result == null) return;
+                if (!int.TryParse(result.ToString().Trim(), out year) || year < 1000 || year > 9998)
+                {
+                    XtraMessageBox.Show("\u8acb\u8f38\u5165\u6709\u6548\u7684\u897f\u5143\u56db\u4f4d\u6578\u5e74\u5ea6\u3002", "\u932f\u8aa4", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+            }
+            var reportRows = BuildFuelUsageStatisticsRows(year);
+            if (reportRows.Count == 0)
+            {
+                XtraMessageBox.Show($"{year} 年沒有可匯出的燃料資料。", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            using (var saveFile = new SaveFileDialog
             {
                 RestoreDirectory = true,
-                FileName = $"廠處使用燃料量統計表-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
+                FileName = $"廠處使用燃料量統計表-{year}-{DateTime.Now:yyyyMMddHHmmss}.xlsx",
                 Filter = "Excel 檔案|*.xlsx"
-            };
-            if (saveFile.ShowDialog() != DialogResult.OK) return;
-
-            string pathExport = saveFile.FileName;
-            string pathTemplate = Path.Combine(TPConfigs.Folder311_Template, "fuel_usage_statistics.xlsx");
-
-            File.Copy(pathTemplate, pathExport, true);
-
-            FileInfo newFile = new FileInfo(pathExport);
-            using (ExcelPackage pck = new ExcelPackage(newFile))
+            })
             {
-                foreach (string vehicleType in dataExcels.Select(r => r.VehicleType).Distinct())
+                if (saveFile.ShowDialog() != DialogResult.OK) return;
+                try
                 {
-                    var ws = pck.Workbook.Worksheets[vehicleType];
-                    var excelBySheet = dataExcels.Where(r => r.VehicleType == vehicleType).ToList();
-                    int startRow = 3, endRow = excelBySheet.Count + 2;
-
-                    if (excelBySheet.Count == 0)
-                        continue;
-
-                    for (int row = startRow; row <= endRow; row++)
-                    {
-                        if (row > startRow)
-                        {
-                            ws.Cells[startRow, 1, startRow, 11].Copy(ws.Cells[row, 1, row, 11]);
-                            ws.Row(row).Height = ws.Row(startRow).Height;
-                        }
-
-                        var item = excelBySheet[row - startRow];
-                        ws.Cells[row, 1].Value = TPConfigs.LoginUser.IdDepartment;
-                        ws.Cells[row, 2].Value = row - startRow + 1;
-                        ws.Cells[row, 4].Value = item.Month;
-                        ws.Cells[row, 5].Value = item.Date;
-                        ws.Cells[row, 6].Value = item.Invoice;
-                        ws.Cells[row, 7].Value = item.Plate;
-                        ws.Cells[row, 10].Value = item.FuelName;
-                        ws.Cells[row, 11].Value = item.Amount;
-                    }
-
-                    var reportRange = ws.Cells[startRow, 1, endRow, 11];
-                    reportRange.Style.Font.Name = "Microsoft JhengHei UI";
-                    reportRange.Style.Font.Size = 11;
-                    reportRange.Style.VerticalAlignment = ExcelVerticalAlignment.Center;
-                    reportRange.Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
-                    reportRange.Style.WrapText = true;
-                    reportRange.Style.Border.Top.Style = ExcelBorderStyle.Thin;
-                    reportRange.Style.Border.Bottom.Style = ExcelBorderStyle.Thin;
-                    reportRange.Style.Border.Left.Style = ExcelBorderStyle.Thin;
-                    reportRange.Style.Border.Right.Style = ExcelBorderStyle.Thin;
-                    ws.Cells[startRow, 5, endRow, 5].Style.Numberformat.Format = "yyyy/mm/dd";
-                    ws.Cells[startRow, 11, endRow, 11].Style.Numberformat.Format = "0.###";
-
-                    ws.Column(1).Width = 12;
-                    ws.Column(2).Width = 8;
-                    ws.Column(4).Width = 10;
-                    ws.Column(5).Width = 14;
-                    ws.Column(6).Width = 22;
-                    ws.Column(7).Width = 16;
-                    ws.Column(10).Width = 24;
-                    ws.Column(11).Width = 16;
-                    ws.View.ShowGridLines = false;
-                    ws.View.ZoomScale = 90;
-                    ws.View.FreezePanes(startRow, 1);
-                    ws.PrinterSettings.Orientation = eOrientation.Landscape;
-                    ws.PrinterSettings.FitToPage = true;
-                    ws.PrinterSettings.FitToWidth = 1;
-                    ws.PrinterSettings.FitToHeight = 0;
-                    ws.PrinterSettings.PrintArea = ws.Cells[1, 1, endRow, 11];
-
-                    List<int> cols = new List<int>() { 1, 4 };
-                    foreach (int col in cols)
-                    {
-                        int mergeStart = startRow;
-                        for (int row = startRow + 1; row <= endRow + 1; row++)
-                        {
-                            var curr = ws.Cells[row, col].Text;
-                            var prev = ws.Cells[mergeStart, col].Text;
-
-                            if (curr != prev || row == endRow + 1)
-                            {
-                                if (row - 1 > mergeStart)
-                                    ws.Cells[mergeStart, col, row - 1, col].Merge = true;
-                                mergeStart = row;
-                            }
-                        }
-                    }
+                    string templatePath = Path.Combine(TPConfigs.Folder311_Template, "fuel_usage_statistics.xlsx");
+                    string departments = string.Join("、", reportRows.Select(row => row.Department).Distinct().OrderBy(value => value));
+                    FuelUsageStatisticsExporter.Export(templatePath, saveFile.FileName, year, departments, reportRows);
+                    Process.Start(saveFile.FileName);
                 }
-
-                pck.Save();
+                catch (Exception ex)
+                {
+                    XtraMessageBox.Show(ex.Message, "匯出失敗", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
+        }
 
-            Process.Start(pathExport);
+        private List<FuelUsageDetail> BuildFuelUsageStatisticsRows(int year)
+        {
+            var fuelDatas = dt311_InvoiceBUS.Instance.GetListFuleByStartDeptId(idDept2Word, year);
+            var vehicles = dt311_VehicleManagementBUS.Instance.GetList();
+            var itemsByInvoice = dt311_InvoiceItemBUS.Instance.GetListByStartDeptId(idDept2Word)
+                .GroupBy(item => item.IdInvoice).ToDictionary(group => group.Key, group => group.ToList());
+            var sellerTypeByTax = dt311_SellerBuyerBUS.Instance.GetList()
+                .Where(seller => !string.IsNullOrWhiteSpace(seller.Tax)).GroupBy(seller => seller.Tax)
+                .ToDictionary(group => group.Key, group => group.First().Type);
+            var reportRows = new List<FuelUsageDetail>();
+            foreach (var invoice in fuelDatas.Where(invoice => IsFuelInvoiceForPdf(invoice, sellerTypeByTax, itemsByInvoice)))
+            {
+                var vehicle = vehicles.FirstOrDefault(item => item.LicensePlate == invoice.LicensePlate);
+                itemsByInvoice.TryGetValue(invoice.TransactionID, out List<dt311_InvoiceItem> items);
+                var fuelItems = (items ?? new List<dt311_InvoiceItem>()).Where(item => IsFuelItemDisplayName(item.DisplayName)).ToList();
+                var quantityItems = fuelItems.Count > 0 ? fuelItems : items;
+                string itemName = quantityItems?.Select(item => item.DisplayName).FirstOrDefault(name => !string.IsNullOrWhiteSpace(name));
+                reportRows.Add(new FuelUsageDetail
+                {
+                    Department = invoice.IdDept,
+                    Date = invoice.IssueDate.Value,
+                    Invoice = invoice.InvoiceCode + invoice.InvoiceNumber,
+                    Plate = invoice.LicensePlate,
+                    Quantity = CalculateInvoiceFuelQuantity(quantityItems),
+                    FuelCategory = GetFuelUsageCategoryName(null, itemName) ?? GetFuelUsageCategoryName(vehicle?.FuelType, null),
+                    FuelName = itemName,
+                    VehicleType = GetFuelUsageWorksheetName(vehicle?.VehicleType)
+                });
+            }
+            return reportRows;
+        }
+
+        private static string GetFuelUsageWorksheetName(string vehicleType)
+        {
+            var parts = (vehicleType ?? string.Empty).Split('/');
+            string name = parts.Length > 1 ? parts[1].Trim() : parts[0].Trim();
+            return name;
         }
 
         private void btnFillFuelTablePdf_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)

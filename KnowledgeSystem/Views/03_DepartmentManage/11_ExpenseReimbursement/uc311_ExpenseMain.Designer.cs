@@ -56,6 +56,7 @@
             this.gridColumn16 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn1 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn26 = new DevExpress.XtraGrid.Columns.GridColumn();
+            this.colFuelQuantity = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gridColumn27 = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gColSellerType = new DevExpress.XtraGrid.Columns.GridColumn();
             this.gColAttId = new DevExpress.XtraGrid.Columns.GridColumn();
@@ -278,6 +279,7 @@
             this.gridColumn16,
             this.gridColumn1,
             this.gridColumn26,
+            this.colFuelQuantity,
             this.gridColumn27,
             this.gColSellerType,
             this.gColAttId,
@@ -412,7 +414,26 @@
             this.gridColumn27.FieldName = "data.FuelFilledBy";
             this.gridColumn27.Name = "gridColumn27";
             this.gridColumn27.Visible = true;
-            this.gridColumn27.VisibleIndex = 13;
+            this.gridColumn27.VisibleIndex = 14;
+            //
+            // colFuelQuantity
+            //
+            this.colFuelQuantity.Caption = "加油量";
+            this.colFuelQuantity.FieldName = "FuelQuantity";
+            this.colFuelQuantity.Name = "colFuelQuantity";
+            this.colFuelQuantity.DisplayFormat.FormatString = "#,##0.###";
+            this.colFuelQuantity.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
+            this.colFuelQuantity.AppearanceHeader.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            this.colFuelQuantity.AppearanceHeader.Options.UseFont = true;
+            this.colFuelQuantity.AppearanceCell.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            this.colFuelQuantity.AppearanceCell.Options.UseFont = true;
+            this.colFuelQuantity.AppearanceCell.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Far;
+            this.colFuelQuantity.AppearanceCell.Options.UseTextOptions = true;
+            this.colFuelQuantity.Visible = true;
+            this.colFuelQuantity.VisibleIndex = 13;
+            this.colFuelQuantity.Width = 90;
+            this.colFuelQuantity.MinWidth = 80;
+            this.colFuelQuantity.OptionsColumn.FixedWidth = true;
             // 
             // gColSellerType
             // 
@@ -440,7 +461,7 @@
             this.gridColumn28.UnboundDataType = typeof(bool);
             this.gridColumn28.UnboundExpression = "Not IsNull([data.AttId])";
             this.gridColumn28.Visible = true;
-            this.gridColumn28.VisibleIndex = 14;
+            this.gridColumn28.VisibleIndex = 15;
             // 
             // repositoryItemMemoEdit1
             // 
@@ -789,7 +810,7 @@
             this.gridColumn30.UnboundDataType = typeof(bool);
             this.gridColumn30.UnboundExpression = "Not IsNull([data.FuelPhotoAttId])";
             this.gridColumn30.Visible = true;
-            this.gridColumn30.VisibleIndex = 15;
+            this.gridColumn30.VisibleIndex = 16;
             // 
             // uc311_ExpenseMain
             // 
@@ -865,6 +886,7 @@
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn25;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn1;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn26;
+        private DevExpress.XtraGrid.Columns.GridColumn colFuelQuantity;
         private DevExpress.XtraGrid.Columns.GridColumn gridColumn27;
         private DevExpress.XtraGrid.Columns.GridColumn gColSellerType;
         private DevExpress.XtraBars.BarButtonItem btnAddXmlFile;
