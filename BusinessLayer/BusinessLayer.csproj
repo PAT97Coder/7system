@@ -187,6 +187,7 @@
     <Compile Include="dt310\dt310_UpdateLeaveUser_detailBUS.cs" />
     <Compile Include="dt310\vw310_EquipmentInfoBUS.cs" />
     <Compile Include="dt311\dt311_InvoiceBUS.cs" />
+    <Compile Include="dt311\ContractorAcceptanceService.cs" />
     <Compile Include="dt311\dt311_InvoiceItemBUS.cs" />
     <Compile Include="dt311\dt311_SellerBuyerBUS.cs" />
     <Compile Include="dt311\dt311_VehicleManagementBUS.cs" />

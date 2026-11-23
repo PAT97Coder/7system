@@ -544,6 +544,7 @@
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SingleConnection.cs" />
+    <Compile Include="ContractorAcceptanceContext.cs" />
     <Compile Include="sys_Log.cs">
       <DependentUpon>ModelDocManager.tt</DependentUpon>
     </Compile>

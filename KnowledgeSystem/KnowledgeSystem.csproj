@@ -271,6 +271,7 @@
     <Compile Include="Helpers\WordHelper.cs" />
     <Compile Include="Helpers\FuelPhotoReportExporter.cs" />
     <Compile Include="Helpers\FuelUsageStatisticsExporter.cs" />
+    <Compile Include="Helpers\ContractorAcceptanceWorkbook.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\00_Generals\f00_AdminChangeUser.cs">
@@ -1026,6 +1027,12 @@
     </Compile>
     <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ExpenseMain.cs">
       <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ContractorAcceptance.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ContractorAcceptance.Designer.cs">
+      <DependentUpon>uc311_ContractorAcceptance.cs</DependentUpon>
     </Compile>
     <Compile Include="Views\03_DepartmentManage\11_ExpenseReimbursement\uc311_ExpenseMain.Designer.cs">
       <DependentUpon>uc311_ExpenseMain.cs</DependentUpon>
