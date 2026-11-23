@@ -188,8 +188,22 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._11_ExpenseReimbursement
         private void Erp_Click(object sender, EventArgs e)
         {
             if (!HasAccess || !(view.GetFocusedRow() is ContractorAcceptance selected) || selected.Validation != "檢查通過") return;
-            // Điểm nối ERP; thứ tự trường và phím sẽ được cấu hình khi có màn hình đích.
-            XtraMessageBox.Show(this, "ERP 輸入順序尚未設定。請先設定目標畫面的欄位順序與按鍵流程。", "ERP 外包工作驗收");
+            try
+            {
+                // Đọc lại qua service để kiểm tra quyền và lấy dữ liệu hiện tại trước khi truyền ERP.
+                var current = service.GetList(UserId).SingleOrDefault(record => record.DocumentNumber == selected.DocumentNumber);
+                var actions = ContractorAcceptanceErp.Build(current);
+                if (!KeyboardHelper.IsEnglishAndCapsOff()) return;
+                string date = actions[0].Text.Substring(0, 8);
+                string message = "日期及本單編號：" + date
+                    + "\n請先將 ERP 游標放在「日期」欄位，再按一次「輸入ERP」，即可連續輸入表頭及全部工作明細。"
+                    + "\n幣別、金額及金額代號保留 ERP 原值。輸入完成後請核對資料。"
+                    + "\n自動輸入時請勿操作鍵盤或滑鼠。";
+                if (XtraMessageBox.Show(this, message, "ERP 外包工作驗收", MessageBoxButtons.OKCancel,
+                    MessageBoxIcon.Information) != DialogResult.OK) return;
+                using (var dialog = new f311_AutoERP(actions)) dialog.ShowDialog(this);
+            }
+            catch (Exception ex) { ShowError(ex); }
         }
 
         private void ShowError(Exception ex) { XtraMessageBox.Show(this, ex.Message, "處理失敗", MessageBoxButtons.OK, MessageBoxIcon.Error); }
