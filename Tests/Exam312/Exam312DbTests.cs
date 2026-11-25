@@ -386,6 +386,8 @@ internal static class Exam312DbTests
             H.Check((int)H.Get(form,"indexQues")==other&&results[essay].UserAnswer.Contains("尚未"),"Direct row navigation loses essay or selects wrong question");
             ((TokenEdit)H.Get(form,"txbUserAns")).EditValue="2";
             H.Call(form,"SaveCurrentAnswer"); H.Check(results[other].UserAnswer=="2","Token selection not captured");
+            var selectedToken=((TokenEdit)H.Get(form,"txbUserAns")).GetTokenList().Single();
+            H.Check(selectedToken.Description=="B" && Convert.ToString(selectedToken.Value)=="2","Letter label changed stored answer value");
             using(var dialogs=new Dialogs { Answer=DialogResult.No }) H.Call(form,"btnSubmit_Click",null,EventArgs.Empty);
             H.Check(form.Visible&&!(bool)H.Get(form,"IsClose"),"Cancel submission closes exam");
             H.Check(((System.Windows.Forms.Timer)H.Get(form,"countdownTimer")).Enabled,"Cancel submission stopped countdown");

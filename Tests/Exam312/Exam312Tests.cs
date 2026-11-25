@@ -132,6 +132,8 @@ internal static class Exam312Tests
             var legacy=JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>("[{\"Questions\":{\"Id\":5,\"DisplayName\":\"舊題目\"},\"Answers\":[],\"QuestionIndex\":1,\"CorrectAnswer\":\"1\",\"UserAnswer\":\"2\",\"IsCorrect\":false}]");
             Check(!legacy[0].Questions.IsEssay && f312_ExamReview.BuildHtml(legacy,0,false).Contains("舊題目"),"Old JSON snapshot cannot be reviewed");
             Check(!f312_ExamReview.BuildQuestionHtml(choice,answerList,2).Contains("正確答案"),"MC key leaked before submit");
+            Check(f312_ExamReview.BuildQuestionHtml(choice,answerList,2).Contains("A. ") && f312_ExamReview.BuildQuestionHtml(choice,answerList,2).Contains("B. "),"Alphabetical option labels missing");
+            Check(f312_ExamReview.BuildQuestionPreviewHtml(choice,answerList,2).Contains("正確答案：</b>A"),"Preview key is not alphabetical");
             var results = new List<f312_DoExam.ExamResult>
             {
                 new f312_DoExam.ExamResult { Questions = essay, QuestionIndex = 1, Answers = new List<dt312_Answers>(), UserAnswer = "", CorrectAnswer = "" },
@@ -200,8 +202,13 @@ internal static class Exam312Tests
                 CorrectAnswer = " 1 ", UserAnswer = "2", IsCorrect = false };
             string wrongHtml = f312_ExamReview.BuildHtml(new[] { optionReview }, 0, false);
             Check(wrongHtml.Contains("class='answer missed'") && wrongHtml.Contains("class='answer selected'")
-                && wrongHtml.Contains("class='summary-item'>正確答案：") && wrongHtml.Contains("class='summary-item'>您的答案：2"),
+                && wrongHtml.Contains("class='summary-item'>正確答案：A") && wrongHtml.Contains("class='summary-item'>您的答案：B"),
                 "Wrong selection or missed correct option is not distinguished");
+            Check(optionReview.CorrectAnswer==" 1 " && optionReview.UserAnswer=="2","Rendering rewrites stored numeric answers");
+            var sparseOptions=new List<dt312_Answers> { new dt312_Answers { Id=17, TrueAns=true, DisplayName="First" }, new dt312_Answers { Id=42, DisplayName="Second" } };
+            var sparseResult=new f312_DoExam.ExamResult { Questions=choice, Answers=sparseOptions, CorrectAnswer="17", UserAnswer="42" };
+            string sparseHtml=f312_ExamReview.BuildHtml(new[]{sparseResult},0,false);
+            Check(sparseHtml.Contains("正確答案：A") && sparseHtml.Contains("您的答案：B"),"Legacy sparse answer IDs do not map to displayed letters");
             File.WriteAllText(Path.Combine(OutputDir, "Exam312-Result.html"), reviewHtml);
             var restored = JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(JsonConvert.SerializeObject(results));
             Check(restored[0].Questions.IsEssay && restored[0].UserAnswer == "最後一次修改", "Essay answer lost from stored official snapshot");

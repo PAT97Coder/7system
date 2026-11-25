@@ -42,6 +42,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
             this.KeyDown += F312_DoExam_KeyDown;
             this.KeyPreview = true;  // Đảm bảo Form nhận được sự kiện KeyDown
+            gvData.CustomColumnDisplayText += DisplayAnswer;
 
             TopMost = true;
         }
@@ -55,7 +56,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             if (indexQues < 0 || indexQues >= examResults.Count) return;
             examResults[indexQues].UserAnswer = examResults[indexQues].Questions.IsEssay ? essayAnswer.Text
-                : string.Join(",", txbUserAns.GetTokenList().Select(r => r.Description as string));
+                : string.Join(",", txbUserAns.GetTokenList().Select(r => Convert.ToString(r.Value)));
             gcData.RefreshDataSource();
         }
 
@@ -73,6 +74,14 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             public int? SnapshotPassingScore { get; set; }
             public string GradedBy { get; set; }
             public DateTime? GradedAt { get; set; }
+        }
+
+        private void DisplayAnswer(object sender, DevExpress.XtraGrid.Views.Base.CustomColumnDisplayTextEventArgs e)
+        {
+            if (e.Column.FieldName != "UserAnswer" || e.ListSourceRowIndex < 0) return;
+            var result = gvData.GetRow(gvData.GetRowHandle(e.ListSourceRowIndex)) as ExamResult;
+            if (result != null && !result.Questions.IsEssay)
+                e.DisplayText = Exam312Ui.AnswerLabels(result.UserAnswer, result.Answers);
         }
 
         private Timer countdownTimer;
@@ -178,7 +187,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             layoutControlItem6.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Never : DevExpress.XtraLayout.Utils.LayoutVisibility.Always;
             essayAnswerItem.Visibility = essay ? DevExpress.XtraLayout.Utils.LayoutVisibility.Always : DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
             var options = answers.Where(a => a.QuesId == ques[index].Id).ToList();
-            txbUserAns.Properties.DataSource = Enumerable.Range(1, options.Count).Select(n => n.ToString()).ToList();
+            txbUserAns.EditValue = null;
+            txbUserAns.Properties.DataSource = null;
+            txbUserAns.Properties.Tokens.Clear();
+            for (int i = 0; i < options.Count; i++)
+                txbUserAns.Properties.Tokens.Add(new TokenEditToken(Exam312Ui.AnswerLabel(i + 1), options[i].Id.ToString()));
             txbUserAns.EditValue = essay ? "" : examResults[index].UserAnswer;
             essayAnswer.Text = essay ? examResults[index].UserAnswer : "";
             webViewQues.DocumentText = f312_ExamReview.BuildQuestionHtml(ques[index], options, index + 1);

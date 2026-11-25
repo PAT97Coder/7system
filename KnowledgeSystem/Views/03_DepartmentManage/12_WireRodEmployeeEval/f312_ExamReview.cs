@@ -147,7 +147,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         public static string BuildQuestionPreviewHtml(DataAccessLayer.dt312_Questions question, IEnumerable<DataAccessLayer.dt312_Answers> answers, int index)
         {
             string value = question.IsEssay ? question.ReferenceAnswer
-                : string.Join(",", answers.Where(a => a.TrueAns).Select(a => a.Id.ToString()));
+                : Exam312Ui.AnswerLabels(string.Join(",", answers.Where(a => a.TrueAns).Select(a => a.Id.ToString())), answers);
             return BuildQuestionHtml(question, answers, index).Replace("</body>",
                 "<p><b>" + (question.IsEssay ? "參考答案：" : "正確答案：") + "</b>" + Encode(value) + "</p></body>");
         }
@@ -157,8 +157,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             html.Append("<h2>第 ").Append(index).Append(" 題（").Append(question.IsEssay ? "申論題，不計分" : question.IsmultiAns ? "複選題" : "單選題").Append("）</h2><p>")
                 .Append(Encode(question.DisplayName)).Append("</p>").Append(Image(question.ImageName));
             if (!question.IsEssay)
-                foreach (var answer in answers)
-                    html.Append("<div class='answer'>").Append(answer.Id).Append("． ").Append(Encode(answer.DisplayName)).Append(Image(answer.ImageName)).Append("</div>");
+                foreach (var option in answers.Select((answer, i) => new { Answer = answer, Label = Exam312Ui.AnswerLabel(i + 1) }))
+                    html.Append("<div class='answer'>").Append(option.Label).Append(". ").Append(Encode(option.Answer.DisplayName)).Append(Image(option.Answer.ImageName)).Append("</div>");
             return html.Append("</body></html>").ToString();
         }
         public f312_ExamReview(IEnumerable<f312_DoExam.ExamResult> results, int? score, bool practice)
@@ -229,20 +229,21 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 {
                     var correctIds = AnswerIds(result.CorrectAnswer);
                     var selectedIds = AnswerIds(result.UserAnswer);
+                    int optionIndex = 0;
                     foreach (var answer in result.Answers)
                     {
                         bool isCorrect = correctIds.Contains(answer.Id.ToString());
                         bool isSelected = selectedIds.Contains(answer.Id.ToString());
                         string css = isCorrect && isSelected ? "correct selected" : isCorrect ? (selectedIds.Count == 0 ? "correct" : "missed") : isSelected ? "selected" : "";
-                        html.Append("<div class='answer ").Append(css).Append("'>").Append(answer.Id).Append(". ")
+                        html.Append("<div class='answer ").Append(css).Append("'>").Append(Exam312Ui.AnswerLabel(++optionIndex)).Append(". ")
                             .Append(Encode(answer.DisplayName));
                         html.Append(Image(answer.ImageName)).Append("</div>");
                     }
                 }
                 html.Append(essay ? "<div class='response ref'><b>參考答案：</b><p>" : "<div class='summary'><span class='summary-item'>正確答案：")
-                    .Append(Encode(essay ? (string.IsNullOrWhiteSpace(result.Questions.ReferenceAnswer) ? "未提供參考答案" : result.Questions.ReferenceAnswer) : result.CorrectAnswer))
+                    .Append(Encode(essay ? (string.IsNullOrWhiteSpace(result.Questions.ReferenceAnswer) ? "未提供參考答案" : result.Questions.ReferenceAnswer) : Exam312Ui.AnswerLabels(result.CorrectAnswer, result.Answers)))
                     .Append(essay ? "</p></div><div class='response'><b>您的答案：</b><p>" : "</span><span class='summary-item'>您的答案：")
-                    .Append(Encode(string.IsNullOrWhiteSpace(result.UserAnswer) ? "未作答" : result.UserAnswer))
+                    .Append(Encode(string.IsNullOrWhiteSpace(result.UserAnswer) ? "未作答" : essay ? result.UserAnswer : Exam312Ui.AnswerLabels(result.UserAnswer, result.Answers)))
                     .Append(essay ? "</p></div>" : "</span></div>");
                 if (essay && grading)
                     html.Append("<div class='response'><label for='essay-score-").Append(result.QuestionIndex)

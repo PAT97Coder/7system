@@ -2,11 +2,28 @@ using DevExpress.XtraBars;
 using System.Drawing;
 using System;
 using BusinessLayer;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 {
     internal static class Exam312Ui
     {
+        internal static string AnswerLabel(int number)
+        {
+            string label = "";
+            while (number > 0) { number--; label = (char)('A' + number % 26) + label; number /= 26; }
+            return label;
+        }
+
+        internal static string AnswerLabels(string values, IEnumerable<DataAccessLayer.dt312_Answers> answers)
+        {
+            var labels = (answers ?? Enumerable.Empty<DataAccessLayer.dt312_Answers>())
+                .Select((a, i) => new { Id = a.Id.ToString(), Label = AnswerLabel(i + 1) }).ToList();
+            return string.Join(",", (values ?? "").Split(',').Select(v => v.Trim()).Where(v => v.Length > 0)
+                .Select(v => labels.FirstOrDefault(a => a.Id == v)?.Label ?? v));
+        }
+
         internal static string ErrorText(Exception error)
         {
             System.Diagnostics.Trace.TraceError("Practice: {0}", error);
