@@ -102,7 +102,7 @@ namespace KnowledgeSystem.Views._00_Generals
         /// </summary>
         private void BuildAccordionElements(List<dm_FunctionM> functions, AccordionControlElementCollection parentCollection, List<int> lsPermissions, Font fontTW14)
         {
-            foreach (var item in functions)
+            foreach (var item in functions.Where(f => f.ControlName != "f312_ExamReview_Grading"))
             {
                 AccordionControlElement accordion = new AccordionControlElement();
 
@@ -122,7 +122,7 @@ namespace KnowledgeSystem.Views._00_Generals
 
                 // 🔁 Lấy các con có quyền
                 var children = item.Children
-                    .Where(c => lsPermissions.Contains(c.Id))
+                    .Where(c => lsPermissions.Contains(c.Id) && c.ControlName != "f312_ExamReview_Grading")
                     .OrderBy(c => c.Prioritize)
                     .ToList();
 

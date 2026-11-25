@@ -83,6 +83,27 @@ internal static class Exam312Tests
             Check(!dt312_ExamScoring.IsCorrect("", "") && !dt312_ExamScoring.IsCorrect("1", null), "Blank/missing key counted as correct");
             Check(dt312_ExamScoring.Score(1, 2) == 50 && dt312_ExamScoring.Score(2, 3) == 67, "Score rounding incorrect");
             Check(dt312_ExamScoring.Score(0, 0) == null, "All-essay exam receives a grade");
+            var weighted = dt312_ExamScoring.AllocateEqualPoints(Enumerable.Repeat(false, 7).Concat(Enumerable.Repeat(true, 3)).ToArray());
+            Check(weighted.Take(7).Sum()==70m && weighted.Skip(7).Sum()==30m && weighted.All(v=>v==10m),"7/3 equal point allocation incorrect");
+            Check(dt312_ExamScoring.AllocateEqualPoints(Enumerable.Repeat(false, 6).Concat(Enumerable.Repeat(true, 4)).ToArray()).All(v=>v==10m),"6/4 changes per-question points");
+            Check(weighted.Sum()==100m && weighted.All(v=>decimal.Round(v,2)==v),"Displayed maxima do not add up to 100");
+            Check(dt312_ExamScoring.AllocateEqualPoints(new[]{true,true,true}).Sum()==100m,"Single-type exam loses points");
+            Check(dt312_ExamScoring.WeightedScore(new decimal[]{12.3m,87.7m})==100,"Decimal total incorrect");
+            Check(dt312_SettingBUS.ChoiceCount(10, 70) == 7, "70/30 ratio incorrect");
+            Check(dt312_SettingBUS.ChoiceCount(3, 50) == 2 && dt312_SettingBUS.ChoiceCount(5, 50) == 3, "Half-question rounding incorrect");
+            Check(dt312_SettingBUS.ChoiceCount(10, 0) == 0 && dt312_SettingBUS.ChoiceCount(10, 100) == 10, "0/100 boundaries incorrect");
+            for (int total = 1; total <= 100; total++)
+                for (int percent = 0; percent <= 100; percent++)
+                {
+                    int choices = dt312_SettingBUS.ChoiceCount(total, percent);
+                    Check(choices >= 0 && choices <= total && total - choices >= 0, "Ratio allocation outside total");
+                }
+            try { dt312_SettingBUS.ChoiceCount(10, 101); throw new Exception("Invalid percentage accepted"); }
+            catch (ArgumentException) { Check(true, "Invalid percentage rejected"); }
+            Check(dt312_ExamScoring.CombinedScore(new decimal[] { 100, 0, 50 }) == 50, "Mixed exam weighting incorrect");
+            Check(dt312_ExamScoring.CombinedScore(new decimal[] { 75, 80 }) == 78, "Essay total rounding incorrect");
+            try { dt312_ExamScoring.CombinedScore(new decimal[] { -1 }); throw new Exception("Invalid mark accepted"); }
+            catch (ArgumentException) { Check(true, "Invalid mark rejected"); }
             using(var allocator=new f312_DoExam(true))
             {
                 var random=new Random(312);
@@ -117,6 +138,15 @@ internal static class Exam312Tests
                 new f312_DoExam.ExamResult { Questions = choice, QuestionIndex = 2, Answers = answerList, UserAnswer = "1", CorrectAnswer = "1" },
                 new f312_DoExam.ExamResult { Questions = second, QuestionIndex = 3, Answers = new List<dt312_Answers>(), UserAnswer = "2", CorrectAnswer = "1" }
             };
+            Check(!dt312_ExamScoring.IsGradingComplete(JsonConvert.SerializeObject(results)),"Pending essay is treated as graded");
+            results[0].EssayScore=0;
+            Check(dt312_ExamScoring.IsGradingComplete(JsonConvert.SerializeObject(results)),"Zero essay mark is treated as ungraded");
+            results[0].EssayScore=null;
+            Check(dt312_ExamScoring.IsGradingComplete(JsonConvert.SerializeObject(results.Skip(1))),"Automatic MC grading is not complete");
+            Check(!dt312_ExamScoring.IsGradingComplete("[]") && !dt312_ExamScoring.IsGradingComplete(null),"Empty paper is treated as graded");
+            Check(f312_ExamReview.BuildHtml(results, 50, false).Contains("待評分"), "Pending essay status missing");
+            Check(!f312_ExamReview.BuildHtml(results, null, false).Contains("<input"), "View mode exposes score editor");
+            Check(f312_ExamReview.BuildHtml(results, null, false, null, true).Contains("id='essay-score-1'"), "Grading editor missing");
             using (var dialog = new f312_EssayQuestion("test", 1, essay, true))
             {
                 dialog.ShowInTaskbar = false; dialog.Show(); Application.DoEvents();

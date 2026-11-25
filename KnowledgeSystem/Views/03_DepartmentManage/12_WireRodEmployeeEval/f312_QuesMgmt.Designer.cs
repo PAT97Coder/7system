@@ -52,6 +52,7 @@
             this.btnExportExcel = new DevExpress.XtraBars.BarButtonItem();
             this.btnReload = new DevExpress.XtraBars.BarButtonItem();
             this.btnUpload = new DevExpress.XtraBars.BarButtonItem();
+            this.btnUploadEssay = new DevExpress.XtraBars.BarButtonItem();
             this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
             this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
@@ -278,7 +279,8 @@
             this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
             this.btnReload,
             this.btnExportExcel,
-            this.btnUpload});
+            this.btnUpload,
+            this.btnUploadEssay});
             this.barManagerTP.MainMenu = this.bar2;
             this.barManagerTP.MaxItemId = 14;
             this.barManagerTP.RepositoryItems.AddRange(new DevExpress.XtraEditors.Repository.RepositoryItem[] {
@@ -308,7 +310,8 @@
             this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnExportExcel, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
             new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnReload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnUpload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnUpload, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph),
+            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnUploadEssay, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
             this.bar2.OptionsBar.AllowQuickCustomization = false;
             this.bar2.OptionsBar.DrawDragBorder = false;
             this.btnAddEssay = new DevExpress.XtraBars.BarButtonItem(this.barManagerTP, "新增申論題") { Enabled = false };
@@ -348,13 +351,20 @@
             // 
             // btnUpload
             // 
-            this.btnUpload.Caption = "上傳";
+            this.btnUpload.Caption = "上傳選擇題";
             this.btnUpload.Id = 12;
             this.btnUpload.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnUpload.ImageOptions.SvgImage")));
             this.btnUpload.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
             this.btnUpload.Name = "btnUpload";
             this.btnUpload.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnUpload_ItemClick);
             this.btnUpload.Enabled = false;
+            this.btnUploadEssay.Caption = "上傳申論題";
+            this.btnUploadEssay.Id = 13;
+            this.btnUploadEssay.Name = "btnUploadEssay";
+            this.btnUploadEssay.ImageOptions.SvgImage = this.btnUpload.ImageOptions.SvgImage;
+            this.btnUploadEssay.ImageOptions.SvgImageSize = this.btnUpload.ImageOptions.SvgImageSize;
+            this.btnUploadEssay.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnUploadEssay_ItemClick);
+            this.btnUploadEssay.Enabled = false;
             // 
             // barDockControlTop
             // 
@@ -498,6 +508,7 @@
         private DevExpress.XtraBars.BarButtonItem btnExportExcel;
         private DevExpress.XtraBars.BarButtonItem btnReload;
         private DevExpress.XtraBars.BarButtonItem btnUpload;
+        private DevExpress.XtraBars.BarButtonItem btnUploadEssay;
         private DevExpress.XtraBars.BarButtonItem btnAddEssay;
         private DevExpress.XtraGrid.Columns.GridColumn colIsEssay;
         private DevExpress.XtraBars.BarDockControl barDockControlTop;

@@ -147,6 +147,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             canManage = dt312_QuestionsBUS.Instance.CanManageQuestions(TPConfigs.LoginUser.Id);
             btnAddEssay.Enabled = canManage;
             btnUpload.Enabled = canManage;
+            btnUploadEssay.Enabled = canManage;
             gvQues.ReadOnlyGridView();
             gvQues.KeyDown += GridControlHelper.GridViewCopyCellData_KeyDown;
             gvQues.OptionsDetail.AllowOnlyOneMasterRowExpanded = true;
@@ -178,6 +179,16 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void btnUpload_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
         {
+            UploadQuestions(false);
+        }
+
+        private void btnUploadEssay_ItemClick(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            UploadQuestions(true);
+        }
+
+        private void UploadQuestions(bool essay)
+        {
             if (!canManage) return;
             using (var dialog = new OpenFileDialog { Filter = "試算表 (*.xlsx)|*.xlsx", RestoreDirectory = true })
             {
@@ -185,6 +196,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 try
                 {
                     var items = Exam312QuestionExcel.Load(dialog.FileName);
+                    if (items.Any(item => item.Question.IsEssay != essay))
+                        throw new ArgumentException(essay ? "請上傳僅包含申論題的 Excel 檔案。" : "請上傳僅包含選擇題的 Excel 檔案。");
                     using (var preview = new f312_ExamReview(items))
                         if (preview.ShowDialog(this) != DialogResult.OK) return;
                     var ids = dt312_QuestionsBUS.Instance.ImportQuestions(TPConfigs.LoginUser.Id, idGroup, items, TPConfigs.Folder312);

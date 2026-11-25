@@ -20,5 +20,7 @@ namespace DataAccessLayer
         public int QuesCount { get; set; }
         public int TestDuration { get; set; }
         public double CycleCreate { get; set; }
+        public int ChoicePercent { get; set; }
+        public int? ChoiceScorePercent { get; set; }
     }
 }

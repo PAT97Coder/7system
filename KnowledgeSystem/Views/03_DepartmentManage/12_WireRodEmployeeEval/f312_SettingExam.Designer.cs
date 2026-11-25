@@ -1,444 +1,153 @@
-﻿namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
+namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 {
     partial class f312_SettingExam
     {
-        /// <summary>
-        /// Required designer variable.
-        /// </summary>
-        private System.ComponentModel.IContainer components = null;
-
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
-            base.Dispose(disposing);
-        }
-
-        #region Windows Form Designer generated code
-
-        /// <summary>
-        /// Required method for Designer support - do not modify
-        /// the contents of this method with the code editor.
-        /// </summary>
-        private void InitializeComponent()
-        {
-            this.components = new System.ComponentModel.Container();
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(f312_SettingExam));
-            this.layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
-            this.txbCountEmp = new DevExpress.XtraEditors.TextEdit();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.txbTotalQues = new DevExpress.XtraEditors.TextEdit();
-            this.txbPassScore = new DevExpress.XtraEditors.TextEdit();
-            this.txbTime = new DevExpress.XtraEditors.TextEdit();
-            this.Root = new DevExpress.XtraLayout.LayoutControlGroup();
-            this.lcUserName = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lcMajor = new DevExpress.XtraLayout.LayoutControlItem();
-            this.lcSchool = new DevExpress.XtraLayout.LayoutControlItem();
-            this.layoutControlItem1 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.emptySpaceItem2 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.layoutControlItem2 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.layoutControlItem3 = new DevExpress.XtraLayout.LayoutControlItem();
-            this.emptySpaceItem1 = new DevExpress.XtraLayout.EmptySpaceItem();
-            this.barManagerTP = new DevExpress.XtraBars.BarManager(this.components);
-            this.bar2 = new DevExpress.XtraBars.Bar();
-            this.btnConfirm = new DevExpress.XtraBars.BarButtonItem();
-            this.barDockControlTop = new DevExpress.XtraBars.BarDockControl();
-            this.barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
-            this.barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
-            this.barDockControlRight = new DevExpress.XtraBars.BarDockControl();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).BeginInit();
-            this.layoutControl1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.txbCountEmp.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbTotalQues.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbPassScore.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbTime.Properties)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Root)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcUserName)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcMajor)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcSchool)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).BeginInit();
-            this.SuspendLayout();
-            // 
-            // layoutControl1
-            // 
-            this.layoutControl1.AllowCustomization = false;
-            this.layoutControl1.Controls.Add(this.txbCountEmp);
-            this.layoutControl1.Controls.Add(this.label2);
-            this.layoutControl1.Controls.Add(this.label1);
-            this.layoutControl1.Controls.Add(this.txbTotalQues);
-            this.layoutControl1.Controls.Add(this.txbPassScore);
-            this.layoutControl1.Controls.Add(this.txbTime);
-            this.layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.layoutControl1.Location = new System.Drawing.Point(0, 49);
-            this.layoutControl1.Name = "layoutControl1";
-            this.layoutControl1.OptionsCustomizationForm.DesignTimeCustomizationFormPositionAndSize = new System.Drawing.Rectangle(433, 0, 650, 400);
-            this.layoutControl1.Root = this.Root;
-            this.layoutControl1.Size = new System.Drawing.Size(269, 164);
-            this.layoutControl1.TabIndex = 8;
-            this.layoutControl1.Text = "layoutControl1";
-            // 
-            // txbCountEmp
-            // 
-            this.txbCountEmp.Location = new System.Drawing.Point(109, 120);
-            this.txbCountEmp.Name = "txbCountEmp";
-            this.txbCountEmp.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbCountEmp.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txbCountEmp.Properties.Appearance.Options.UseFont = true;
-            this.txbCountEmp.Properties.Appearance.Options.UseForeColor = true;
-            this.txbCountEmp.Properties.MaskSettings.Set("MaskManagerType", typeof(DevExpress.Data.Mask.NumericMaskManager));
-            this.txbCountEmp.Properties.MaskSettings.Set("MaskManagerSignature", "allowNull=False");
-            this.txbCountEmp.Properties.MaskSettings.Set("mask", "D");
-            this.txbCountEmp.Size = new System.Drawing.Size(79, 32);
-            this.txbCountEmp.StyleController = this.layoutControl1;
-            this.txbCountEmp.TabIndex = 21;
-            // 
-            // label2
-            // 
-            this.label2.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(244)))), ((int)(((byte)(244)))));
-            this.label2.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.label2.ForeColor = System.Drawing.Color.Black;
-            this.label2.Location = new System.Drawing.Point(192, 48);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(65, 32);
-            this.label2.TabIndex = 20;
-            this.label2.Text = "/100";
-            this.label2.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // label1
-            // 
-            this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(244)))), ((int)(((byte)(244)))), ((int)(((byte)(244)))));
-            this.label1.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.label1.ForeColor = System.Drawing.Color.Black;
-            this.label1.Location = new System.Drawing.Point(192, 12);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(65, 32);
-            this.label1.TabIndex = 19;
-            this.label1.Text = "分鐘";
-            this.label1.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
-            // 
-            // txbTotalQues
-            // 
-            this.txbTotalQues.Location = new System.Drawing.Point(109, 84);
-            this.txbTotalQues.Name = "txbTotalQues";
-            this.txbTotalQues.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbTotalQues.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txbTotalQues.Properties.Appearance.Options.UseFont = true;
-            this.txbTotalQues.Properties.Appearance.Options.UseForeColor = true;
-            this.txbTotalQues.Properties.MaskSettings.Set("MaskManagerType", typeof(DevExpress.Data.Mask.NumericMaskManager));
-            this.txbTotalQues.Properties.MaskSettings.Set("MaskManagerSignature", "allowNull=False");
-            this.txbTotalQues.Properties.MaskSettings.Set("mask", "D");
-            this.txbTotalQues.Size = new System.Drawing.Size(79, 32);
-            this.txbTotalQues.StyleController = this.layoutControl1;
-            this.txbTotalQues.TabIndex = 18;
-            // 
-            // txbPassScore
-            // 
-            this.txbPassScore.Location = new System.Drawing.Point(109, 48);
-            this.txbPassScore.Name = "txbPassScore";
-            this.txbPassScore.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbPassScore.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txbPassScore.Properties.Appearance.Options.UseFont = true;
-            this.txbPassScore.Properties.Appearance.Options.UseForeColor = true;
-            this.txbPassScore.Properties.MaskSettings.Set("MaskManagerType", typeof(DevExpress.Data.Mask.NumericMaskManager));
-            this.txbPassScore.Properties.MaskSettings.Set("MaskManagerSignature", "allowNull=False");
-            this.txbPassScore.Properties.MaskSettings.Set("mask", "D");
-            this.txbPassScore.Size = new System.Drawing.Size(79, 32);
-            this.txbPassScore.StyleController = this.layoutControl1;
-            this.txbPassScore.TabIndex = 17;
-            // 
-            // txbTime
-            // 
-            this.txbTime.Location = new System.Drawing.Point(109, 12);
-            this.txbTime.Name = "txbTime";
-            this.txbTime.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.txbTime.Properties.Appearance.ForeColor = System.Drawing.Color.Black;
-            this.txbTime.Properties.Appearance.Options.UseFont = true;
-            this.txbTime.Properties.Appearance.Options.UseForeColor = true;
-            this.txbTime.Properties.DisplayFormat.FormatString = "N0";
-            this.txbTime.Properties.DisplayFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-            this.txbTime.Properties.EditFormat.FormatString = "N0";
-            this.txbTime.Properties.EditFormat.FormatType = DevExpress.Utils.FormatType.Numeric;
-            this.txbTime.Properties.MaskSettings.Set("MaskManagerType", typeof(DevExpress.Data.Mask.NumericMaskManager));
-            this.txbTime.Properties.MaskSettings.Set("MaskManagerSignature", "allowNull=False");
-            this.txbTime.Properties.MaskSettings.Set("mask", "D");
-            this.txbTime.Properties.UseMaskAsDisplayFormat = true;
-            this.txbTime.Size = new System.Drawing.Size(79, 32);
-            this.txbTime.StyleController = this.layoutControl1;
-            this.txbTime.TabIndex = 7;
-            // 
-            // Root
-            // 
-            this.Root.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
-            this.Root.GroupBordersVisible = false;
-            this.Root.Items.AddRange(new DevExpress.XtraLayout.BaseLayoutItem[] {
-            this.lcUserName,
-            this.lcMajor,
-            this.lcSchool,
-            this.layoutControlItem1,
-            this.emptySpaceItem2,
-            this.layoutControlItem2,
-            this.layoutControlItem3,
-            this.emptySpaceItem1});
-            this.Root.Name = "Root";
-            this.Root.Size = new System.Drawing.Size(269, 164);
-            this.Root.TextVisible = false;
-            // 
-            // lcUserName
-            // 
-            this.lcUserName.AllowHtmlStringInCaption = true;
-            this.lcUserName.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.lcUserName.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
-            this.lcUserName.AppearanceItemCaption.Options.UseFont = true;
-            this.lcUserName.AppearanceItemCaption.Options.UseForeColor = true;
-            this.lcUserName.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
-            this.lcUserName.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
-            this.lcUserName.Control = this.txbTime;
-            this.lcUserName.Location = new System.Drawing.Point(0, 0);
-            this.lcUserName.Name = "lcUserName";
-            this.lcUserName.Size = new System.Drawing.Size(180, 36);
-            this.lcUserName.Text = "時期限制<color=red>*</color>";
-            this.lcUserName.TextSize = new System.Drawing.Size(85, 24);
-            // 
-            // lcMajor
-            // 
-            this.lcMajor.AllowHtmlStringInCaption = true;
-            this.lcMajor.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.lcMajor.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
-            this.lcMajor.AppearanceItemCaption.Options.UseFont = true;
-            this.lcMajor.AppearanceItemCaption.Options.UseForeColor = true;
-            this.lcMajor.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
-            this.lcMajor.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
-            this.lcMajor.Control = this.txbTotalQues;
-            this.lcMajor.Location = new System.Drawing.Point(0, 72);
-            this.lcMajor.Name = "lcMajor";
-            this.lcMajor.Size = new System.Drawing.Size(180, 36);
-            this.lcMajor.Text = "題目數量<color=red>*</color>";
-            this.lcMajor.TextSize = new System.Drawing.Size(85, 24);
-            // 
-            // lcSchool
-            // 
-            this.lcSchool.AllowHtmlStringInCaption = true;
-            this.lcSchool.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.lcSchool.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
-            this.lcSchool.AppearanceItemCaption.Options.UseFont = true;
-            this.lcSchool.AppearanceItemCaption.Options.UseForeColor = true;
-            this.lcSchool.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
-            this.lcSchool.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
-            this.lcSchool.Control = this.txbPassScore;
-            this.lcSchool.Location = new System.Drawing.Point(0, 36);
-            this.lcSchool.Name = "lcSchool";
-            this.lcSchool.Size = new System.Drawing.Size(180, 36);
-            this.lcSchool.Text = "及格分數<color=red>*</color>";
-            this.lcSchool.TextSize = new System.Drawing.Size(85, 24);
-            // 
-            // layoutControlItem1
-            // 
-            this.layoutControlItem1.Control = this.label1;
-            this.layoutControlItem1.Location = new System.Drawing.Point(180, 0);
-            this.layoutControlItem1.Name = "layoutControlItem1";
-            this.layoutControlItem1.Size = new System.Drawing.Size(69, 36);
-            this.layoutControlItem1.TextSize = new System.Drawing.Size(0, 0);
-            this.layoutControlItem1.TextVisible = false;
-            // 
-            // emptySpaceItem2
-            // 
-            this.emptySpaceItem2.AllowHotTrack = false;
-            this.emptySpaceItem2.Location = new System.Drawing.Point(180, 72);
-            this.emptySpaceItem2.Name = "emptySpaceItem2";
-            this.emptySpaceItem2.Size = new System.Drawing.Size(69, 36);
-            this.emptySpaceItem2.TextSize = new System.Drawing.Size(0, 0);
-            // 
-            // layoutControlItem2
-            // 
-            this.layoutControlItem2.Control = this.label2;
-            this.layoutControlItem2.Location = new System.Drawing.Point(180, 36);
-            this.layoutControlItem2.Name = "layoutControlItem2";
-            this.layoutControlItem2.Size = new System.Drawing.Size(69, 36);
-            this.layoutControlItem2.TextSize = new System.Drawing.Size(0, 0);
-            this.layoutControlItem2.TextVisible = false;
-            // 
-            // layoutControlItem3
-            // 
-            this.layoutControlItem3.AllowHtmlStringInCaption = true;
-            this.layoutControlItem3.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.layoutControlItem3.AppearanceItemCaption.ForeColor = System.Drawing.Color.Black;
-            this.layoutControlItem3.AppearanceItemCaption.Options.UseFont = true;
-            this.layoutControlItem3.AppearanceItemCaption.Options.UseForeColor = true;
-            this.layoutControlItem3.AppearanceItemCaptionDisabled.ForeColor = System.Drawing.Color.Black;
-            this.layoutControlItem3.AppearanceItemCaptionDisabled.Options.UseForeColor = true;
-            this.layoutControlItem3.Control = this.txbCountEmp;
-            this.layoutControlItem3.CustomizationFormText = "參與人數<color=red>*</color>";
-            this.layoutControlItem3.Location = new System.Drawing.Point(0, 108);
-            this.layoutControlItem3.Name = "layoutControlItem3";
-            this.layoutControlItem3.Size = new System.Drawing.Size(180, 36);
-            this.layoutControlItem3.Text = "參與人數<color=red>*</color>";
-            this.layoutControlItem3.TextSize = new System.Drawing.Size(85, 24);
-            // 
-            // emptySpaceItem1
-            // 
-            this.emptySpaceItem1.AllowHotTrack = false;
-            this.emptySpaceItem1.Location = new System.Drawing.Point(180, 108);
-            this.emptySpaceItem1.Name = "emptySpaceItem1";
-            this.emptySpaceItem1.Size = new System.Drawing.Size(69, 36);
-            this.emptySpaceItem1.TextSize = new System.Drawing.Size(0, 0);
-            // 
-            // barManagerTP
-            // 
-            this.barManagerTP.Bars.AddRange(new DevExpress.XtraBars.Bar[] {
-            this.bar2});
-            this.barManagerTP.DockControls.Add(this.barDockControlTop);
-            this.barManagerTP.DockControls.Add(this.barDockControlBottom);
-            this.barManagerTP.DockControls.Add(this.barDockControlLeft);
-            this.barManagerTP.DockControls.Add(this.barDockControlRight);
-            this.barManagerTP.Form = this;
-            this.barManagerTP.Items.AddRange(new DevExpress.XtraBars.BarItem[] {
-            this.btnConfirm});
-            this.barManagerTP.MainMenu = this.bar2;
-            this.barManagerTP.MaxItemId = 4;
-            // 
-            // bar2
-            // 
-            this.bar2.BarAppearance.Disabled.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.bar2.BarAppearance.Disabled.Options.UseFont = true;
-            this.bar2.BarAppearance.Hovered.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.bar2.BarAppearance.Hovered.ForeColor = System.Drawing.Color.Black;
-            this.bar2.BarAppearance.Hovered.Options.UseFont = true;
-            this.bar2.BarAppearance.Hovered.Options.UseForeColor = true;
-            this.bar2.BarAppearance.Normal.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.bar2.BarAppearance.Normal.ForeColor = System.Drawing.Color.Black;
-            this.bar2.BarAppearance.Normal.Options.UseFont = true;
-            this.bar2.BarAppearance.Normal.Options.UseForeColor = true;
-            this.bar2.BarAppearance.Pressed.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
-            this.bar2.BarAppearance.Pressed.ForeColor = System.Drawing.Color.Black;
-            this.bar2.BarAppearance.Pressed.Options.UseFont = true;
-            this.bar2.BarAppearance.Pressed.Options.UseForeColor = true;
-            this.bar2.BarName = "Main menu";
-            this.bar2.CanDockStyle = DevExpress.XtraBars.BarCanDockStyle.Top;
-            this.bar2.DockCol = 0;
-            this.bar2.DockRow = 0;
-            this.bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
-            this.bar2.LinksPersistInfo.AddRange(new DevExpress.XtraBars.LinkPersistInfo[] {
-            new DevExpress.XtraBars.LinkPersistInfo(DevExpress.XtraBars.BarLinkUserDefines.PaintStyle, this.btnConfirm, "", true, true, true, 0, null, DevExpress.XtraBars.BarItemPaintStyle.CaptionGlyph)});
-            this.bar2.OptionsBar.AllowQuickCustomization = false;
-            this.bar2.OptionsBar.DrawDragBorder = false;
-            this.bar2.OptionsBar.MultiLine = true;
-            this.bar2.OptionsBar.UseWholeRow = true;
-            this.bar2.Text = "Main menu";
-            // 
-            // btnConfirm
-            // 
-            this.btnConfirm.Caption = "確認";
-            this.btnConfirm.Id = 2;
-            this.btnConfirm.ImageOptions.SvgImage = ((DevExpress.Utils.Svg.SvgImage)(resources.GetObject("btnConfirm.ImageOptions.SvgImage")));
-            this.btnConfirm.ImageOptions.SvgImageSize = new System.Drawing.Size(32, 32);
-            this.btnConfirm.Name = "btnConfirm";
-            this.btnConfirm.ItemClick += new DevExpress.XtraBars.ItemClickEventHandler(this.btnConfirm_ItemClick);
-            // 
-            // barDockControlTop
-            // 
-            this.barDockControlTop.CausesValidation = false;
-            this.barDockControlTop.Dock = System.Windows.Forms.DockStyle.Top;
-            this.barDockControlTop.Location = new System.Drawing.Point(0, 0);
-            this.barDockControlTop.Manager = this.barManagerTP;
-            this.barDockControlTop.Size = new System.Drawing.Size(269, 49);
-            // 
-            // barDockControlBottom
-            // 
-            this.barDockControlBottom.CausesValidation = false;
-            this.barDockControlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.barDockControlBottom.Location = new System.Drawing.Point(0, 213);
-            this.barDockControlBottom.Manager = this.barManagerTP;
-            this.barDockControlBottom.Size = new System.Drawing.Size(269, 0);
-            // 
-            // barDockControlLeft
-            // 
-            this.barDockControlLeft.CausesValidation = false;
-            this.barDockControlLeft.Dock = System.Windows.Forms.DockStyle.Left;
-            this.barDockControlLeft.Location = new System.Drawing.Point(0, 49);
-            this.barDockControlLeft.Manager = this.barManagerTP;
-            this.barDockControlLeft.Size = new System.Drawing.Size(0, 164);
-            // 
-            // barDockControlRight
-            // 
-            this.barDockControlRight.CausesValidation = false;
-            this.barDockControlRight.Dock = System.Windows.Forms.DockStyle.Right;
-            this.barDockControlRight.Location = new System.Drawing.Point(269, 49);
-            this.barDockControlRight.Manager = this.barManagerTP;
-            this.barDockControlRight.Size = new System.Drawing.Size(0, 164);
-            // 
-            // f312_SettingExam
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(269, 213);
-            this.Controls.Add(this.layoutControl1);
-            this.Controls.Add(this.barDockControlLeft);
-            this.Controls.Add(this.barDockControlRight);
-            this.Controls.Add(this.barDockControlBottom);
-            this.Controls.Add(this.barDockControlTop);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
-            this.IconOptions.Image = global::KnowledgeSystem.Properties.Resources.AppIcon;
-            this.Name = "f312_SettingExam";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "考試資訊設定";
-            this.Load += new System.EventHandler(this.f312_SettingExam_Load);
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControl1)).EndInit();
-            this.layoutControl1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.txbCountEmp.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbTotalQues.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbPassScore.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.txbTime.Properties)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.Root)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcUserName)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcMajor)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.lcSchool)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.layoutControlItem3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.emptySpaceItem1)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.barManagerTP)).EndInit();
-            this.ResumeLayout(false);
-            this.PerformLayout();
-
-        }
-
-        #endregion
-
+        private System.ComponentModel.IContainer components;
         private DevExpress.XtraLayout.LayoutControl layoutControl1;
-        private DevExpress.XtraEditors.TextEdit txbCountEmp;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private DevExpress.XtraEditors.TextEdit txbTotalQues;
-        private DevExpress.XtraEditors.TextEdit txbPassScore;
-        private DevExpress.XtraEditors.TextEdit txbTime;
         private DevExpress.XtraLayout.LayoutControlGroup Root;
-        private DevExpress.XtraLayout.LayoutControlItem lcUserName;
-        private DevExpress.XtraLayout.LayoutControlItem lcMajor;
-        private DevExpress.XtraLayout.LayoutControlItem lcSchool;
-        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem1;
-        private DevExpress.XtraLayout.EmptySpaceItem emptySpaceItem2;
-        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem2;
-        private DevExpress.XtraLayout.LayoutControlItem layoutControlItem3;
-        private DevExpress.XtraLayout.EmptySpaceItem emptySpaceItem1;
+        private DevExpress.XtraEditors.SpinEdit txbTime, txbPassScore, txbTotalQues, txbCountEmp;
+        private DevExpress.XtraEditors.SpinEdit choicePercentEdit, essayPercentEdit;
+        private DevExpress.XtraEditors.SpinEdit choiceScoreEdit, essayScoreEdit;
+        private DevExpress.XtraEditors.LabelControl ratioPreview;
         private DevExpress.XtraBars.BarManager barManagerTP;
         private DevExpress.XtraBars.Bar bar2;
         private DevExpress.XtraBars.BarButtonItem btnConfirm;
-        private DevExpress.XtraBars.BarDockControl barDockControlTop;
-        private DevExpress.XtraBars.BarDockControl barDockControlBottom;
-        private DevExpress.XtraBars.BarDockControl barDockControlLeft;
-        private DevExpress.XtraBars.BarDockControl barDockControlRight;
+        private DevExpress.XtraBars.BarDockControl barDockControlTop, barDockControlBottom, barDockControlLeft, barDockControlRight;
+
+        protected override void Dispose(bool disposing) { if (disposing) components?.Dispose(); base.Dispose(disposing); }
+
+        private void InitializeComponent()
+        {
+            components = new System.ComponentModel.Container();
+            layoutControl1 = new DevExpress.XtraLayout.LayoutControl();
+            Root = new DevExpress.XtraLayout.LayoutControlGroup();
+            txbTime = new DevExpress.XtraEditors.SpinEdit();
+            txbPassScore = new DevExpress.XtraEditors.SpinEdit();
+            txbTotalQues = new DevExpress.XtraEditors.SpinEdit();
+            txbCountEmp = new DevExpress.XtraEditors.SpinEdit();
+            choicePercentEdit = new DevExpress.XtraEditors.SpinEdit();
+            essayPercentEdit = new DevExpress.XtraEditors.SpinEdit();
+            choiceScoreEdit = new DevExpress.XtraEditors.SpinEdit();
+            essayScoreEdit = new DevExpress.XtraEditors.SpinEdit();
+            ratioPreview = new DevExpress.XtraEditors.LabelControl();
+            barManagerTP = new DevExpress.XtraBars.BarManager(components);
+            bar2 = new DevExpress.XtraBars.Bar();
+            btnConfirm = new DevExpress.XtraBars.BarButtonItem();
+            barDockControlTop = new DevExpress.XtraBars.BarDockControl();
+            barDockControlBottom = new DevExpress.XtraBars.BarDockControl();
+            barDockControlLeft = new DevExpress.XtraBars.BarDockControl();
+            barDockControlRight = new DevExpress.XtraBars.BarDockControl();
+            SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)layoutControl1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)Root).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)barManagerTP).BeginInit();
+            layoutControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            layoutControl1.Name = "layoutControl1";
+            layoutControl1.AllowCustomization = false;
+            layoutControl1.Root = Root;
+            Root.Name = "Root";
+            Root.GroupBordersVisible = false;
+            Root.EnableIndentsWithoutBorders = DevExpress.Utils.DefaultBoolean.True;
+            Root.Padding = new DevExpress.XtraLayout.Utils.Padding(10);
+            AddSettingRow(txbTime, "txbTime", "時期限制", 1, 32767, "分鐘");
+            AddSettingRow(txbPassScore, "txbPassScore", "及格分數", 0, 100, "/100");
+            AddSettingRow(txbTotalQues, "txbTotalQues", "題目數量", 1, 32767);
+            AddSettingRow(txbCountEmp, "txbCountEmp", "參與人數", 1, 32767);
+            AddSettingRow(choicePercentEdit, "choicePercentEdit", "選擇題比例", 0, 100, "%");
+            AddSettingRow(essayPercentEdit, "essayPercentEdit", "申論題比例", 0, 100, "%");
+            choicePercentEdit.EditValue = 70m;
+            essayPercentEdit.EditValue = 30m;
+            AddSettingRow(choiceScoreEdit, "choiceScoreEdit", "選擇題配分（%）", 0, 100);
+            AddSettingRow(essayScoreEdit, "essayScoreEdit", "申論題配分（%）", 0, 100);
+            choiceScoreEdit.EditValue = 70m; essayScoreEdit.EditValue = 30m;
+            foreach (var scoreEdit in new[] { choiceScoreEdit, essayScoreEdit })
+            {
+                scoreEdit.Properties.ReadOnly = true;
+                scoreEdit.Properties.IsFloatValue = true;
+                scoreEdit.Properties.Mask.EditMask = "0.##";
+                scoreEdit.Properties.Buttons.Clear();
+                scoreEdit.TabStop = false;
+            }
+            ratioPreview.Name = "ratioPreview";
+            ratioPreview.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 12F);
+            ratioPreview.AutoSizeMode = DevExpress.XtraEditors.LabelAutoSizeMode.Vertical;
+            layoutControl1.Controls.Add(ratioPreview);
+            var previewItem = Root.AddItem();
+            previewItem.Name = "ratioPreviewItem"; previewItem.Control = ratioPreview; previewItem.TextVisible = false;
+            previewItem.Move(Root.Items[Root.Items.Count - 2], DevExpress.XtraLayout.Utils.InsertType.Bottom);
+            layoutControl1.GetItemByControl(choiceScoreEdit).Parent.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+            layoutControl1.GetItemByControl(essayScoreEdit).Parent.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+            previewItem.Visibility = DevExpress.XtraLayout.Utils.LayoutVisibility.Never;
+            choicePercentEdit.EditValueChanged += ChoicePercentChanged;
+            essayPercentEdit.EditValueChanged += EssayPercentChanged;
+            txbTotalQues.EditValueChanged += (s, e) => UpdateRatioPreview();
+            barManagerTP.Form = this;
+            barManagerTP.Bars.Add(bar2); barManagerTP.Items.Add(btnConfirm);
+            barManagerTP.DockControls.Add(barDockControlTop); barManagerTP.DockControls.Add(barDockControlBottom);
+            barManagerTP.DockControls.Add(barDockControlLeft); barManagerTP.DockControls.Add(barDockControlRight);
+            barDockControlTop.Manager = barDockControlBottom.Manager = barDockControlLeft.Manager = barDockControlRight.Manager = barManagerTP;
+            barDockControlTop.Dock = System.Windows.Forms.DockStyle.Top;
+            barDockControlBottom.Dock = System.Windows.Forms.DockStyle.Bottom;
+            barDockControlLeft.Dock = System.Windows.Forms.DockStyle.Left;
+            barDockControlRight.Dock = System.Windows.Forms.DockStyle.Right;
+            bar2.BarName = "考試資訊設定"; bar2.DockStyle = DevExpress.XtraBars.BarDockStyle.Top;
+            bar2.AddItem(btnConfirm); Exam312Ui.StyleBar(bar2);
+            btnConfirm.Name = "btnConfirm"; btnConfirm.Caption = "確認"; btnConfirm.Id = 0;
+            btnConfirm.ImageOptions.SvgImage = Helpers.TPSvgimages.Confirm;
+            Exam312Ui.StyleButton(btnConfirm); btnConfirm.ItemClick += btnConfirm_ItemClick;
+            Controls.AddRange(new System.Windows.Forms.Control[] { layoutControl1, barDockControlTop, barDockControlBottom, barDockControlLeft, barDockControlRight });
+            layoutControl1.BringToFront();
+            ClientSize = new System.Drawing.Size(289, 285);
+            AutoScaleDimensions = new System.Drawing.SizeF(7F, 14F);
+            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedToolWindow;
+            MaximizeBox = false; MinimizeBox = false;
+            IconOptions.Image = global::KnowledgeSystem.Properties.Resources.AppIcon;
+            Name = "f312_SettingExam"; Text = "考試資訊設定";
+            StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
+            Load += f312_SettingExam_Load;
+            ((System.ComponentModel.ISupportInitialize)barManagerTP).EndInit();
+            ((System.ComponentModel.ISupportInitialize)Root).EndInit();
+            ((System.ComponentModel.ISupportInitialize)layoutControl1).EndInit();
+            ResumeLayout(false); PerformLayout();
+        }
+
+        private void AddSettingRow(DevExpress.XtraEditors.SpinEdit editor, string name, string caption, int minimum, int maximum, string unit = "")
+        {
+            editor.Name = name;
+            editor.Properties.IsFloatValue = false;
+            editor.Properties.MinValue = minimum; editor.Properties.MaxValue = maximum;
+            editor.Properties.Mask.EditMask = "d";
+            editor.Properties.Buttons.Clear();
+            editor.Properties.Appearance.TextOptions.HAlignment = DevExpress.Utils.HorzAlignment.Near;
+            editor.Properties.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            editor.EditValue = minimum;
+            layoutControl1.Controls.Add(editor);
+            var row = Root.AddGroup();
+            row.Name = name + "Row";
+            row.GroupBordersVisible = false;
+            row.Padding = new DevExpress.XtraLayout.Utils.Padding(0);
+            row.Spacing = new DevExpress.XtraLayout.Utils.Padding(0);
+            row.MinSize = new System.Drawing.Size(0, 36);
+            row.MaxSize = new System.Drawing.Size(0, 36);
+            if (Root.Items.Count > 1) row.Move(Root.Items[Root.Items.Count - 2], DevExpress.XtraLayout.Utils.InsertType.Bottom);
+            var item = row.AddItem(caption + (unit == "%" ? "" : "<color=red>*</color>"), editor);
+            item.Name = name + "Item";
+            item.AllowHtmlStringInCaption = true;
+            item.TextAlignMode = DevExpress.XtraLayout.TextAlignModeItem.CustomSize;
+            item.TextSize = new System.Drawing.Size(105, 24);
+            item.TextToControlDistance = 12;
+            item.AppearanceItemCaption.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            item.MinSize = new System.Drawing.Size(200, 36);
+            item.MaxSize = new System.Drawing.Size(200, 36);
+            item.SizeConstraintsType = DevExpress.XtraLayout.SizeConstraintsType.Custom;
+            var unitLabel = new DevExpress.XtraEditors.LabelControl { Name = name + "Unit", Text = unit };
+            unitLabel.Appearance.Font = new System.Drawing.Font("Microsoft JhengHei UI", 14.25F);
+            layoutControl1.Controls.Add(unitLabel);
+            var unitItem = row.AddItem();
+            unitItem.Name = name + "UnitItem"; unitItem.Control = unitLabel; unitItem.TextVisible = false;
+            unitItem.Padding = new DevExpress.XtraLayout.Utils.Padding(8, 2, 2, 2);
+            unitItem.Move(item, DevExpress.XtraLayout.Utils.InsertType.Right);
+        }
     }
 }

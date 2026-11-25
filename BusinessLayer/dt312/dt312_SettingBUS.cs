@@ -24,6 +24,23 @@ namespace BusinessLayer
 
         private dt312_SettingBUS() { logger = new TPLogger(MethodBase.GetCurrentMethod().DeclaringType.FullName); }
 
+        public static int ChoiceCount(int total, int choicePercent)
+        {
+            if (total <= 0) throw new ArgumentException("題目數量必須大於0。");
+            if (choicePercent < 0 || choicePercent > 100) throw new ArgumentException("選擇題比例必須介於0至100%。");
+            return (int)Math.Round(total * (decimal)choicePercent / 100m, MidpointRounding.AwayFromZero);
+        }
+
+        private static void Validate(dt312_Setting item)
+        {
+            if (item == null) throw new ArgumentNullException(nameof(item));
+            ChoiceCount(item.QuesCount, item.ChoicePercent);
+            if (item.ChoiceScorePercent.HasValue && (item.ChoiceScorePercent < 0 || item.ChoiceScorePercent > 100))
+                throw new ArgumentException("分數權重必須介於0至100%。");
+            if (item.TestDuration <= 0 || item.CountEmp <= 0 || item.PassingScore < 0 || item.PassingScore > 100)
+                throw new ArgumentException("考試時間與參與人數必須大於0；及格分數必須介於0至100。");
+        }
+
         public List<dt312_Setting> GetList()
         {
             try
@@ -58,6 +75,7 @@ namespace BusinessLayer
 
         public bool Add(dt312_Setting item)
         {
+            Validate(item);
             try
             {
                 using (var _context = new DBDocumentManagementSystemEntities())
@@ -76,6 +94,7 @@ namespace BusinessLayer
 
         public bool AddRange(List<dt312_Setting> items)
         {
+            foreach (var item in items) Validate(item);
             try
             {
                 using (var _context = new DBDocumentManagementSystemEntities())
@@ -94,6 +113,7 @@ namespace BusinessLayer
 
         public bool AddOrUpdate(dt312_Setting item)
         {
+            Validate(item);
             try
             {
                 using (var _context = new DBDocumentManagementSystemEntities())

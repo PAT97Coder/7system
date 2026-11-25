@@ -149,7 +149,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
-                e.Menu.Items.Add(itemViewInfo);
+                try
+                {
+                    var view = sender as GridView;
+                    if (view == null) return;
+                    view.FocusedRowHandle = e.HitInfo.RowHandle;
+                    int id = Convert.ToInt32(view.GetRowCellValue(e.HitInfo.RowHandle, gColEmpId));
+                    var attempt = dt312_ExamUserBUS.Instance.GetItemById(id);
+                    if (attempt?.SubmitAt != null && dt312_ExamScoring.IsGradingComplete(attempt.ExamData))
+                        e.Menu.Items.Add(itemViewInfo);
+                }
+                catch (Exception ex) { MsgTP.MsgError(Exam312Ui.ErrorText(ex)); }
             }
         }
     }

@@ -1,4 +1,4 @@
-﻿using BusinessLayer;
+using BusinessLayer;
 using DataAccessLayer;
 using DevExpress.Charts.Native;
 using DevExpress.Data.Helpers;
@@ -38,10 +38,12 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             Text = practice ? "模擬測驗" : "正式考試";
             this.FormBorderStyle = FormBorderStyle.None; // Bỏ khung viền
             this.WindowState = FormWindowState.Maximized; // Phóng to toàn màn hình
-            this.TopMost = !practice; // Đảm bảo form luôn ở trên cùng
+         //   this.TopMost = !practice; // Đảm bảo form luôn ở trên cùng
 
             this.KeyDown += F312_DoExam_KeyDown;
             this.KeyPreview = true;  // Đảm bảo Form nhận được sự kiện KeyDown
+
+            TopMost = true;
         }
 
         public bool IsPractice { get; }
@@ -66,6 +68,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             public string UserAnswer { get; set; }
             public bool IsCorrect { get; set; }
             public bool IsMultiChoice { get; set; }
+            public decimal? EssayScore { get; set; }
+            public decimal? MaxScore { get; set; }
+            public int? SnapshotPassingScore { get; set; }
+            public string GradedBy { get; set; }
+            public DateTime? GradedAt { get; set; }
         }
 
         private Timer countdownTimer;
@@ -207,6 +214,9 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             int graded = examResults.Count(r => !r.Questions.IsEssay);
             int correct = examResults.Count(r => r.IsCorrect);
             int? score = dt312_ExamScoring.Score(correct, graded);
+            if (!IsPractice && examResults.All(r => r.MaxScore.HasValue))
+                score = dt312_ExamScoring.WeightedScore(examResults.Select(r => r.IsCorrect ? r.MaxScore.Value : 0m));
+            if (!IsPractice && examResults.Any(r => r.Questions.IsEssay)) score = null;
             try
             {
                 if (!IsPractice)
@@ -229,8 +239,8 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                     using (var review = new f312_ExamReview(examResults, score, true)) review.ShowDialog(this);
                 }
                 else
-                    MsgTP.MsgShowInfomation(score.HasValue ? $"{(score.Value >= passingScore ? "考試通過" : "考試未通過")}；成績：{score}/100；選擇題答對 {correct}/{graded} 題。申論題不計分。"
-                        : "已提交作答。本次全為申論題，不計分。");
+                    MsgTP.MsgShowInfomation(score.HasValue ? $"{(score.Value >= passingScore ? "考試通過" : "考試未通過")}；成績：{score}/100；選擇題答對 {correct}/{graded} 題。"
+                        : "已提交作答，待申論題評分完成後公布成績。");
                 IsClose = true; Close();
             }
             catch (Exception ex)
@@ -321,6 +331,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private string LoadData()
         {
+            ques.Clear(); answers.Clear(); examResults.Clear();
             if (IsPractice && !dt312_QuestionsBUS.Instance.CanPractice(TPConfigs.LoginUser.Id))
                 return "您沒有模擬測驗的權限。";
             if (!IsPractice)
@@ -345,55 +356,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             if (dataQues.Count < numQues)
                 return "題目數量不夠！";
 
-            // Group và đếm số lượng (Code cũ của bạn)
-            var quesCountsQuery = from data in dataQues
-                                  group data by data.GroupId into dtg
-                                  select new
-                                  {
-                                      IdGroup = dtg.Key,
-                                      QuestionCount = dtg.Count()
-                                  };
+            int choiceCount;
+            try { choiceCount = dt312_SettingBUS.ChoiceCount(numQues, setting.ChoicePercent); }
+            catch (ArgumentException ex) { return ex.Message; }
+            int essayCount = numQues - choiceCount;
+            int availableChoice = dataQues.Count(q => !q.IsEssay);
+            int availableEssay = dataQues.Count(q => q.IsEssay);
+            if (availableChoice < choiceCount || availableEssay < essayCount)
+                return $"題庫數量不夠！需要選擇題 {choiceCount} 題、申論題 {essayCount} 題；可用選擇題 {availableChoice} 題、申論題 {availableEssay} 題。請調整比例或補充題庫。";
 
-            // Loại các nhóm đã bị xóa
-
-            quesCountsQuery = quesCountsQuery.Where(r => !groupIsRemove.Select(x => x.Id).ToList().Contains(r.IdGroup)).ToList();
-
-            // --- PHẦN 2: CHUẨN BỊ DỮ LIỆU TÍNH TOÁN ---
-
-            // Map sang object GroupDistribution
-            var listForCalc = quesCountsQuery.Select(x => new GroupDistribution
-            {
-                GroupId = x.IdGroup,
-                MaxAvailable = x.QuestionCount,
-                CountToTake = 0
-            }).ToList();
-
-            // --- PHẦN 3: XỬ LÝ PHÂN BỔ (CODE MỚI THÊM VÀO) ---
-
-            // BƯỚC 1: Trộn ngẫu nhiên thứ tự các nhóm 
-            // (Để khi chia phần dư, nhóm nào được ưu tiên +1 sẽ là ngẫu nhiên)
-            listForCalc = listForCalc.OrderBy(x => Guid.NewGuid()).ToList();
-
-            // BƯỚC 2: Gọi hàm tính toán logic chia đều
-            DistributeQuestions(listForCalc, numQues);
-
-            // BƯỚC 3: Lấy danh sách câu hỏi thực tế dựa trên số lượng đã tính
-            foreach (var groupInfo in listForCalc)
-            {
-                if (groupInfo.CountToTake > 0)
-                {
-                    // Lấy các câu hỏi thuộc nhóm này từ danh sách gốc dataQues
-                    var questionsOfGroup = dataQues
-                        .Where(q => q.GroupId == groupInfo.GroupId)
-                        // Quan trọng: Trộn ngẫu nhiên câu hỏi TRONG nhóm để không luôn lấy các câu đầu tiên
-                        .OrderBy(x => Guid.NewGuid())
-                        .Take(groupInfo.CountToTake)
-                        .ToList();
-
-                    ques.AddRange(questionsOfGroup);
-                }
-            }
-
+            ques.AddRange(SelectQuestionsByType(dataQues.Where(q => !q.IsEssay).ToList(), choiceCount));
+            ques.AddRange(SelectQuestionsByType(dataQues.Where(q => q.IsEssay).ToList(), essayCount));
             ques = ques.OrderBy(x => Guid.NewGuid()).ToList();
 
             answers = dt312_AnswersBUS.Instance.GetListByListQues(ques.Select(r => r.Id).ToList())
@@ -407,7 +380,6 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                     TrueAns = answer.TrueAns
                 })).ToList();
 
-            // Lấy danh sách câu trả lời đúng dưới dạng 1,2,3
             var correctAnsByIdQues = answers.Where(r => r.TrueAns).GroupBy(r => r.QuesId).Select(r => new
             {
                 QuesId = r.Key,
@@ -425,7 +397,28 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 IsMultiChoice = question.IsmultiAns
             }).ToList();
 
+            if (!IsPractice)
+            {
+                var maxima = dt312_ExamScoring.AllocateEqualPoints(examResults.Select(r => r.Questions.IsEssay).ToArray());
+                for (int i = 0; i < examResults.Count; i++)
+                {
+                    examResults[i].MaxScore = maxima[i];
+                    examResults[i].SnapshotPassingScore = passingScore;
+                }
+            }
+
             return "";
+        }
+
+        private List<dt312_Questions> SelectQuestionsByType(List<dt312_Questions> pool, int count)
+        {
+            if (count == 0) return new List<dt312_Questions>();
+            var distribution = pool.GroupBy(q => q.GroupId)
+                .Select(g => new GroupDistribution { GroupId = g.Key, MaxAvailable = g.Count() })
+                .OrderBy(x => Guid.NewGuid()).ToList();
+            DistributeQuestions(distribution, count);
+            return distribution.SelectMany(g => pool.Where(q => q.GroupId == g.GroupId)
+                .OrderBy(q => Guid.NewGuid()).Take(g.CountToTake)).ToList();
         }
 
         private void CountdownTimer_Tick(object sender, EventArgs e)

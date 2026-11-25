@@ -13,6 +13,75 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         private IList<DataAccessLayer.dt312_QuestionImportItem> importItems;
         private int importIndex;
         private bool isResultView;
+        private DataAccessLayer.dt312_ExamUser gradingAttempt;
+        private List<f312_DoExam.ExamResult> gradingResults;
+        private DevExpress.XtraBars.BarButtonItem btnFinishGrading;
+
+        public f312_ExamReview(int attemptId, bool grading)
+            : this(BusinessLayer.dt312_ExamUserBUS.Instance.GetItemById(attemptId), grading) { }
+
+        private f312_ExamReview(DataAccessLayer.dt312_ExamUser attempt, bool grading)
+        {
+            if (attempt == null || string.IsNullOrEmpty(attempt.ExamData))
+                throw new System.InvalidOperationException("找不到試卷。");
+            InitializeComponent();
+            EnableResultPrinting();
+            gradingResults = Newtonsoft.Json.JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(attempt.ExamData);
+            if (!grading)
+            {
+                browser.DocumentText = BuildHtml(gradingResults, attempt.Score, false);
+                return;
+            }
+            if (!BusinessLayer.dt312_ExamUserBUS.Instance.CanGrade(TPConfigs.LoginUser.Id))
+                throw new System.UnauthorizedAccessException("您沒有評分權限。");
+            if (!attempt.SubmitAt.HasValue || !gradingResults.Any(r => r.Questions.IsEssay)
+                || gradingResults.Any(r => r.Questions.IsEssay && r.EssayScore.HasValue))
+                throw new System.InvalidOperationException("試卷沒有待評分的申論題，或已完成評分。");
+            gradingResults = Newtonsoft.Json.JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(
+                BusinessLayer.dt312_ExamScoring.PreparePendingGradingData(attempt.ExamData));
+            gradingAttempt = attempt;
+            Text = "進行評分";
+            btnPrint.Visibility = DevExpress.XtraBars.BarItemVisibility.Never;
+            btnFinishGrading = new DevExpress.XtraBars.BarButtonItem(previewManager, "結束評分");
+            btnFinishGrading.ImageOptions.SvgImage = TPSvgimages.Confirm;
+            btnFinishGrading.Enabled = false;
+            Exam312Ui.StyleButton(btnFinishGrading);
+            previewBar.AddItem(btnFinishGrading);
+            btnFinishGrading.ItemClick += FinishGrading_Click;
+            FormClosing += (s, e) => {
+                if (gradingAttempt != null && System.Windows.Forms.MessageBox.Show(this,
+                    "評分尚未儲存，確定離開？", "進行評分", System.Windows.Forms.MessageBoxButtons.YesNo,
+                    System.Windows.Forms.MessageBoxIcon.Question) != System.Windows.Forms.DialogResult.Yes) e.Cancel = true;
+            };
+            browser.DocumentText = BuildHtml(gradingResults, null, false, null, true);
+        }
+
+        private void FinishGrading_Click(object sender, DevExpress.XtraBars.ItemClickEventArgs e)
+        {
+            if (gradingAttempt == null || browser.Document == null) return;
+            try
+            {
+                var marks = new Dictionary<int, decimal>();
+                foreach (var row in gradingResults.Where(r => r.Questions.IsEssay))
+                {
+                    string value = browser.Document.GetElementById("essay-score-" + row.QuestionIndex)?.GetAttribute("value");
+                    decimal mark;
+                    decimal maximum = row.MaxScore ?? 100m;
+                    if (!decimal.TryParse((value ?? "").Trim().Replace(',', '.'), System.Globalization.NumberStyles.AllowDecimalPoint,
+                        System.Globalization.CultureInfo.InvariantCulture, out mark) || mark < 0 || mark > maximum || decimal.Round(mark, 2) != mark)
+                        throw new System.ArgumentException("第 " + row.QuestionIndex + " 題滿分 " + maximum.ToString("0.##") + "，請輸入範圍內的評分（最多兩位小數）。");
+                    marks.Add(row.QuestionIndex, mark);
+                }
+                BusinessLayer.dt312_ExamUserBUS.Instance.FinishGrading(TPConfigs.LoginUser.Id,
+                    gradingAttempt.Id, gradingAttempt.ExamData, marks);
+                gradingAttempt = null;
+                DialogResult = System.Windows.Forms.DialogResult.OK;
+                Close();
+            }
+            catch (System.ArgumentException ex) { MsgTP.MsgError(ex.Message); }
+            catch (System.InvalidOperationException ex) { MsgTP.MsgError(ex.Message); }
+            catch (System.Exception ex) { MsgTP.MsgError(Exam312Ui.ErrorText(ex)); }
+        }
 
         private void EnableResultPrinting()
         {
@@ -31,6 +100,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
 
         private void Browser_DocumentCompleted(object sender, System.Windows.Forms.WebBrowserDocumentCompletedEventArgs e)
         {
+            if (btnFinishGrading != null) btnFinishGrading.Enabled = browser.ReadyState == System.Windows.Forms.WebBrowserReadyState.Complete;
             btnPrint.Enabled = isResultView && browser.ReadyState == System.Windows.Forms.WebBrowserReadyState.Complete
                 && browser.Document?.Body != null;
         }
@@ -116,7 +186,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
             return BuildHtml(results, score, practice, null);
         }
         public static string BuildHtml(IEnumerable<f312_DoExam.ExamResult> results, int? score, bool practice,
-            DataAccessLayer.dt312_PracticeResult participant)
+            DataAccessLayer.dt312_PracticeResult participant, bool grading = false)
         {
             var rows = results.ToList();
             var html = new StringBuilder("<!doctype html><html lang='zh-Hant'><head><meta charset='utf-8'><meta http-equiv='X-UA-Compatible' content='IE=edge'>");
@@ -139,7 +209,11 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                     .Append(Metric("部門", participant.Department))
                     .Append(Metric("考試日期", participant.SubmitAt.ToString("yyyy/MM/dd HH:mm:ss"))).Append("</div>");
             html.Append("<div class='metrics'><div class='metric score'><b>成績：</b>")
-                .Append(score.HasValue ? score.Value + "／100" : "不計分（全為申論題）").Append("</div></div>");
+                .Append(!practice && rows.Any(r => r.Questions.IsEssay && !r.EssayScore.HasValue) ? "待評分"
+                    : score.HasValue ? score.Value + "／100" : "不計分（全為申論題）").Append("</div></div>");
+            if (grading) html.Append(rows.All(r => r.MaxScore.HasValue)
+                ? "<p class='note'>請依各題滿分輸入實際得分（最多兩位小數）。各題得分相加，總分最後四捨五入為整數。填妥後按「結束評分」儲存。</p>"
+                : "<p class='note'>本試卷使用舊制：每題按0–100評分，總分為各題評分的平均值。填妥後按「結束評分」儲存。</p>");
             if (practice) html.Append("<p class='note'>本次為模擬測驗，不列入正式考試成績。</p>");
             html.Append("</div>");
             foreach (var result in rows.OrderBy(r => r.QuestionIndex))
@@ -148,7 +222,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                 html.Append("<section class='q'><div class='qhead'><h2>第 ").Append(result.QuestionIndex)
                     .Append(" 題<span class='tag'>").Append(essay ? "申論題" : result.Questions.IsmultiAns ? "複選題" : "單選題")
                     .Append("</span></h2></div><div class='badge ").Append(essay ? "neutral" : result.IsCorrect ? "ok" : "bad").Append("'>")
-                    .Append(essay ? "不計分" : result.IsCorrect ? "答對" : "答錯")
+                    .Append(essay ? (practice ? "不計分" : result.EssayScore.HasValue ? "評分：" + result.EssayScore.Value + "／" + (result.MaxScore ?? 100m).ToString("0.##") : "待評分") : result.IsCorrect ? "答對" : "答錯")
                     .Append("</div><div class='question'>").Append(Encode(result.Questions.DisplayName))
                     .Append("</div>").Append(Image(result.Questions.ImageName));
                 if (!essay)
@@ -169,7 +243,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
                     .Append(Encode(essay ? (string.IsNullOrWhiteSpace(result.Questions.ReferenceAnswer) ? "未提供參考答案" : result.Questions.ReferenceAnswer) : result.CorrectAnswer))
                     .Append(essay ? "</p></div><div class='response'><b>您的答案：</b><p>" : "</span><span class='summary-item'>您的答案：")
                     .Append(Encode(string.IsNullOrWhiteSpace(result.UserAnswer) ? "未作答" : result.UserAnswer))
-                    .Append(essay ? "</p></div></section>" : "</span></div></section>");
+                    .Append(essay ? "</p></div>" : "</span></div>");
+                if (essay && grading)
+                    html.Append("<div class='response'><label for='essay-score-").Append(result.QuestionIndex)
+                        .Append("'>評分（滿分：").Append((result.MaxScore ?? 100m).ToString("0.##")).Append(" 分）：</label><input type='text' autocomplete='off' style='font-size:20px;width:100px' id='essay-score-")
+                        .Append(result.QuestionIndex).Append("' value=''></div>");
+                if (!practice && result.MaxScore.HasValue)
+                    html.Append("<p class='note'>滿分：").Append(result.MaxScore.Value.ToString("0.##")).Append(" 分</p>");
+                if (essay && result.GradedAt.HasValue && !practice)
+                    html.Append("<p class='note'>評分人：").Append(Encode(result.GradedBy)).Append("；評分時間：")
+                        .Append(Encode(result.GradedAt.Value.ToString("yyyy/MM/dd HH:mm"))).Append("</p>");
+                html.Append("</section>");
             }
             return html.Append("</div></body></html>").ToString();
         }

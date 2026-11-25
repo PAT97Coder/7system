@@ -1341,6 +1341,8 @@
           <Property Name="QuesCount" Type="int" Nullable="false" />
           <Property Name="TestDuration" Type="int" Nullable="false" />
           <Property Name="CycleCreate" Type="float" Nullable="false" />
+          <Property Name="ChoicePercent" Type="int" Nullable="false" />
+          <Property Name="ChoiceScorePercent" Type="int" />
         </EntityType>
         <EntityType Name="dt313_AbnormalCatalog">
           <Key>
@@ -2292,7 +2294,6 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt312_ExamUser" EntityType="DBDocumentManagementSystemModel.dt312_ExamUser" />
           <EntitySet Name="dt312_Groups" EntityType="DBDocumentManagementSystemModel.dt312_Groups" />
           <EntitySet Name="dt312_Questions" EntityType="DBDocumentManagementSystemModel.dt312_Questions" />
-          <EntitySet Name="dt312_Setting" EntityType="DBDocumentManagementSystemModel.dt312_Setting" />
           <EntitySet Name="dt312_ExamMgmt" EntityType="DBDocumentManagementSystemModel.dt312_ExamMgmt" />
           <EntitySet Name="dt403_05_Standard" EntityType="DBDocumentManagementSystemModel.dt403_05_Standard" />
           <EntitySet Name="dt403_05_StandardAtt" EntityType="DBDocumentManagementSystemModel.dt403_05_StandardAtt" />
@@ -2378,6 +2379,7 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <EntitySet Name="dt316_Report" EntityType="DBDocumentManagementSystemModel.dt316_Report" />
           <EntitySet Name="dt312_ExternalParticipant" EntityType="DBDocumentManagementSystemModel.dt312_ExternalParticipant" />
           <EntitySet Name="dt312_PracticeAttempt" EntityType="DBDocumentManagementSystemModel.dt312_PracticeAttempt" />
+          <EntitySet Name="dt312_Setting" EntityType="DBDocumentManagementSystemModel.dt312_Setting" />
           </EntityContainer>
         <EntityType Name="dm_Function">
           <Key>
@@ -3566,17 +3568,6 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="IsEssay" Type="Boolean" Nullable="false" />
           <Property Name="ReferenceAnswer" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
         </EntityType>
-        <EntityType Name="dt312_Setting">
-          <Key>
-            <PropertyRef Name="id" />
-          </Key>
-          <Property Name="id" Type="Int32" Nullable="false" />
-          <Property Name="CountEmp" Type="Int32" Nullable="false" />
-          <Property Name="PassingScore" Type="Int32" Nullable="false" />
-          <Property Name="QuesCount" Type="Int32" Nullable="false" />
-          <Property Name="TestDuration" Type="Int32" Nullable="false" />
-          <Property Name="CycleCreate" Type="Double" Nullable="false" />
-        </EntityType>
         <EntityType Name="dt312_ExamMgmt">
           <Key>
             <PropertyRef Name="Id" />
@@ -4368,6 +4359,19 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
           <Property Name="SubmitAt" Type="DateTime" Precision="3" />
           <Property Name="Score" Type="Int32" />
           <Property Name="ExamData" Type="String" MaxLength="Max" FixedLength="false" Unicode="true" />
+        </EntityType>
+        <EntityType Name="dt312_Setting">
+          <Key>
+            <PropertyRef Name="id" />
+          </Key>
+          <Property Name="id" Type="Int32" Nullable="false" />
+          <Property Name="CountEmp" Type="Int32" Nullable="false" />
+          <Property Name="PassingScore" Type="Int32" Nullable="false" />
+          <Property Name="QuesCount" Type="Int32" Nullable="false" />
+          <Property Name="TestDuration" Type="Int32" Nullable="false" />
+          <Property Name="CycleCreate" Type="Double" Nullable="false" />
+          <Property Name="ChoicePercent" Type="Int32" Nullable="false" />
+          <Property Name="ChoiceScorePercent" Type="Int32" />
         </EntityType>
         </Schema>
     </edmx:ConceptualModels>
@@ -5664,18 +5668,6 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>
-          <EntitySetMapping Name="dt312_Setting">
-            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_Setting">
-              <MappingFragment StoreEntitySet="dt312_Setting">
-                <ScalarProperty Name="CycleCreate" ColumnName="CycleCreate" />
-                <ScalarProperty Name="TestDuration" ColumnName="TestDuration" />
-                <ScalarProperty Name="QuesCount" ColumnName="QuesCount" />
-                <ScalarProperty Name="PassingScore" ColumnName="PassingScore" />
-                <ScalarProperty Name="CountEmp" ColumnName="CountEmp" />
-                <ScalarProperty Name="id" ColumnName="id" />
-              </MappingFragment>
-            </EntityTypeMapping>
-          </EntitySetMapping>
           <EntitySetMapping Name="dt312_ExamMgmt">
             <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_ExamMgmt">
               <MappingFragment StoreEntitySet="dt312_ExamMgmt">
@@ -6350,6 +6342,20 @@ warning 6002: The table/view 'DBDocumentManagementSystem.dbo.vw310_EquipmentInfo
                 <ScalarProperty Name="InternalUserId" ColumnName="InternalUserId" />
                 <ScalarProperty Name="PracticeKind" ColumnName="PracticeKind" />
                 <ScalarProperty Name="Id" ColumnName="Id" />
+              </MappingFragment>
+            </EntityTypeMapping>
+          </EntitySetMapping>
+          <EntitySetMapping Name="dt312_Setting">
+            <EntityTypeMapping TypeName="DBDocumentManagementSystemModel.dt312_Setting">
+              <MappingFragment StoreEntitySet="dt312_Setting">
+                <ScalarProperty Name="ChoicePercent" ColumnName="ChoicePercent" />
+                <ScalarProperty Name="ChoiceScorePercent" ColumnName="ChoiceScorePercent" />
+                <ScalarProperty Name="CycleCreate" ColumnName="CycleCreate" />
+                <ScalarProperty Name="TestDuration" ColumnName="TestDuration" />
+                <ScalarProperty Name="QuesCount" ColumnName="QuesCount" />
+                <ScalarProperty Name="PassingScore" ColumnName="PassingScore" />
+                <ScalarProperty Name="CountEmp" ColumnName="CountEmp" />
+                <ScalarProperty Name="id" ColumnName="id" />
               </MappingFragment>
             </EntityTypeMapping>
           </EntitySetMapping>

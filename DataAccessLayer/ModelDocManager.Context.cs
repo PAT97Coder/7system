@@ -129,7 +129,6 @@ namespace DataAccessLayer
         public virtual DbSet<dt312_ExamUser> dt312_ExamUser { get; set; }
         public virtual DbSet<dt312_Groups> dt312_Groups { get; set; }
         public virtual DbSet<dt312_Questions> dt312_Questions { get; set; }
-        public virtual DbSet<dt312_Setting> dt312_Setting { get; set; }
         public virtual DbSet<dt312_ExamMgmt> dt312_ExamMgmt { get; set; }
         public virtual DbSet<dt403_05_Standard> dt403_05_Standard { get; set; }
         public virtual DbSet<dt403_05_StandardAtt> dt403_05_StandardAtt { get; set; }
@@ -171,5 +170,6 @@ namespace DataAccessLayer
         public virtual DbSet<dt316_Report> dt316_Report { get; set; }
         public virtual DbSet<dt312_ExternalParticipant> dt312_ExternalParticipant { get; set; }
         public virtual DbSet<dt312_PracticeAttempt> dt312_PracticeAttempt { get; set; }
+        public virtual DbSet<dt312_Setting> dt312_Setting { get; set; }
     }
 }

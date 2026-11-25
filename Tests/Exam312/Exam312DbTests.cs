@@ -129,7 +129,7 @@ internal static class Exam312DbTests
             var group = new dt312_Groups { DisplayName="安全題組", CreateAt=new DateTime(2026,10,20), CreateBy=Manager };
             var removed = new dt312_Groups { DisplayName="停用題組", CreateAt=new DateTime(2026,10,20), CreateBy=Manager, RemoveAt=new DateTime(2026,10,20), RemoveBy=Manager };
             db.dt312_Groups.Add(group); db.dt312_Groups.Add(removed);
-            db.dt312_Setting.Add(new dt312_Setting { id=1, CountEmp=10, PassingScore=60, QuesCount=3, TestDuration=20, CycleCreate=12 });
+            db.dt312_Setting.Add(new dt312_Setting { id=1, CountEmp=10, PassingScore=60, QuesCount=3, ChoicePercent=70, TestDuration=20, CycleCreate=12 });
             db.SaveChanges(); activeGroup=group.Id; removedGroup=removed.Id;
             var multi = new dt312_Questions { GroupId=activeGroup, DisplayName="選出正確的安全措施（複選）", IsmultiAns=true };
             db.dt312_Questions.Add(multi);
@@ -166,6 +166,98 @@ internal static class Exam312DbTests
         H.Check(bus.GetItemById(boundary).ReferenceAnswer.Length == 16000, "Boundary-length essay does not round trip");
         bus.RemoveById(boundary);
         Pass("Role grants/denials; similar-name isolation; account normalization; empty/oversize/boundary/group/type validation");
+    }
+    private static void QuestionRatios()
+    {
+        As(Manager);
+        int testGroup;
+        using (var db = new DBDocumentManagementSystemEntities())
+        {
+            H.Check(db.dt312_Setting.Find(1).ChoicePercent == 70, "Default ratio not migrated");
+            var group = new dt312_Groups { DisplayName="比例測試", CreateBy=Manager, CreateAt=DateTime.Now };
+            db.dt312_Groups.Add(group); db.SaveChanges(); testGroup = group.Id;
+            for (int i = 0; i < 20; i++)
+            {
+                var question = new dt312_Questions { GroupId=testGroup, DisplayName="比例題 " + i, IsEssay=i >= 10 };
+                db.dt312_Questions.Add(question); db.SaveChanges();
+                if (!question.IsEssay) db.dt312_Answers.Add(new dt312_Answers { QuesId=question.Id, DisplayName="正確", TrueAns=true });
+            }
+            db.SaveChanges();
+        }
+        using (var form = new f312_SettingExam())
+        {
+            form.Show(); Application.DoEvents();
+            var total = (SpinEdit)H.Get(form, "txbTotalQues");
+            var choice = (SpinEdit)H.Get(form, "choicePercentEdit");
+            var essay = (SpinEdit)H.Get(form, "essayPercentEdit");
+            total.Value=10; choice.Value=70;
+            H.Check(essay.Value == 30 && ((LabelControl)H.Get(form,"ratioPreview")).Text.Contains("7 題"), "Ratio preview or complement incorrect");
+            essay.Value=80; H.Check(choice.Value==20, "Essay edit does not update choice ratio");
+            choice.Value=70;
+            var choiceWeight=(SpinEdit)H.Get(form,"choiceScoreEdit");
+            var essayWeight=(SpinEdit)H.Get(form,"essayScoreEdit");
+            H.Check(choiceWeight.Properties.ReadOnly && essayWeight.Properties.ReadOnly,"Automatic point distribution is editable");
+            choice.Value=60;
+            H.Check(choiceWeight.Value==60 && essayWeight.Value==40,"6/4 points do not match question counts");
+            total.Value=3; choice.Value=50;
+            H.Check(choiceWeight.Value==66.67m && essayWeight.Value==33.33m,"Points do not follow rounded question counts");
+            total.Value=10; choice.Value=70;
+            H.Check(choiceWeight.Value==70 && essayWeight.Value==30,"7/3 automatic points incorrect");
+            H.Screenshot(form,"09-question-ratio-settings.png");
+            foreach (var field in new[] { "txbTime", "txbPassScore", "txbTotalQues", "txbCountEmp", "choicePercentEdit", "essayPercentEdit" })
+            {
+                var edit=(SpinEdit)H.Get(form,field);
+                H.Check(edit.Width >= 60 && edit.Height >= 24 && edit.Bottom <= edit.Parent.Height, "Settings editor clipped: " + field);
+            }
+            H.Call(form,"btnConfirm_ItemClick",null,null);
+            H.Check(form.DialogResult==DialogResult.OK,"Settings save failed");
+        }
+        using (var db = new DBDocumentManagementSystemEntities())
+        {
+            var setting=db.dt312_Setting.Find(1);
+            H.Check(setting.QuesCount==10 && setting.ChoicePercent==70 && !setting.ChoiceScorePercent.HasValue && setting.CycleCreate==12,"Ratio settings did not round-trip or reset cycle");
+        }
+        using (var form = new f312_SettingExam())
+        {
+            form.Show(); Application.DoEvents();
+            H.Check(((SpinEdit)H.Get(form,"choicePercentEdit")).Value==70 && ((SpinEdit)H.Get(form,"essayPercentEdit")).Value==30,"Saved ratio not restored");
+            form.Close();
+        }
+        using (var db = new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoiceScorePercent=1; db.SaveChanges(); }
+        As(Learner);
+        using (var form = new f312_DoExam(false) { idExamUser=assignedId })
+        {
+            H.Check((string)H.Call(form,"LoadData")=="","Equal-point official exam fails to load");
+            H.Check(Results(form).Count==10 && Results(form).All(r=>r.MaxScore==10m),"Old manual weights affect new exams");
+        }
+        As(Manager);
+        using (var db = new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoiceScorePercent=null; db.SaveChanges(); }
+        foreach (int percent in new[] {70,0,100})
+        {
+            using (var db = new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoicePercent=percent; db.SaveChanges(); }
+            for (int run=0;run<5;run++)
+            using (var form = new f312_DoExam(true))
+            {
+                H.Check((string)H.Call(form,"LoadData")=="","Configured ratio cannot generate exam");
+                var rows=Results(form);
+                H.Check(rows.Count==10 && rows.Count(r=>!r.Questions.IsEssay)==percent/10 && rows.Select(r=>r.Questions.Id).Distinct().Count()==10,"Question ratio, total, or uniqueness incorrect");
+                H.Check(rows.All(r=>r.Questions.GroupId!=removedGroup),"Inactive group included in ratio allocation");
+            }
+        }
+        using (var db = new DBDocumentManagementSystemEntities())
+        {
+            var ids=db.dt312_Questions.Where(q=>q.GroupId==testGroup).Select(q=>q.Id).ToList();
+            db.dt312_Answers.RemoveRange(db.dt312_Answers.Where(a=>ids.Contains(a.QuesId)));
+            db.dt312_Questions.RemoveRange(db.dt312_Questions.Where(q=>q.GroupId==testGroup));
+            db.dt312_Groups.Remove(db.dt312_Groups.Find(testGroup));
+            var setting=db.dt312_Setting.Find(1); setting.QuesCount=3; setting.ChoicePercent=100;
+            db.SaveChanges();
+        }
+        using (var form = new f312_DoExam(true)) H.Check(((string)H.Call(form,"LoadData")).Contains("需要選擇題 3"),"Choice shortage silently replaced by essays");
+        using (var db = new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoicePercent=0; db.SaveChanges(); }
+        using (var form = new f312_DoExam(true)) H.Check(((string)H.Call(form,"LoadData")).Contains("申論題 3"),"Essay shortage silently replaced by choices");
+        using (var db = new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoicePercent=70; db.SaveChanges(); }
+        Pass("Ratio migration rerun; settings UI preview/complement/save/reopen; preserved cycle; exact 70/30, 0/100, 100/0 pools; inactive exclusion; type shortage rejection");
     }
     private static void EssayRoundTrip()
     {
@@ -339,14 +431,154 @@ internal static class Exam312DbTests
         using(var db=new DBDocumentManagementSystemEntities())
         {
             var row=db.dt312_ExamUser.Single(r=>r.Id==assignedId);
-            H.Check(row.Score==100&&row.IsPass==true&&row.SubmitAt.HasValue,"Official score/pass/submission not persisted");
+            H.Check(!row.Score.HasValue&&!row.IsPass.HasValue&&row.SubmitAt.HasValue,"Mixed exam must await essay grading");
             var results=JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(row.ExamData);
             H.Check(results.Single(r=>r.Questions.IsEssay).UserAnswer.Contains("防護"),"Official essay text lost");
             using(var review=new f312_ExamReview(results,row.Score,false))
             { review.Show(); var browser=(WebBrowser)H.Get(review,"browser"); Wait(()=>browser.ReadyState==WebBrowserReadyState.Complete&&browser.Document?.Body!=null,"official review"); H.Screenshot(review,"07-official-result.png"); review.Close(); }
         }
         using(var form=new f312_DoExam(false) { idExamUser=assignedId }) H.Check(((string)H.Call(form,"LoadData")).Length>0,"Submitted exam can restart");
-        Pass("Official ownership protection; real persistence of 100/pass/timestamp/essay snapshot; repeated submit/restart rejection");
+        Pass("Official ownership protection; pending essay score/pass; timestamp/essay snapshot; repeated submit/restart rejection");
+    }
+    private static void CheckResultMenu(int attemptId, params string[] expected)
+    {
+        using(var host=new Form { ClientSize=new Size(1250,800), ShowInTaskbar=false })
+        using(var uc=new uc312_ExamMgmt())
+        {
+            host.Controls.Add(uc); uc.Dock=DockStyle.Fill; host.Show(); Application.DoEvents();
+            var master=(DevExpress.XtraGrid.Views.Grid.GridView)H.Get(uc,"gvData");
+            var attempt=dt312_ExamUserBUS.Instance.GetItemById(attemptId);
+            int masterRow=master.LocateByValue("Id",attempt.ExamId);
+            master.ExpandMasterRow(masterRow); Application.DoEvents();
+            var detail=(DevExpress.XtraGrid.Views.Grid.GridView)master.GetDetailView(masterRow,0);
+            int row=detail.LocateByValue("Id",attemptId);
+            detail.MakeRowVisible(row); Application.DoEvents();
+            var cell=((DevExpress.XtraGrid.Views.Grid.ViewInfo.GridViewInfo)detail.GetViewInfo()).GetGridCellInfo(row,detail.VisibleColumns[0]);
+            var hit=detail.CalcHitInfo(new Point(cell.Bounds.X+5,cell.Bounds.Y+5));
+            using(var menu=new DevExpress.XtraGrid.Menu.GridViewMenu(detail))
+            {
+                H.Call(uc,"gvEmp_PopupMenuShowing",detail,new DevExpress.XtraGrid.Views.Grid.PopupMenuShowingEventArgs(menu,hit));
+                H.Check(menu.Items.Cast<DevExpress.Utils.Menu.DXMenuItem>().Select(i=>i.Caption).SequenceEqual(expected),"Result menu does not match grading status/permission");
+            }
+            host.Close();
+        }
+    }
+    private static void Grading()
+    {
+        var bus = dt312_ExamUserBUS.Instance;
+        var attempt = bus.GetItemById(assignedId);
+        var results = JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(attempt.ExamData);
+        int index = results.Single(r => r.Questions.IsEssay).QuestionIndex;
+        decimal half = decimal.Round((results.Single(r => r.Questions.IsEssay).MaxScore ?? 100m) / 2m, 2, MidpointRounding.AwayFromZero);
+        var marks = new Dictionary<int, decimal> { { index, half } };
+        H.Check(!bus.CanGrade(Manager) && !bus.CanGrade(Learner), "View/question rights grant grading implicitly");
+        Expect<UnauthorizedAccessException>(() => bus.FinishGrading(Learner, assignedId, attempt.ExamData, marks), "Viewer can save scores");
+        As(Learner);
+        CheckResultMenu(assignedId);
+        Expect<UnauthorizedAccessException>(() => { using(var form = new f312_ExamReview(assignedId, true)) { } }, "Viewer can open grading mode");
+        using(var db = new DBDocumentManagementSystemEntities())
+        {
+            db.dm_Function.Add(new dm_Function { Id=931200, IdParent=0, DisplayName="考試結果", ControlName="uc312_ExamMgmt" });
+            db.SaveChanges();
+            string migration = File.ReadAllText(Path.Combine(Environment.GetEnvironmentVariable("EXAM312_TEST_WORKSPACE"), "Database/20261114_add_312_grading_permission.sql"));
+            db.Database.ExecuteSqlCommand(migration);
+            db.Database.ExecuteSqlCommand(migration);
+            int functionId = db.dm_Function.Single(f => f.ControlName == "f312_ExamReview_Grading").Id;
+            db.dm_FunctionRole.Add(new dm_FunctionRole { IdFunction=functionId, IdRole=11 }); db.SaveChanges();
+        }
+        H.Check(bus.CanGrade(Manager) && !bus.CanGrade(Learner), "Separate grading permission failed");
+        Expect<ArgumentException>(() => bus.FinishGrading(Manager, assignedId, attempt.ExamData, new Dictionary<int, decimal>()), "Missing essay accepted");
+        Expect<ArgumentException>(() => bus.FinishGrading(Manager, assignedId, attempt.ExamData, new Dictionary<int, decimal> { { index, 101 } }), "Out of range mark accepted");
+        Expect<InvalidOperationException>(() => bus.FinishGrading(Manager, assignedId, "stale", marks), "Stale snapshot accepted");
+        As(Manager);
+        CheckResultMenu(assignedId,"進行評分");
+        using(var form = new f312_ExamReview(assignedId, true))
+        {
+            form.Show();
+            var browser = (WebBrowser)H.Get(form, "browser");
+            Wait(() => browser.ReadyState == WebBrowserReadyState.Complete && browser.Document?.GetElementById("essay-score-" + index) != null, "grading editor");
+            browser.Document.GetElementById("essay-score-" + index).SetAttribute("value", half.ToString(System.Globalization.CultureInfo.InvariantCulture));
+            H.Screenshot(form, "08-essay-grading.png");
+            H.Call(form, "FinishGrading_Click", null, null);
+            H.Check(form.DialogResult == DialogResult.OK, "Grading form did not save/close");
+        }
+        var saved = bus.GetItemById(assignedId);
+        CheckResultMenu(assignedId,"查看詳情");
+        var graded = JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(saved.ExamData).Single(r => r.Questions.IsEssay);
+        H.Check(saved.Score == 83 && saved.IsPass == true && graded.EssayScore == half && graded.GradedBy == Manager && graded.GradedAt.HasValue, "Combined score/audit not persisted");
+        Expect<InvalidOperationException>(() => bus.FinishGrading(Manager, assignedId, saved.ExamData, marks), "Completed grading overwritten");
+        Pass("Separate grading permission; view-only rejection; missing/range/stale checks; actual grading UI save; combined score and audit; duplicate rejection");
+    }
+    private static void DecimalWeightedGrading()
+    {
+        As(Manager);
+        var rows = new List<f312_DoExam.ExamResult> {
+            new f312_DoExam.ExamResult { Questions=new dt312_Questions { IsEssay=false, DisplayName="MC" }, QuestionIndex=1,
+                Answers=new List<dt312_Answers>(), CorrectAnswer="1", UserAnswer="1", MaxScore=87.7m, SnapshotPassingScore=60 },
+            new f312_DoExam.ExamResult { Questions=new dt312_Questions { IsEssay=true, DisplayName="Essay" }, QuestionIndex=2,
+                Answers=new List<dt312_Answers>(), UserAnswer="answer", MaxScore=12.3m, SnapshotPassingScore=60 }
+        };
+        int id;
+        using(var db=new DBDocumentManagementSystemEntities())
+        {
+            var attempt=new dt312_ExamUser { ExamId=1, UserId=Learner, SubmitAt=DateTime.Now, ExamData=JsonConvert.SerializeObject(rows) };
+            db.dt312_ExamUser.Add(attempt);
+            db.dt312_Setting.Find(1).ChoiceScorePercent=1;
+            db.dt312_Setting.Find(1).PassingScore=99;
+            db.SaveChanges(); id=attempt.Id;
+        }
+        var bus=dt312_ExamUserBUS.Instance;
+        string snapshot=bus.GetItemById(id).ExamData;
+        Expect<ArgumentException>(()=>bus.FinishGrading(Manager,id,snapshot,new Dictionary<int,decimal>{{2,12.31m}}),"Above decimal maximum accepted");
+        Expect<ArgumentException>(()=>bus.FinishGrading(Manager,id,snapshot,new Dictionary<int,decimal>{{2,10.001m}}),"More than two decimals accepted");
+        using(var form=new f312_ExamReview(id,true))
+        {
+            form.Show(); var browser=(WebBrowser)H.Get(form,"browser");
+            Wait(()=>browser.ReadyState==WebBrowserReadyState.Complete && browser.Document?.GetElementById("essay-score-2")!=null,"decimal grading editor");
+            H.Check(browser.Document.Body.InnerText.Contains("12.3"),"Actual maximum not shown");
+            browser.Document.GetElementById("essay-score-2").SetAttribute("value","10,5");
+            H.Screenshot(form,"10-weighted-decimal-grading.png");
+            H.Call(form,"FinishGrading_Click",null,null);
+            H.Check(form.DialogResult==DialogResult.OK,"Decimal input not saved");
+        }
+        var saved=bus.GetItemById(id);
+        H.Check(saved.Score==98 && saved.IsPass==true,"Saved weights or passing threshold changed with current settings");
+        H.Check(JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(saved.ExamData)[1].EssayScore==10.5m,"Comma decimal input corrupted");
+        using(var db=new DBDocumentManagementSystemEntities()) { db.dt312_Setting.Find(1).ChoiceScorePercent=70; db.dt312_Setting.Find(1).PassingScore=60; db.SaveChanges(); }
+        Pass("Decimal weighted grading: actual maximum, comma input, range and precision checks, stored weight/threshold independence");
+    }
+    private static void LegacyPendingGrading()
+    {
+        As(Manager);
+        var rows=Enumerable.Range(1,10).Select(i=>new f312_DoExam.ExamResult {
+            QuestionIndex=i, Questions=new dt312_Questions { DisplayName="舊題目 " + i, IsEssay=i>7 },
+            Answers=new List<dt312_Answers>(), CorrectAnswer="1", UserAnswer="1"
+        }).ToList();
+        int id;
+        string original=JsonConvert.SerializeObject(rows);
+        using(var db=new DBDocumentManagementSystemEntities())
+        {
+            var attempt=new dt312_ExamUser { ExamId=1, UserId=Learner, SubmitAt=DateTime.Now, Score=100, ExamData=original };
+            db.dt312_ExamUser.Add(attempt); db.SaveChanges(); id=attempt.Id;
+        }
+        var bus=dt312_ExamUserBUS.Instance;
+        Expect<ArgumentException>(()=>bus.FinishGrading(Manager,id,original,new Dictionary<int,decimal>{{8,10.01m},{9,5m},{10,0m}}),"Legacy paper accepts old 100-point scale");
+        using(var form=new f312_ExamReview(id,true))
+        {
+            form.Show(); var browser=(WebBrowser)H.Get(form,"browser");
+            Wait(()=>browser.ReadyState==WebBrowserReadyState.Complete && browser.Document?.GetElementById("essay-score-8")!=null,"legacy grading editor");
+            H.Check(browser.Document.Body.InnerText.Contains("滿分：10 分"),"Legacy 10-question paper still shows 100 points per question");
+            H.Check(bus.GetItemById(id).ExamData==original,"Opening grading changes stored paper");
+            browser.Document.GetElementById("essay-score-8").SetAttribute("value","10");
+            browser.Document.GetElementById("essay-score-9").SetAttribute("value","5");
+            browser.Document.GetElementById("essay-score-10").SetAttribute("value","0");
+            H.Call(form,"FinishGrading_Click",null,null);
+            H.Check(form.DialogResult==DialogResult.OK,"Legacy grading save failed");
+        }
+        var saved=bus.GetItemById(id);
+        H.Check(saved.Score==85 && JsonConvert.DeserializeObject<List<f312_DoExam.ExamResult>>(saved.ExamData).All(r=>r.MaxScore==10m),"Legacy maximum or total not saved correctly");
+        H.Check(dt312_ExamScoring.PreparePendingGradingData(saved.ExamData)==saved.ExamData,"Completed grading changed");
+        Pass("Legacy pending paper: actual per-question maximum, unchanged on open, over-limit rejection, correct saved total, completed-paper preservation");
     }
     private static void ConfigurationEdges()
     {
@@ -371,7 +603,7 @@ internal static class Exam312DbTests
     private static void AllEssay()
     {
         using(var db=new DBDocumentManagementSystemEntities())
-        { db.dt312_Setting.Find(1).QuesCount=1; foreach(var q in db.dt312_Questions.Where(q=>!q.IsEssay)) q.GroupId=removedGroup; db.SaveChanges(); }
+        { db.dt312_Setting.Find(1).QuesCount=1; db.dt312_Setting.Find(1).ChoicePercent=0; foreach(var q in db.dt312_Questions.Where(q=>!q.IsEssay)) q.GroupId=removedGroup; db.SaveChanges(); }
         As(Learner);
         using(var form=Open(true))
         {
@@ -394,8 +626,8 @@ internal static class Exam312DbTests
     }
     internal static void Run()
     {
-        ConnectToDisposableDatabase(); Seed(); PermissionsAndValidation(); EssayRoundTrip();
-        EntryPointsAndNavigation(); PracticeAndTimeout(); Official(); SubmissionFailureAndLongClock(); ConfigurationEdges(); AllEssay();
+        ConnectToDisposableDatabase(); Seed(); PermissionsAndValidation(); EssayRoundTrip(); QuestionRatios();
+        EntryPointsAndNavigation(); PracticeAndTimeout(); Official(); Grading(); DecimalWeightedGrading(); LegacyPendingGrading(); SubmissionFailureAndLongClock(); ConfigurationEdges(); AllEssay();
         As(Manager);
         Directory.CreateDirectory(H.OutputDir);
         File.WriteAllLines(Path.Combine(H.OutputDir,"integration-results.txt"),Passed.Select(p=>"PASS: "+p));

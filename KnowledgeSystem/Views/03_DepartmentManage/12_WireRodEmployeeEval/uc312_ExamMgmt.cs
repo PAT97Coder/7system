@@ -46,6 +46,7 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         List<dt312_ExamUser> examUsers;
 
         DXMenuItem itemViewInfo;
+        DXMenuItem itemGrade;
         DXMenuItem itemStartExam;
         DXMenuItem itemFinishExam;
         DXMenuItem itemExportExam;
@@ -54,6 +55,17 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         private void InitializeMenuItems()
         {
             itemViewInfo = CreateMenuItem("查看詳情", ItemViewInfo_Click, TPSvgimages.View);
+            itemGrade = CreateMenuItem("進行評分", (s, e) => {
+                try
+                {
+                    var view = gcData.FocusedView as GridView;
+                    if (view == null || view.FocusedRowHandle < 0) return;
+                    int id = Convert.ToInt32(view.GetRowCellValue(view.FocusedRowHandle, gColEmpId));
+                    using (var form = new f312_ExamReview(id, true))
+                        if (form.ShowDialog(FindForm()) == DialogResult.OK) LoadData();
+                }
+                catch (Exception ex) { MsgTP.MsgError(Exam312Ui.ErrorText(ex)); }
+            }, TPSvgimages.Edit);
             //itemStartExam = CreateMenuItem("開始考試", ItemStartExam_Click, TPSvgimages.Start);
             //itemFinishExam = CreateMenuItem("完成考試", ItemFinishExam_Click, TPSvgimages.Finish);
             //itemExportExam = CreateMenuItem("導出結果", ItemExportExam_Click, TPSvgimages.Print);
@@ -192,7 +204,20 @@ namespace KnowledgeSystem.Views._03_DepartmentManage._12_WireRodEmployeeEval
         {
             if (e.HitInfo.InRowCell && e.HitInfo.InDataRow)
             {
-                e.Menu.Items.Add(itemViewInfo);
+                try
+                {
+                    var view = sender as GridView;
+                    if (view == null) return;
+                    view.FocusedRowHandle = e.HitInfo.RowHandle;
+                    int id = Convert.ToInt32(view.GetRowCellValue(e.HitInfo.RowHandle, gColEmpId));
+                    var attempt = dt312_ExamUserBUS.Instance.GetItemById(id);
+                    if (attempt == null || !attempt.SubmitAt.HasValue || string.IsNullOrWhiteSpace(attempt.ExamData)) return;
+                    if (dt312_ExamScoring.IsGradingComplete(attempt.ExamData))
+                        e.Menu.Items.Add(itemViewInfo);
+                    else if (dt312_ExamUserBUS.Instance.CanGrade(TPConfigs.LoginUser.Id))
+                        e.Menu.Items.Add(itemGrade);
+                }
+                catch (Exception ex) { MsgTP.MsgError(Exam312Ui.ErrorText(ex)); }
             }
         }
     }
